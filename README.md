@@ -1,15 +1,5 @@
-# Ministry of Justice Template Repository
+# MoJ Operations Engineering Reports
 
-Use this template to [create a repository] with the default initial files for a Ministry of Justice Github repository, including:
+A web application to receive JSON data and publish various reports based on it.
 
-* The correct LICENSE
-* Github actions
-* .gitignore file
-
-Once you have created your repository, please:
-
-* Edit the copy of this README.md file to document your project
-* Grant permissions to the appropriate MoJ teams
-* Setup branch protection
-
-[create a repository]: https://github.com/ministryofjustice/template-repository/generate
+Similar to the MoJ Cloud Platform team's [How out of date are we?](https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk/)
