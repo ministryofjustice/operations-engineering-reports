@@ -1,0 +1,19 @@
+<h1>GitHub Collaborators</h1>
+
+<p>
+  GitHub users with access to ministryofjustice repositories
+  who are <b>not</b> members of the ministryofjustice
+  GitHub organization.
+</p>
+
+<% if list.any? %>
+  <div class="row">
+    <% list.each do |item| %>
+      <p><%= item %>
+    <% end %>
+  </div>
+<% else %>
+  <h1>
+    Awaiting data
+  </h1>
+<% end %>
