@@ -1,5 +1,8 @@
-# IMAGE := ministryofjustice/operations-engineering-reports:1.0
-IMAGE := foo
+IMAGE := ministryofjustice/operations-engineering-reports:1.0
+NAMESPACE := operations-engineering
+
+deploy:
+	kubectl -n $(NAMESPACE) apply -f kubernetes_deployment/
 
 dev-server:
 	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
