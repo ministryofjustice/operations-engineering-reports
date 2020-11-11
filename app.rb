@@ -77,6 +77,10 @@ end
 
 ############################################################
 
+get "/" do
+  erb :index
+end
+
 get "/:docpath" do
   docpath = params.fetch("docpath")
   if accept_json?(request)
