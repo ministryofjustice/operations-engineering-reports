@@ -25,14 +25,21 @@ class Collaborators < ItemList
   end
 
   def collaborators
-    list.map(&:login).sort.uniq
+    list
+      .inject({}) { |hash, i| hash[i.login] = i; hash }
+      .values
+      .sort { |a,b| a.login <=> b.login }
   end
 
   def repository_collaborators(repo_name)
-    list.filter { |i| i.repository == repo_name }
+    list
+      .filter { |i| i.repository == repo_name }
+      .sort_by { |i| i.login }
   end
 
   def collaborator_repositories(login)
-    list.filter { |i| i.login == login }
+    list
+      .filter { |i| i.login == login }
+      .sort_by { |i| i.repository }
   end
 end
