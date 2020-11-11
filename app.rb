@@ -64,7 +64,7 @@ def render_item_list(docpath, params, klass = ItemList)
 
   locals = {
     updated_at: item_list.updated_at,
-    list: item_list.list,
+    data: item_list,
   }
 
   erb template, locals: locals

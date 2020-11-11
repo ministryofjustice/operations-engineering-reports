@@ -10,23 +10,29 @@ class RepoCollab
 end
 
 class Collaborators < ItemList
-  attr_reader :group_by
-
-  REPOSITORY = "repository" # Github repository name
-  LOGIN = "login" # Github login of collaborator
-
-  def initialize(params)
-    @group_by = params.fetch(:group_by, REPOSITORY)
-    super(params)
-  end
+  REPOSITORY = :repository # Github repository name
+  LOGIN = :login # Github login of collaborator
 
   def list
-    @list ||=
-      begin
-        super.map { |i| RepoCollab.new(i) }
-      end
+    @list ||= super.map { |i| RepoCollab.new(i) }
   end
 
-  private
+  def repositories
+    list
+      .inject({}) { |hash, i| hash[i.repository] = i; hash }
+      .values
+      .sort { |a,b| a.repository <=> b.repository }
+  end
 
+  def collaborators
+    list.map(&:login).sort.uniq
+  end
+
+  def repository_collaborators(repo_name)
+    list.filter { |i| i.repository == repo_name }
+  end
+
+  def collaborator_repositories(login)
+    list.filter { |i| i.login == login }
+  end
 end

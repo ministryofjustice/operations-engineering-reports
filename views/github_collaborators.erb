@@ -6,24 +6,21 @@
   GitHub organization.
 </p>
 
-<% if list.any? %>
+<% if data.list.any? %>
   <div class="row">
-    <table class="table table-striped">
-      <thead class="thead-dark">
-        <tr>
-          <th>Repository</th>
-          <th>Collaborator</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% list.each do |item| %>
-          <tr>
-            <td> <%= link_to item.repository, item.repo_url %> </td>
-            <td> <%= link_to item.login, item.login_url %> </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <ul>
+    <% data.repositories.each do |item| %>
+      <li>
+        <%= link_to item.repository, item.repo_url %>
+        <ul>
+          <% data.repository_collaborators(item.repository).each do |collab| %>
+            <li>
+              <%= link_to collab.login, collab.login_url %>
+            </li>
+          <% end %>
+        </ul>
+      </li>
+    <% end %>
   </div>
 <% else %>
   <h1>
