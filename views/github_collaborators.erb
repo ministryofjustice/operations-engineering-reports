@@ -8,9 +8,22 @@
 
 <% if list.any? %>
   <div class="row">
-    <% list.each do |item| %>
-      <p><%= item %>
-    <% end %>
+    <table class="table table-striped">
+      <thead class="thead-dark">
+        <tr>
+          <th>Repository</th>
+          <th>Collaborator</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% list.each do |item| %>
+          <tr>
+            <td> <%= item["repository"] %> </td>
+            <td> <%= item["login"] %> </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
 <% else %>
   <h1>
