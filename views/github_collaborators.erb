@@ -16,20 +16,20 @@
     </p>
 
     <div class="row">
-      <ul>
-        <% data.collaborators.each do |collab| %>
-          <li>
-            <%= link_to collab.login, collab.login_url %>
-            <ul>
-              <% data.collaborator_repositories(collab.login).each do |repo| %>
-                <li>
-                  <%= link_to repo.repository, repo.repo_url %>
-                </li>
-              <% end %>
-            </ul>
-          </li>
-        <% end %>
-      </ul>
+      <% data.collaborators.each do |collab| %>
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th> <%= link_to collab.login, collab.login_url %> </th>
+            </tr>
+          </thead>
+          <% data.collaborator_repositories(collab.login).each do |repo| %>
+            <tr>
+              <td> <%= link_to repo.repository, repo.repo_url %> </td>
+            </tr>
+          <% end %>
+        </table>
+      <% end %>
     </div>
 
   <% else %> <%# if params["group_by"] == "login" %>
@@ -40,20 +40,20 @@
     </p>
 
     <div class="row">
-      <ul>
-        <% data.repositories.each do |repo| %>
-          <li>
-            <%= link_to repo.repository, repo.repo_url %>
-            <ul>
-              <% data.repository_collaborators(repo.repository).each do |collab| %>
-                <li>
-                  <%= link_to collab.login, collab.login_url %>
-                </li>
-              <% end %>
-            </ul>
-          </li>
-        <% end %>
-      </ul>
+      <% data.repositories.each do |repo| %>
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th> <%= link_to repo.repository, repo.repo_url %> </th>
+            </tr>
+          </thead>
+          <% data.repository_collaborators(repo.repository).each do |collab| %>
+            <tr>
+              <td> <%= link_to collab.login, collab.login_url %> </td>
+            </tr>
+          <% end %>
+        </table>
+      <% end %>
     </div>
 
   <% end %> <%# if params["group_by"] == "login" %>
