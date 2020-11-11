@@ -43,11 +43,13 @@ def datafile(docpath)
   "data/#{docpath}.json"
 end
 
-def get_data_from_json_file(docpath, klass)
+def get_data_from_json_file(docpath, params, klass)
   klass.new(
-    store: store,
-    file: datafile(docpath),
-    logger: logger,
+    params.merge(
+      store: store,
+      file: datafile(docpath),
+      logger: logger,
+    )
   )
 end
 
@@ -55,10 +57,10 @@ def serve_json_data(docpath)
   store.retrieve_file(datafile(docpath))
 end
 
-def render_item_list(docpath, klass = ItemList)
+def render_item_list(docpath, params, klass = ItemList)
   template = docpath.to_sym
 
-  item_list = get_data_from_json_file(docpath, klass)
+  item_list = get_data_from_json_file(docpath, params, klass)
 
   locals = {
     updated_at: item_list.updated_at,
@@ -88,7 +90,7 @@ get "/:docpath" do
   if accept_json?(request)
      serve_json_data(docpath)
   else
-    render_item_list(docpath, LIST_RENDERER.fetch(docpath, ItemList))
+    render_item_list(docpath, params, LIST_RENDERER.fetch(docpath, ItemList))
   end
 end
 
