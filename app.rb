@@ -6,7 +6,11 @@ require "sinatra"
 require "./lib/opseng_reports"
 
 CONTENT_TYPE_JSON = "application/json"
-LIST_RENDERER = {} # Different list item classes to use for different reports
+
+# Different list item classes to use for different reports
+LIST_RENDERER = {
+  "github_collaborators" => Collaborators
+}
 
 if development?
   require "sinatra/reloader"
