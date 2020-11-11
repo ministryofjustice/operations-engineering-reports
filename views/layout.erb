@@ -37,7 +37,9 @@
       <section class="jumbotron text-center">
         <div class="container">
           <h1>Operations Engineering Reports</h1>
-          <p class="lead text-muted">Updated: <%= updated_at %> UTC</p>
+          <% if defined?(updated_at) %>
+            <p class="lead text-muted">Updated: <%= updated_at %> UTC</p>
+          <% end %>
         </div>
       </section>
 
