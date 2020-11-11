@@ -7,21 +7,57 @@
 </p>
 
 <% if data.list.any? %>
-  <div class="row">
-    <ul>
-    <% data.repositories.each do |item| %>
-      <li>
-        <%= link_to item.repository, item.repo_url %>
-        <ul>
-          <% data.repository_collaborators(item.repository).each do |collab| %>
-            <li>
-              <%= link_to collab.login, collab.login_url %>
-            </li>
-          <% end %>
-        </ul>
-      </li>
-    <% end %>
-  </div>
+
+  <% if params["group_by"] == "login" %>
+
+    <h2>Collaborators</h2>
+    <p>
+      <%= link_to "Group by repository", "?group_by=repository" %>
+    </p>
+
+    <div class="row">
+      <ul>
+        <% data.collaborators.each do |collab| %>
+          <li>
+            <%= link_to collab.login, collab.login_url %>
+            <ul>
+              <% data.collaborator_repositories(collab.login).each do |repo| %>
+                <li>
+                  <%= link_to repo.repository, repo.repo_url %>
+                </li>
+              <% end %>
+            </ul>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+  <% else %> <%# if params["group_by"] == "login" %>
+
+    <h2>Repositories</h2>
+    <p>
+      <%= link_to "Group by collaborator", "?group_by=login" %>
+    </p>
+
+    <div class="row">
+      <ul>
+        <% data.repositories.each do |repo| %>
+          <li>
+            <%= link_to repo.repository, repo.repo_url %>
+            <ul>
+              <% data.repository_collaborators(repo.repository).each do |collab| %>
+                <li>
+                  <%= link_to collab.login, collab.login_url %>
+                </li>
+              <% end %>
+            </ul>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+  <% end %> <%# if params["group_by"] == "login" %>
+
 <% else %>
   <h1>
     Awaiting data
