@@ -1,23 +1,21 @@
 class ItemList
   attr_reader :logger, :store
 
+  DATA_KEY = "data"
+  UPDATED_AT = "updated_at"
+
   def initialize(params)
     @json_file = params.fetch(:file)
-    @key = params.fetch(:key) # top-level key containing list of items
     @logger = params.fetch(:logger)
     @store = params.fetch(:store, Filestore.new)
   end
 
   def list
-    @list ||= data.nil? ? [] : data.fetch(@key)
+    @list ||= data.nil? ? [] : data.fetch(DATA_KEY)
   end
 
   def updated_at
-    @updated_at ||= data.nil? ? "" : string_to_formatted_time(data.fetch("updated_at"))
-  end
-
-  def todo_count
-    list.length
+    @updated_at ||= data.nil? ? "" : string_to_formatted_time(data.fetch(UPDATED_AT))
   end
 
   private

@@ -6,7 +6,6 @@ require "sinatra"
 require "./lib/opseng_reports"
 
 CONTENT_TYPE_JSON = "application/json"
-DATA_KEY = "data" # Every JSON file should have a "data" key
 LIST_RENDERER = {} # Different list item classes to use for different reports
 
 if development?
@@ -40,11 +39,10 @@ def datafile(docpath)
   "data/#{docpath}.json"
 end
 
-def get_data_from_json_file(docpath, key, klass)
+def get_data_from_json_file(docpath, klass)
   klass.new(
     store: store,
     file: datafile(docpath),
-    key: key,
     logger: logger,
   )
 end
@@ -56,7 +54,7 @@ end
 def render_item_list(docpath, klass = ItemList)
   template = docpath.to_sym
 
-  item_list = get_data_from_json_file(docpath, DATA_KEY, klass)
+  item_list = get_data_from_json_file(docpath, klass)
 
   locals = {
     updated_at: item_list.updated_at,
