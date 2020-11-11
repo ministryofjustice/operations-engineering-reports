@@ -19,6 +19,11 @@ spec:
           env:
             - name: RACK_ENV
               value: "production"
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: operations-engineering-reports-api-key
+                  key: token
             - name: DYNAMODB_REGION
               value: "eu-west-2"
             - name: DYNAMODB_ACCESS_KEY_ID
