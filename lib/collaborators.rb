@@ -1,11 +1,14 @@
 class RepoCollab
-  attr_reader :repository, :login, :repo_url, :login_url
+  attr_reader :repository, :login, :repo_url, :login_url, :issues, :href, :permission
 
   def initialize(hash)
     @repository = hash.fetch("repository")
     @repo_url = hash.fetch("repo_url")
     @login = hash.fetch("login")
     @login_url = hash.fetch("login_url")
+    @issues = hash.fetch("issues")
+    @href = hash.fetch("href")
+    @permission = hash.fetch("permission")
   end
 end
 
