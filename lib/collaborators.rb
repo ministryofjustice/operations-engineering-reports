@@ -1,11 +1,14 @@
 class RepoCollab
-  attr_reader :repository, :login, :repo_url, :login_url
+  attr_reader :repository, :login, :repo_url, :login_url, :issues, :href, :permission
 
   def initialize(hash)
     @repository = hash.fetch("repository")
     @repo_url = hash.fetch("repo_url")
     @login = hash.fetch("login")
     @login_url = hash.fetch("login_url")
+    @issues = hash.fetch("issues")
+    @href = hash.fetch("href")
+    @permission = hash.fetch("permission")
   end
 end
 
@@ -19,16 +22,16 @@ class Collaborators < ItemList
 
   def repositories
     list
-      .inject({}) { |hash, i| hash[i.repository] = i; hash }
+      .each_with_object({}) { |i, hash| hash[i.repository] = i; }
       .values
-      .sort { |a,b| a.repository <=> b.repository }
+      .sort_by(&:repository)
   end
 
   def collaborators
     list
-      .inject({}) { |hash, i| hash[i.login] = i; hash }
+      .each_with_object({}) { |i, hash| hash[i.login] = i; }
       .values
-      .sort { |a,b| a.login <=> b.login }
+      .sort_by(&:login)
   end
 
   def repository_collaborators(repo_name)

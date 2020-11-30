@@ -24,12 +24,26 @@
         <table class="table table-striped">
           <thead class="thead-dark">
             <tr>
-              <th> <%= link_to collab.login, collab.login_url %> </th>
+              <th> Collaborator: <%= link_to collab.login, collab.login_url %> </th>
             </tr>
           </thead>
           <% data.collaborator_repositories(collab.login).each do |repo| %>
             <tr>
-              <td> <%= link_to repo.repository, repo.repo_url %> </td>
+              <td>
+                <p>Repository: <%= link_to repo.repository, repo.repo_url %></p>
+                <p>
+                  Issues:
+                  <ol>
+                    <% repo.issues.each do |issue| %>
+                      <li> <%= issue %> </li>
+                    <% end %>
+                  </ol>
+                </p>
+                <p>
+                  Please use this link to raise a PR to fix these issues:
+                  <a href="<%= repo.href %>" class="badge badge-pill badge-primary">edit collaborator definition</a>
+                </p>
+              </td>
             </tr>
           <% end %>
         </table>
@@ -48,12 +62,26 @@
         <table class="table table-striped">
           <thead class="thead-dark">
             <tr>
-              <th> <%= link_to repo.repository, repo.repo_url %> </th>
+              <th> Repository: <%= link_to repo.repository, repo.repo_url %> </th>
             </tr>
           </thead>
           <% data.repository_collaborators(repo.repository).each do |collab| %>
             <tr>
-              <td> <%= link_to collab.login, collab.login_url %> </td>
+              <td>
+                <p>Collaborator: <%= link_to collab.login, collab.login_url %></p>
+                <p>
+                  Issues:
+                  <ol>
+                    <% collab.issues.each do |issue| %>
+                      <li> <%= issue %> </li>
+                    <% end %>
+                  </ol>
+                </p>
+                <p>
+                  Please use this link to raise a PR to fix these issues:
+                  <a href="<%= collab.href %>" class="badge badge-pill badge-primary">edit collaborator definition</a>
+                </p>
+              </td>
             </tr>
           <% end %>
         </table>
