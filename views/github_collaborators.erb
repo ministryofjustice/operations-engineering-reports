@@ -1,4 +1,7 @@
-<h1>GitHub Collaborators</h1>
+<% if data.list.any? %>
+  <% total = " (#{data.list.size})" %>
+<% end %>
+<h1>GitHub Collaborators<%= total %></h1>
 
 <p>
   GitHub users with access to ministryofjustice repositories
