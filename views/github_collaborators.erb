@@ -52,7 +52,10 @@
         <table class="table table-striped">
           <thead class="thead-dark">
             <tr>
-              <th> Collaborator: <%= link_to collab.login, collab.login_url %> </th>
+              <th>
+                Collaborator: <%= link_to collab.login, collab.login_url %>,
+                last commit: <%= collab.last_commit %>
+              </th>
             </tr>
           </thead>
           <% data.collaborator_repositories(collab.login).each do |repo| %>
@@ -96,7 +99,10 @@
           <% data.repository_collaborators(repo.repository).each do |collab| %>
             <tr>
               <td>
-                <p>Collaborator: <%= link_to collab.login, collab.login_url %></p>
+                <p>
+                  Collaborator: <%= link_to collab.login, collab.login_url %>,
+                  last commit: <%= collab.last_commit %>
+                </p>
                 <p>
                   Issues:
                   <ol>
