@@ -1,5 +1,5 @@
 class RepoCollab
-  attr_reader :repository, :login, :repo_url, :login_url, :issues, :href, :permission
+  attr_reader :repository, :login, :repo_url, :login_url, :issues, :href, :permission, :last_commit
 
   def initialize(hash)
     @repository = hash.fetch("repository")
@@ -9,6 +9,7 @@ class RepoCollab
     @issues = hash.fetch("issues")
     @href = hash.fetch("href")
     @permission = hash.fetch("permission")
+    @last_commit = hash.fetch("last_commit", "")
   end
 end
 

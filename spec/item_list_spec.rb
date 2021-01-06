@@ -4,19 +4,21 @@ describe ItemList do
   let(:json) { data.to_json }
   let(:logger) { double(Sinatra::CommonLogger) }
 
-  let(:params) { {
-    file: "foo.json",
-    key: key,
-    logger: logger,
-  } }
+  let(:params) {
+    {
+      file: "foo.json",
+      key: key,
+      logger: logger
+    }
+  }
 
   let(:key) { "mylist" }
   let(:mylist) { ["foo", "bar", "baz"] }
   let(:updated_at) { "2020-07-14 12:34:56" }
   let(:data) {
     {
-      mylist: mylist,
-      updated_at: updated_at,
+      data: mylist,
+      updated_at: updated_at
     }
   }
 
@@ -36,10 +38,6 @@ describe ItemList do
     it "returns mylist" do
       expect(item_list.list).to eq(mylist)
     end
-
-    it "has some todos" do
-      expect(item_list.todo_count).to eq(3)
-    end
   end
 
   context "when there is no json data file" do
@@ -54,10 +52,6 @@ describe ItemList do
     it "has empty updated_at" do
       expect(item_list.updated_at).to eq("")
     end
-
-    it "has zero todos" do
-      expect(item_list.todo_count).to eq(0)
-    end
   end
 
   context "when there is invalid json data in the file" do
@@ -69,10 +63,6 @@ describe ItemList do
 
     it "has empty updated_at" do
       expect(item_list.updated_at).to eq("")
-    end
-
-    it "has zero todos" do
-      expect(item_list.todo_count).to eq(0)
     end
   end
 end
