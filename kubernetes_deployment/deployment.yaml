@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: operations-engineering-reports
-          image: ministryofjustice/operations-engineering-reports:1.4
+          image: ministryofjustice/operations-engineering-reports:1.6
           env:
             - name: RACK_ENV
               value: "production"
