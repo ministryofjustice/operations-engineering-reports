@@ -93,7 +93,11 @@
         <table class="table table-striped">
           <thead class="thead-dark">
             <tr>
-              <th> Repository: <%= link_to repo.repository, repo.repo_url %> </th>
+              <th>
+                <a href="#<%= repo.repository %>">&lt;/&gt;</a>
+                <span id="<%= repo.repository %>"></span>
+                Repository: <%= link_to repo.repository, repo.repo_url %>
+              </th>
             </tr>
           </thead>
           <% data.repository_collaborators(repo.repository).each do |collab| %>
