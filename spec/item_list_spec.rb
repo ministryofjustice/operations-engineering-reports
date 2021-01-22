@@ -38,6 +38,10 @@ describe ItemList do
     it "returns mylist" do
       expect(item_list.list).to eq(mylist)
     end
+
+    it "says data provided" do
+      expect(item_list.data_provided?).to be true
+    end
   end
 
   context "when there is no json data file" do
@@ -51,6 +55,10 @@ describe ItemList do
 
     it "has empty updated_at" do
       expect(item_list.updated_at).to eq("")
+    end
+
+    it "says no data provided" do
+      expect(item_list.data_provided?).to be false
     end
   end
 

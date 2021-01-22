@@ -130,7 +130,7 @@
   <% end %> <%# if params["group_by"] == "login" %>
 
 <% else %> <%# if data.list.any? %>
-  <h1>
-    Awaiting data
-  </h1>
+  <% if !data.data_provided? %>
+    <h1>Awaiting data</h1>
+  <% end %>
 <% end %> <%# if data.list.any? %>

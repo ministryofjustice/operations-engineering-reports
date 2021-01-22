@@ -18,6 +18,10 @@ class ItemList
     @updated_at ||= data.nil? ? "" : string_to_formatted_time(data.fetch(UPDATED_AT))
   end
 
+  def data_provided?
+    updated_at != ""
+  end
+
   private
 
   def data
