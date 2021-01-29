@@ -1,9 +1,4 @@
-IMAGE := ministryofjustice/operations-engineering-reports:1.0
-NAMESPACE := operations-engineering
-
-deploy:
-	kubectl config use-context live-1 \
-		&& kubectl -n $(NAMESPACE) apply -f kubernetes_deployment/
+IMAGE := ministryofjustice/operations-engineering-reports:1.7 # This is no longer correct - get the last image from the ECR (somehow)
 
 dev-server:
 	API_KEY=soopersekrit ./app.rb -o 0.0.0.0

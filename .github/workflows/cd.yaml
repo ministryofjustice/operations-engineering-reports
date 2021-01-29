@@ -1,0 +1,45 @@
+name: Continuous Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+
+env:
+  KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+  NAMESPACE: operations-engineering-reports
+  ECR_NAME: ${{ secrets.ECR_NAME }}
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: docker build -t foo .
+      - name: Push to ECR
+        id: ecr
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
+          region: eu-west-2
+          local-image: foo
+          image: ${ECR_NAME}:${{ github.sha }}
+      - name: Update image tag
+        run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes_deployment/deployment.tpl | envsubst > kubernetes_deployment/deployment.yaml
+      - name: Authenticate to the cluster
+        env:
+          KUBE_CERT: ${{ secrets.KUBE_CERT }}
+          KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
+        run: |
+          echo "${KUBE_CERT}" > ca.crt
+          kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://api.${KUBE_CLUSTER}
+          kubectl config set-credentials deploy-user --token=${KUBE_TOKEN}
+          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${NAMESPACE}
+          kubectl config use-context ${KUBE_CLUSTER}
+      - name: Apply the updated manifest
+        run: |
+          kubectl -n ${NAMESPACE} apply -f kubernetes_deployment/

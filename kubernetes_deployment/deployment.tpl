@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: operations-engineering-reports
-          image: ministryofjustice/operations-engineering-reports:1.7
+          image: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME}:${IMAGE_TAG}
           env:
             - name: RACK_ENV
               value: "production"
