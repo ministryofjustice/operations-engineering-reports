@@ -7,8 +7,8 @@ on:
       - 'main'
 
 env:
-  KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-  NAMESPACE: operations-engineering-reports
+  KUBE_CLUSTER: ${{ secrets.KUBE_CLUSTER }}
+  KUBE_NAMESPACE: ${{ secrets.KUBE_NAMESPACE }}
   ECR_NAME: ${{ secrets.ECR_NAME }}
 
 jobs:
@@ -38,8 +38,8 @@ jobs:
           echo "${KUBE_CERT}" > ca.crt
           kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://api.${KUBE_CLUSTER}
           kubectl config set-credentials deploy-user --token=${KUBE_TOKEN}
-          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${NAMESPACE}
+          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${KUBE_NAMESPACE}
           kubectl config use-context ${KUBE_CLUSTER}
       - name: Apply the updated manifest
         run: |
-          kubectl -n ${NAMESPACE} apply -f kubernetes_deployment/
+          kubectl -n ${KUBE_NAMESPACE} apply -f kubernetes_deployment/
