@@ -10,11 +10,8 @@ Similar to the MoJ Cloud Platform team's [reporting app](https://reports.apps.li
 
 ## Updating
 
-To update this app.
+Any changes merged to the `main` branch will be deployed via github actions.
 
-* Commit and push changes to the code & specs
-* Create a new release using the [github ui](https://github.com/ministryofjustice/operations-engineering-reports/releases)
-* Edit `kubernetes_deployment/deployment.yaml` to update the docker image version number
-* Run `make deploy`
+See `.github/workflows/cd.yaml` for details.
 
 [here]: https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/
