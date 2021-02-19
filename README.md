@@ -6,6 +6,13 @@ The live site is published [here].
 
 Similar to the MoJ Cloud Platform team's [reporting app](https://reports.apps.live-1.cloud-platform.service.justice.gov.uk/)
 
+## Reports
+
+This is the current list of reports, with links to the source repositories:
+
+* [GitHub External Collaborators](https://github.com/ministryofjustice/github-collaborators)
+* [GitHub Repository Standards](https://github.com/ministryofjustice/github-repository-standards)
+
 ## Updating
 
 Any changes merged to the `main` branch will be deployed via github actions.

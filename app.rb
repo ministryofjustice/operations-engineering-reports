@@ -9,7 +9,8 @@ CONTENT_TYPE_JSON = "application/json"
 
 # Different list item classes to use for different reports
 LIST_RENDERER = {
-  "github_collaborators" => Collaborators
+  "github_collaborators" => Collaborators,
+  "github_repositories" => GithubRepositories
 }
 
 if development?
