@@ -1,0 +1,44 @@
+<% if data.list.any? %>
+  <% total = " (#{data.list.size})" %>
+<% end %>
+<h1>MoJ Public GitHub Repositories: <%= total %></h1>
+<h2>With compliance issues: <%= data.failing.count %> </h2>
+
+<div class="row">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Repository</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% data.failing.each do |repo| %>
+        <tr>
+          <td><%= repo.name %></td>
+        </tr>
+      <% end %>
+    </tbody>
+</div>
+
+<div class="row">
+  <% data.failing.each do |repo| %>
+    <a href="<%= repo.url %>">
+      <div class="card mb-3 mr-3" style="max-width: 18rem;">
+        <div class="card-header">
+          <h5 class="card-title"><%= repo.name %></h5>
+        </div>
+        <div class="card-body">
+          <h6>Last push: <%= repo.last_push %></h6>
+
+          <h6>Failed checks:</h6>
+          <% repo.report.each do |key, value| %>
+            <% if !value %>
+              <%= key %><br/>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </a>
+  <% end %>
+</div>
+
