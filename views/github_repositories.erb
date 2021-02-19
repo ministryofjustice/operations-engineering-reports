@@ -1,0 +1,48 @@
+<% if updated_at.to_s == "" %>
+  <h2>Awaiting data</h2>
+<% else %>
+  <% if data.list.any? %>
+    <% total = " (#{data.list.size})" %>
+  <% end %>
+  <h1>MoJ Public GitHub Repositories: <%= total %></h1>
+  <h2>With compliance issues: <%= data.failing.count %> </h2>
+
+  <p>
+    This report lists <b>public</b> MoJ GitHub repositories which are not
+    full compliant with our organisation standards.
+  </p>
+
+  <div class="row">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Problems</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.failing.each do |repo| %>
+          <tr>
+            <td>
+              <span class="badge bg-dark bg-secondary">
+                <a href="#<%= repo.name %>">&lt;/&gt;</a>
+              </span>
+              <span id="<%= repo.name %>"></span>
+              <a href="<%= repo.url %>"><%= repo.name %></a><br />
+
+              Last push: <%= repo.last_push %>
+            </td>
+            <td>
+              <ul>
+                <% repo.report.each do |key, value| %>
+                  <% if !value %>
+                    <li><%= repo.readable_problem(key) %></li>
+                  <% end %>
+                <% end %>
+              </ul>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+  </div>
+<% end %>
