@@ -10,7 +10,7 @@ gem "sinatra"
 gem "sinatra-contrib"
 gem "aws-sdk-dynamodb"
 gem "bundler-audit", "~>0.9.0.1"
-gem "puma"
+gem "puma", "~>5.5"
 gem "rexml"
 
 group :development do
