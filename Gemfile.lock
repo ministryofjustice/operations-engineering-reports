@@ -31,12 +31,9 @@ GEM
     pry-byebug (3.9.0)
       byebug (~> 11.0)
       pry (~> 0.13.0)
-    puma (5.5.0)
-      nio4r (~> 2.0)
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
-    rexml (3.2.5)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
       rspec-expectations (~> 3.10.0)
@@ -73,14 +70,9 @@ DEPENDENCIES
   aws-sdk-dynamodb
   bundler-audit (~> 0.9.0.1)
   pry-byebug
-  puma (~> 5.5)
-  rexml
   rspec
   sinatra
   sinatra-contrib
-
-RUBY VERSION
-   ruby 3.0.2p107
 
 BUNDLED WITH
    2.2.22
