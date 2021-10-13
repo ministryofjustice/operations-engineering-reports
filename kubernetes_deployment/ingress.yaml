@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: operations-engineering-reports-ingress
   namespace: operations-engineering
+  annotations:
+    external-dns.alpha.kubernetes.io/set-identifier: operations-engineering-reports-ingress-operations-engineering-blue
+    external-dns.alpha.kubernetes.io/aws-weight: "100"
 spec:
   tls:
   - hosts:
