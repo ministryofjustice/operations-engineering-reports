@@ -17,7 +17,7 @@ class GithubRepository
       "default_branch_main" => "The default branch is not `main`",
       "has_default_branch_protection" => "Branch protection is not enabled for `#{default_branch}`",
       "requires_approving_reviews" => "Pull request reviews are not required",
-      "administrators_require_review" => "Administrator PRs do not require reviews",
+      "administrators_require_review" => "Administrator PRs do not require reviews"
     }.fetch(str) { str }
   end
 
@@ -34,7 +34,7 @@ class GithubRepositories < ItemList
   def list
     @list ||= super
       .map { |i| GithubRepository.new(i) }
-      .sort {|a,b| a.name <=> b.name}
+      .sort_by(&:name)
   end
 
   def failing
