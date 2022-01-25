@@ -1,5 +1,5 @@
 class GithubRepository
-  attr_reader :name, :default_branch, :report, :status, :url, :last_push
+  attr_reader :name, :default_branch, :report, :status, :url, :last_push, :issues_enabled
 
   FAIL = "FAIL"
 
@@ -10,6 +10,7 @@ class GithubRepository
     @url = hash.fetch("url")
     @last_push = hash.fetch("last_push")
     @report = hash.fetch("report")
+    @issues_enabled = hash.fetch("issues_enabled")
   end
 
   def readable_problem(str)
@@ -17,7 +18,8 @@ class GithubRepository
       "default_branch_main" => "The default branch is not `main`",
       "has_default_branch_protection" => "Branch protection is not enabled for `#{default_branch}`",
       "requires_approving_reviews" => "Pull request reviews are not required",
-      "administrators_require_review" => "Administrator PRs do not require reviews"
+      "administrators_require_review" => "Administrator PRs do not require reviews",
+      "issues_is_enabled" => "The issues section is not enabled"
     }.fetch(str) { str }
   end
 
@@ -55,4 +57,5 @@ __END__
         "requires_code_owner_reviews": true,
         "administrators_require_review": true,
         "dismisses_stale_reviews": true,
-        "team_is_admin": true
+        "team_is_admin": true,
+        "issues_is_enabled": true
