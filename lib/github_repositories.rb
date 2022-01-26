@@ -19,7 +19,8 @@ class GithubRepository
       "has_default_branch_protection" => "Branch protection is not enabled for `#{default_branch}`",
       "requires_approving_reviews" => "Pull request reviews are not required",
       "administrators_require_review" => "Administrator PRs do not require reviews",
-      "issues_section_enabled" => "The issues section is not enabled"
+      "issues_section_enabled" => "The issues section is not enabled",
+      "requires_code_owner_reviews" => "Pull request code owner reviews are not required"
     }.fetch(str) { str }
   end
 
