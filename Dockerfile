@@ -1,4 +1,4 @@
-FROM ruby:2.7-alpine
+FROM ruby:2.7.4-alpine
 
 RUN addgroup -g 1000 -S appgroup \
   && adduser -u 1000 -S appuser -G appgroup \
