@@ -33,11 +33,10 @@ class GithubRepository
   def fail?
     status == FAIL
   end
-  
+
   def pass?
     status == PASS
   end
-  
 end
 
 class GithubRepositories < ItemList
