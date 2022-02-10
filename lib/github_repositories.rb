@@ -2,6 +2,7 @@ class GithubRepository
   attr_reader :name, :default_branch, :report, :status, :url, :last_push, :issues_enabled
 
   FAIL = "FAIL"
+  PASS = "PASS"
 
   def initialize(hash)
     @name = hash.fetch("name")
@@ -32,6 +33,10 @@ class GithubRepository
   def fail?
     status == FAIL
   end
+
+  def pass?
+    status == PASS
+  end
 end
 
 class GithubRepositories < ItemList
@@ -43,6 +48,10 @@ class GithubRepositories < ItemList
 
   def failing
     list.filter(&:fail?)
+  end
+
+  def pass
+    list.filter(&:pass?)
   end
 end
 
