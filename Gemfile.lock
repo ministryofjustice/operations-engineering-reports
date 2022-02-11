@@ -21,15 +21,22 @@ GEM
     diff-lcs (1.5.0)
     jmespath (1.5.0)
     method_source (1.0.0)
+    mini_portile2 (2.7.1)
     multi_json (1.15.0)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
+    nokogiri (1.13.1)
+      mini_portile2 (~> 2.7.0)
+      racc (~> 1.4)
+    nokogiri (1.13.1-x64-mingw32)
+      racc (~> 1.4)
     pry (0.13.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
     pry-byebug (3.9.0)
       byebug (~> 11.0)
       pry (~> 0.13.0)
+    racc (1.6.0)
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
@@ -68,6 +75,7 @@ PLATFORMS
 DEPENDENCIES
   aws-sdk-dynamodb
   bundler-audit (~> 0.9.0.1)
+  nokogiri
   pry-byebug
   rspec
   sinatra
