@@ -4,7 +4,7 @@ RUN addgroup -gid 1000 --system appgroup \
   && adduser -uid 1000 --system appuser \
   && adduser appuser appgroup \
   && gem install bundler \
-  && bundle config set without 'development'
+  && bundle config
 
 WORKDIR /app
 
