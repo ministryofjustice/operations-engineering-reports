@@ -11,8 +11,5 @@ gem "sinatra"
 gem "sinatra-contrib"
 gem "aws-sdk-dynamodb"
 gem "bundler-audit", "~>0.9.0.1"
-
-group :development do
-  gem "rspec"
-  gem "pry-byebug"
-end
+gem "rspec"
+gem "pry-byebug"
