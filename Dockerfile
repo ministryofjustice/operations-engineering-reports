@@ -1,8 +1,8 @@
-FROM ruby:3.0.3-alpine3.15
+FROM ruby:latest
 
-RUN addgroup -g 1000 -S appgroup \
-  && adduser -u 1000 -S appuser -G appgroup \
-  && apk update \
+RUN addgroup -gid 1000 --system appgroup \
+  && adduser -uid 1000 --system appuser \
+  && adduser appuser appgroup \
   && gem install bundler \
   && bundle config set without 'development'
 
