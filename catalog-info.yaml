@@ -78,14 +78,113 @@ spec:
         /github_collaborators:
           get:
             summary: Get all undocumented External GitHub Collaborators
+            description: Return undocumented External GitHub Collaborators in the MoJ GitHub Org
+            responses:
+              '200':
+                description: A JSON array of External GitHub Collaborators
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      items:
+                        $ref: '#components/schemas/ExternalCollab'
           post:
             summary: Push new External GitHub Collaborators data
+            description: External GitHub Collaborators data
+            requestBody:
+              required: true
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    items:
+                      $ref: '#components/schemas/ExternalCollab'
+            responses:
+              '200':
+                description: Data has been successfully collected
         /github_repositories:
           get:
             summary: Get all Public Ministry of Justice Repositories and their compliance information
+            description: Get all Public Ministry of Justice Repositories and their compliance information
+            responses:
+              '200':
+                description: A JSON array of Public GitHub Repositories
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      items:
+                        $ref: '#components/schemas/Repository'
           post:
             summary: Push new Ministry of Justice Repositories data
+            description: Push new Ministry of Justice Repositories data
+            requestBody:
+              required: true
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    items:
+                      $ref: '#components/schemas/Repository'
       components:
+        schemas:
+          Repository:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the Repository
+              default_branch:
+                type: string
+                description: Default branch of the Repository
+              status:
+                type: string
+                description: Compliance status of the Repository
+              url:
+                type: string
+                description: URL of the Repository
+              last_push:
+                type: string
+                description: Datetime of the last commit for the Repository
+              report:
+                type: string
+              issues_enabled:
+                type: string
+                description: If issues are enabled on the Repository
+          ExternalCollab:
+            type: object
+            properties:
+              repository:
+                type: string
+                description: Repository the User is attached to
+              repo_url:
+                type: string
+                description: URL of the Repository
+              login:
+                type: string
+                description: GitHub Username
+              login_url:
+                type: string
+                description: Login URL for the User
+              issues:
+                type: array
+                description: The reasons the user has been flagged as undocumented
+                items:
+                  type: string
+              href:
+                type: string
+              permission:
+                type: string
+                description: The permissions the User has for the target Repository
+              last_commit:
+                type: string
+                description: Last commit message for the User
+
+
+
+
+
+
         securitySchemes:
           api_key:
             type: apiKey
