@@ -1,0 +1,95 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: ops-eng-reports
+  title: Operations Engineering Reports
+  description: Reporting site for Operations Engineering team
+spec:
+  owner: group:operations-engineering
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ops-eng-reports-frontend
+  title: Operations Engineering Reports Frontend
+  description: Frontend application for Operations Engineering Reports
+  links:
+  - url: https://github.com/ministryofjustice/operations-engineering-reports/blob/main/kubernetes_deployment/live/deployment.tpl
+    title: Kubernetes Definition
+spec:
+  owner: group:operations-engineering
+  type: application
+  lifecycle: production
+  system: system:ops-eng-reports
+  dependsOn:
+  - component:ops-eng-reports-database
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ops-eng-reports-database
+  title: Operations Engineering Reports Database
+  description: DynamoDB Database for Operations Engineering Reports
+spec:
+  owner: group:operations-engineering
+  type: database
+  lifecycle: production
+  system: system:ops-eng-reports
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ops-eng-reports-api
+  title: Operations Engineering Reports API
+  description: API for Operations Engineering Reports
+spec:
+  owner: group:operations-engineering
+  type: API
+  lifecycle: production
+  system: system:ops-eng-reports
+  dependsOn:
+  - component:ops-eng-reports-database
+  - component:ops-eng-reports-frontend
+  providesApis:
+  - api:ops-eng-reports-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ops-eng-reports-api
+  title: Operations Engineering Reports API
+  description: API for Operations Engineering Reports
+spec:
+  owner: group:operations-engineering
+  type: openapi
+  lifecycle: production
+  system: system:ops-eng-reports
+  definition: |
+    openapi: "3.0.3"
+    info:
+      version: 1.0.0
+      title: Reports API
+      license:
+        name: MIT
+      servers:
+        - url: https://operations-engineering-reports.cloud-platform.service.justice.gov.uk
+      paths:
+        /github_collaborators:
+          get:
+            summary: Get all undocumented External GitHub Collaborators
+          post:
+            summary: Push new External GitHub Collaborators data
+        /github_repositories:
+          get:
+            summary: Get all Public Ministry of Justice Repositories and their compliance information
+          post:
+            summary: Push new Ministry of Justice Repositories data
+      components:
+        securitySchemes:
+          api_key:
+            type: apiKey
+            name: X-API-KEY
+            in: header
+      security:
+        - api_key: []
