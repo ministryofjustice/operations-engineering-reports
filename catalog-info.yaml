@@ -179,12 +179,6 @@ spec:
               last_commit:
                 type: string
                 description: Last commit message for the User
-
-
-
-
-
-
         securitySchemes:
           api_key:
             type: apiKey
