@@ -6,7 +6,7 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 ruby "3.1.1"
 
-gem "nokogiri", "~>1.13.2"
+gem "nokogiri", "~>1.13.4"
 gem "sinatra"
 gem "sinatra-contrib"
 gem "aws-sdk-dynamodb"
