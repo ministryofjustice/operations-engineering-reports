@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "daily"
 
-  - package-ecosystem: “bundler”
-    directory: “/”
+  - package-ecosystem: "bundler"
+    directory: "/"
     schedule:
-      interval: “daily”
+      interval: "daily"
