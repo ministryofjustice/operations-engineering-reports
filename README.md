@@ -22,3 +22,7 @@ Any changes merged to the `main` branch will be deployed via github actions.
 See `.github/workflows/cd.yaml` for details.
 
 [here]: https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/
+
+## Local Development
+
+Run `make start-development-server` and open http://localhost:4567/github_collaborators within a browser.
