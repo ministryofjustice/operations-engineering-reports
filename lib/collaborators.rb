@@ -8,7 +8,7 @@ class RepoCollab
     @login_url = hash.fetch("login_url")
     @issues = hash.fetch("issues")
     @href = hash.fetch("href")
-    @permission = hash.fetch("permission")
+    @permission = hash.fetch("permission")  
     @last_commit = hash.fetch("last_commit", "")
   end
 end
