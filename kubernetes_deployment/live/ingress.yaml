@@ -15,10 +15,10 @@ spec:
     - host: operations-engineering-reports.cloud-platform.service.justice.gov.uk
       http:
         paths:
-        - backend:
-            service:
-              name: operations-engineering-reports-service
-              port:
-                number: 4567
-          path: /
-          pathType: ImplementationSpecific
+          - backend:
+              service:
+                name: operations-engineering-reports-service
+                port:
+                  number: 4567
+            path: /
+            pathType: ImplementationSpecific
