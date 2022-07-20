@@ -7,6 +7,7 @@ metadata:
     external-dns.alpha.kubernetes.io/set-identifier: operations-engineering-reports-ingress-operations-engineering-green
     external-dns.alpha.kubernetes.io/aws-weight: "100"
 spec:
+  ingressClassName: default
   tls:
   - hosts:
     - operations-engineering-reports.cloud-platform.service.justice.gov.uk
