@@ -9,13 +9,13 @@ metadata:
 spec:
   ingressClassName: default
   tls:
-  - hosts:
-    - operations-engineering-reports.cloud-platform.service.justice.gov.uk
+    - hosts:
+        - operations-engineering-reports.cloud-platform.service.justice.gov.uk
   rules:
     - host: operations-engineering-reports.cloud-platform.service.justice.gov.uk
       http:
         paths:
-        - path: /
-          backend:
-            serviceName: operations-engineering-reports-service
-            servicePort: 4567
+          - path: /
+            backend:
+              serviceName: operations-engineering-reports-service
+              servicePort: 4567
