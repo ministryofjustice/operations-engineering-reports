@@ -21,7 +21,6 @@ class GithubRepository
       "requires_approving_reviews" => "Pull request reviews are not required",
       "administrators_require_review" => "Administrator pull requests do not require reviews",
       "issues_section_enabled" => "The issues section is not enabled",
-      "requires_code_owner_reviews" => "Pull request code owner reviews are not required",
       "has_require_approvals_enabled" => "Pull request review approvals are not required"
     }.fetch(str) { str }
   end
@@ -67,6 +66,5 @@ __END__
         "requires_approving_reviews": true,
         "administrators_require_review": true,
         "issues_section_enabled": true
-        "requires_code_owner_reviews": true,
         "has_require_approvals_enabled": true
       }
