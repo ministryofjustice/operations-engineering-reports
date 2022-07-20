@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: operations-engineering-reports-ingress
@@ -15,7 +15,10 @@ spec:
     - host: operations-engineering-reports.cloud-platform.service.justice.gov.uk
       http:
         paths:
-          - path: /
-            backend:
-              serviceName: operations-engineering-reports-service
-              servicePort: 4567
+        - backend:
+            service:
+              name: operations-engineering-reports-service
+              port:
+                number: 4567
+          path: /
+          pathType: ImplementationSpecific
