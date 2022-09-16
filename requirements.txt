@@ -1,0 +1,10 @@
+authlib
+boto3
+cryptography
+flask
+flask-seasurf
+flask-cors
+govuk-frontend-jinja
+gunicorn
+python-dotenv
+requests

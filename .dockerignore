@@ -1,3 +1,7 @@
+Dockerfile
+.git/
+.github/
+
 *.py[cod]
 
 # C extensions
@@ -45,8 +49,6 @@ docs/_build
 .webassets-cache
 
 # Virtualenvs
-.env
-.env.dev
 env
 env*
 venv
@@ -64,8 +66,5 @@ node_modules/
 
 .sass-cache/
 
-.mypy_cache
-
-docker
-*.sha256
-
+docs/
+README.md

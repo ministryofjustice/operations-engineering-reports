@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: "dynamodb-local"
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: "/home/dynamodblocal"
+  app:
+    depends_on:
+      - "dynamodb-local"
+    links:
+      - "dynamodb-local"
+    build: .
+    image: "operations-engineering-reports"
+    container_name: "operations-engineering-reports"
+    environment:
+      FLASK_CONFIGURATION: "development"
+      FLASK_DEBUG: "true"
+      FLASK_APP: "operations_engineering_reports"
+      AWS_ACCESS_KEY_ID: "DUMMYIDEXAMPLE"
+      AWS_SECRET_ACCESS_KEY: "DUMMYEXAMPLEKEY"
+      AWS_DEFAULT_REGION: "eu-west-2"
+      DYNAMODB_TABLE_NAME: "cp-637250fa84046ef0"
+      DOCKER_COMPOSE_DEV: "true"
+    ports:
+      - "4567:4567"
+    env_file: .env

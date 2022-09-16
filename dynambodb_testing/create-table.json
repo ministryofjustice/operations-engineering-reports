@@ -1,0 +1,9 @@
+{
+  "TableName": "cp-637250fa84046ef0",
+  "KeySchema": [{ "AttributeName": "filename", "KeyType": "HASH" }],
+  "AttributeDefinitions": [{ "AttributeName": "filename", "AttributeType": "S" }],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}
