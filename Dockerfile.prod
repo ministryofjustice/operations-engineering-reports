@@ -17,4 +17,6 @@ ENV PYTHONUNBUFFERED 1
 
 USER appuser
 
+EXPOSE 4567
+
 ENTRYPOINT gunicorn --bind 0.0.0.0:4567 operations_engineering_reports:app

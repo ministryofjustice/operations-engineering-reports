@@ -19,4 +19,4 @@ EXPOSE 4567
 
 USER appuser
 
-ENTRYPOINT FLASK_APP=operations_engineering_reports flask run --host=0.0.0.0
+ENTRYPOINT FLASK_APP=operations_engineering_reports flask run --host=0.0.0.0 --port=4567
