@@ -34,13 +34,13 @@ test: venv
 all:
 
 local:
-	bash start.sh
+	bash scripts/start-local.sh
 
 prod: lint
-	docker-compose -f docker-compose-prod.yml up -d --build
+	bash scripts/start-prod.sh
 
 dev:
-	docker-compose -f docker-compose.yml up -d --build
+	bash scripts/start-dev.sh
 
 stop:
 	docker-compose down -v --remove-orphans
