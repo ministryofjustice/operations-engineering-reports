@@ -317,7 +317,8 @@ def encrypt_decrypt_data():
 
 def send_encrypted_data_to_server():
     """Replicate sending encrypted data to the App"""
-    url = "http://localhost:4567/update_private_repositories"
+    url = "http://127.0.0.1:80/update_private_repositories"
+    # url = "http://127.0.0.1:4567/update_private_repositories"
     headers = {"Content-Type": "application/json", "X-API-KEY": "default123"}
     data_json = {
         "updated_at": "2022-08-22 15:28:53",
@@ -329,7 +330,8 @@ def send_encrypted_data_to_server():
 
 def send_data_to_server():
     """Replicate sending plain text data to the App"""
-    url = "http://localhost:4567/update_private_repositories"
+    url = "http://127.0.0.1:80/update_private_repositories"
+    # url = "http://127.0.0.1:4567/update_private_repositories"
     headers = {"Content-Type": "application/json", "X-API-KEY": "default123"}
     requests.post(url, headers=headers, json=DATA_JSON, timeout=1.5)
 

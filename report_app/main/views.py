@@ -267,22 +267,7 @@ def apply_data_to_table(item_type, new_request):
     logger.debug("apply_data_to_table()")
     if new_request.method == "POST":
         if "X-API-KEY" in new_request.headers:
-            api_key_correct = False
-
-            if os.getenv(
-                "FLASK_CONFIGURATION", "production"
-            ) == "development" and new_request.headers["X-API-KEY"] == os.getenv(
-                "API_KEY", "default123"
-            ):
-                # Development
-                api_key_correct = True
-            elif new_request.headers.get("X-API-KEY") == os.getenv("API_KEY"):
-                # Production
-                api_key_correct = True
-            else:
-                logger.warning("apply_data_to_table(): incorrect api key")
-
-            if api_key_correct:
+            if new_request.headers.get("X-API-KEY") == os.getenv("API_KEY"):
                 logger.debug("apply_data_to_table(): api key correct")
 
                 if item_type == "public":
@@ -298,6 +283,8 @@ def apply_data_to_table(item_type, new_request):
                     repository.add_item_to_table(new_request.json)
                 else:
                     logger.warning("apply_data_to_table(): Did not update")
+            else:
+                logger.warning("apply_data_to_table(): incorrect api key")
 
 
 @main.route("/update_private_repositories", methods=["POST"])
