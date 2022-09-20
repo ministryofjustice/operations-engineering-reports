@@ -111,7 +111,7 @@ def callback():
     """If login succesful redirect to /home
 
     Returns:
-        Redirects to /home
+        Redirects to /home if user has correct email domain else redirects to /logout
     """
     logger.debug("callback()")
     try:
@@ -121,7 +121,17 @@ def callback():
     except (Exception,):  # pylint: disable=W0703
         return render_template("500.html"), 500
     else:
-        return redirect("/home")
+        user_email = session["user"]["userinfo"]["email"]
+        if (
+            "@digital.justice.gov.uk" in user_email
+            or "@justice.gov.uk" in user_email
+            or "@cica.gov.uk" in user_email
+            or "@hmcts.net" in user_email
+        ):
+            logger.info("User has approved email domain")
+            return redirect("/home")
+        logger.warning("User does not have an approved email domain")
+        return redirect("/logout")
 
 
 @main.route("/logout")
