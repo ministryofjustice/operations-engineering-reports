@@ -2,7 +2,6 @@
 import os
 import logging
 from flask import Flask
-from flask_seasurf import SeaSurf
 from flask_cors import CORS
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 from report_app.main.views import (
@@ -55,5 +54,4 @@ app.register_error_handler(404, page_not_found)
 app.register_error_handler(500, unknown_server_error)
 
 # Security and Protection extenstions
-SeaSurf(app)
 CORS(app)
