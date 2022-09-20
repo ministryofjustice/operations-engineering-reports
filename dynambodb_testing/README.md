@@ -80,8 +80,12 @@ Sometimes it will be necessary to set the AWS credentials when interacting with 
 
 The following commands apply the AWS credentials to a terminal window only:
 
-```
-export AWS_DEFAULT_REGION=eu-west-2 && export AWS_ACCESS_KEY_ID=ASIIAMFAKENOPZLX6J5L && export AWS_SECRET_ACCESS_KEY=w0pE4j5k4FlUrkIIAMFAKEdiLMKLGZlxyctrGpTam
+For production use:
 
-unset AWS_DEFAULT_REGION && unset AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY
-```
+`export AWS_DEFAULT_REGION=eu-west-2 && export AWS_ACCESS_KEY_ID=ASIIAMFAKENOPZLX6J5L && export AWS_SECRET_ACCESS_KEY=w0pE4j5k4FlUrkIIAMFAKEdiLMKLGZlxyctrGpTam`
+
+For development use:
+
+`export AWS_DEFAULT_REGION=eu-west-2 && export AWS_ACCESS_KEY_ID=DUMMYIDEXAMPLE && export AWS_SECRET_ACCESS_KEY=DUMMYEXAMPLEKEY`
+
+`unset AWS_DEFAULT_REGION && unset AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY`
