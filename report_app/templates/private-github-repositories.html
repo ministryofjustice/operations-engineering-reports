@@ -56,8 +56,6 @@
       {% endfor %}
     </tbody>
   </table>
-{% else %}
-  <p class="govuk-body" id="compliant_repositories">Database data is not available.</p>
 {% endif %}
 
 {% if number_non_compliant_repos %}
@@ -88,8 +86,6 @@
       {% endfor %}
     </tbody>
   </table>
-{% else %}
-  <p class="govuk-body" id="non_compliant_repositories">Database data is not available.</p>
 {% endif %}
 
 {{ super() }}
