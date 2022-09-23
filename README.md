@@ -40,7 +40,7 @@ ENCRYPTION_KEY=
 
 Edit `~/.aws/config` and add `cli_pager=` to negate the need to press a button to continue the terminal when AWS commands are completed within the termial.
 
-Run `make local` to run a local instance of the Flask App and a local AWS DynamoDB instance. This runs the App in the terminal and the AWS DynamoDB instance in a Docker container. This will run `start.sh`. When running the App using this command, you may need to press Q twice to continue the terminal when the AWS commands to create and add data to the database are executed. Use `crtl + c` to cancel the App and it will automatically remove the Docker container.
+Run `make local` to run a local instance of the Flask App and a local AWS DynamoDB instance. This runs the App in the terminal and the AWS DynamoDB instance in a Docker container. This will run `scripts/start-local.sh`. When running the App using this command, you may need to press Q twice to continue the terminal when the AWS commands to create and add data to the database are executed. Use `crtl + c` to cancel the App and it will automatically remove the Docker container.
 
 Run `make dev` to run a local instance of the Flask App and a local AWS DynamoDB instance. This runs the App and database in seperate containers using Docker compose.
 
