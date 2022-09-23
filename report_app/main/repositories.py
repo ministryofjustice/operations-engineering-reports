@@ -122,25 +122,30 @@ class Repositories:
             list: list of strings that describe the failure reasons
         """
         reasons = []
-        if repo_checks.get("default_branch_main"):
+        if not repo_checks.get("default_branch_main"):
             reasons.append("The default branch is not `main`")
 
-        if repo_checks.get("has_default_branch_protection"):
+        if not repo_checks.get("has_default_branch_protection"):
             msg = "Branch protection is not enabled for " + default_branch
             reasons.append(msg)
 
-        if repo_checks.get("requires_approving_reviews"):
+        if not repo_checks.get("requires_approving_reviews"):
             reasons.append("Pull request reviews are not required")
 
-        if repo_checks.get("administrators_require_review"):
+        if not repo_checks.get("administrators_require_review"):
             reasons.append("Administrator pull requests do not require reviews")
 
-        if repo_checks.get("issues_section_enabled"):
+        if not repo_checks.get("issues_section_enabled"):
             reasons.append("The issues section is not enabled")
 
-        if repo_checks.get("has_require_approvals_enabled"):
+        if not repo_checks.get("has_require_approvals_enabled"):
             reasons.append("Pull request review approvals are not required")
 
+        if not repo_checks.get("has_license"):
+            reasons.append("License is not MIT")
+
+        if not repo_checks.get("has_description"):
+            reasons.append("Description section is empty")
         return reasons
 
     def get_non_compliant_repositories(self):
@@ -194,7 +199,7 @@ class Repositories:
             received_json (json): the data to add to the item
         """
         logger.debug("Repositories.update_item_in_table()")
-        received_json["data"] = self.decrypt_data(received_json.get("data"))
+        received_json = self.decrypt_data(received_json)
         dynamodb = DynamoDB.from_context()
         if dynamodb:
             if dynamodb.exists(self.table_name):
@@ -215,7 +220,7 @@ class Repositories:
             received_json (json): the data to add to the item
         """
         logger.debug("Repositories.add_item_to_table()")
-        received_json["data"] = self.decrypt_data(received_json.get("data"))
+        received_json = self.decrypt_data(received_json)
         dynamodb = DynamoDB.from_context()
         if dynamodb:
             if dynamodb.exists(self.table_name):
