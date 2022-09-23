@@ -8,7 +8,7 @@
       "cwd": "${workspaceRoot}",
       "program": "${workspaceFolder}/operations_engineering_reports.py",
       // "program": "${workspaceFolder}/dynambodb_testing/dynamodb.py",
-      // "program": "${workspaceFolder}/tests/helper_code.py",
+      // "program": "${workspaceFolder}/dynambodb_testing/helper_code.py",
       "console": "integratedTerminal",
       "args": [""],
       "preLaunchTask": "build_db",
