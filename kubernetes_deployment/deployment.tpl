@@ -63,10 +63,5 @@ spec:
                 secretKeyRef:
                   name: opseng-reports-table
                   key: opseng_reports_encrypt_key
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: opseng-reports-table
-                  key: opseng_reports_api_key
           ports:
           - containerPort: 4567
