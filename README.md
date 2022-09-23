@@ -40,7 +40,7 @@ ENCRYPTION_KEY=
 
 Edit `~/.aws/config` and add `cli_pager=` to negate the need to press a button to continue the terminal when AWS commands are completed within the termial.
 
-Run `make local` to run a local instance of the Flask App and a local AWS DynamoDB instance. This runs the App in the terminal and the AWS DynamoDB instance in a Docker container. This will run `start.sh`. When running the App using this command, you may need to press Q twice to continue the terminal when the AWS commands to create and add data to the database are executed. Use `crtl + c` to cancel the App and it will automatically remove the Docker container.
+Run `make local` to run a local instance of the Flask App and a local AWS DynamoDB instance. This runs the App in the terminal and the AWS DynamoDB instance in a Docker container. This will run `scripts/start-local.sh`. When running the App using this command, you may need to press Q twice to continue the terminal when the AWS commands to create and add data to the database are executed. Use `crtl + c` to cancel the App and it will automatically remove the Docker container.
 
 Run `make dev` to run a local instance of the Flask App and a local AWS DynamoDB instance. This runs the App and database in seperate containers using Docker compose.
 
@@ -58,7 +58,7 @@ See the files in the `dynambodb_testing` folder for the commands and code that c
 
 ## AWS Credentials
 
-AWS env variables are set and used when creating, writing and reading from the AWS DynamoDB local instance. The env variables should be the same for each operation on the database wether via an AWS command or within code else they will fail. You will find the env variables are set in the VS Code debugger start files `launch.json` and `tasks.json`, in the `start.sh` script file and the Docker compose files `docker-compose.yml` and `docker-compose-prod.yml`. This generally involves setting and using the same env values `AWS_ACCESS_KEY_ID = DUMMYIDEXAMPLE`, `AWS_SECRET_ACCESS_KEY = DUMMYEXAMPLEKEY` and `AWS_DEFAULT_REGION = eu-west-2` when creating, writing and reading the database. For production the AWS keys are over written using the following env variables values `DYNAMODB_ACCESS_KEY_ID`, `DYNAMODB_SECRET_ACCESS_KEY`, and `DYNAMODB_REGION`.
+AWS env variables are set and used when creating, writing and reading from the AWS DynamoDB local instance. The env variables should be the same for each operation on the database wether via an AWS command or within code else they will fail. You will find the env variables are set in the VS Code debugger start files `launch.json` and `tasks.json`, in the `scripts/start-local.sh` script file and the Docker compose files `docker-compose.yml` and `docker-compose-prod.yml`. This generally involves setting and using the same env values `AWS_ACCESS_KEY_ID = DUMMYIDEXAMPLE`, `AWS_SECRET_ACCESS_KEY = DUMMYEXAMPLEKEY` and `AWS_DEFAULT_REGION = eu-west-2` when creating, writing and reading the database. For production the AWS keys are over written using the following env variables values `DYNAMODB_ACCESS_KEY_ID`, `DYNAMODB_SECRET_ACCESS_KEY`, and `DYNAMODB_REGION`.
 
 ## Troubleshooting
 
