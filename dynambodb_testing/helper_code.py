@@ -250,9 +250,10 @@ DATA_JSON = {
 
 def example_encrypt_decrypt():
     """Example of creating a key, encrypt and decrypt some data"""
-    key_byte = b"ZRc1sygKdVJbQhVejPJnK8jIYTB6boD6V1Qe1SJL1ew="
+    # key_byte = b"ZRc1sygKdVJbQhVejPJnK8jIYTB6boD6V1Qe1SJL1ew="
+    # key_hex = "5a5263317379674b64564a62516856656a504a6e4b386a4959544236626f44365631516531534a4c3165773d"
+    key_byte = Fernet.generate_key()
     key_hex = key_byte.hex()
-    key_hex = "5a5263317379674b64564a62516856656a504a6e4b386a4959544236626f44365631516531534a4c3165773d"
     key_from_hex_as_bytes = bytes.fromhex(key_hex)
     if key_from_hex_as_bytes == key_byte:
         print("matches")
@@ -339,10 +340,10 @@ def main():
     print("-" * 88)
     print("Start")
 
+    example_encrypt_decrypt()
     # encrypt_decrypt_data()
     # send_data_to_server()
-    send_encrypted_data_to_server()
-    # crypto_key()
+    # send_encrypted_data_to_server()
 
     print("Finished")
     print("-" * 88)
