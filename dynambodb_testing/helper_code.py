@@ -250,8 +250,6 @@ DATA_JSON = {
 
 def example_encrypt_decrypt():
     """Example of creating a key, encrypt and decrypt some data"""
-    # key_byte = b"ZRc1sygKdVJbQhVejPJnK8jIYTB6boD6V1Qe1SJL1ew="
-    # key_hex = "5a5263317379674b64564a62516856656a504a6e4b386a4959544236626f44365631516531534a4c3165773d"
     key_byte = Fernet.generate_key()
     key_hex = key_byte.hex()
     key_from_hex_as_bytes = bytes.fromhex(key_hex)
@@ -318,19 +316,18 @@ def encrypt_decrypt_data():
 
 def send_encrypted_data_to_server():
     """Replicate sending encrypted data to the App"""
-    # url = "http://127.0.0.1:80/update_private_repositories"
     url = "http://127.0.0.1:4567/update_private_repositories"
     headers = {"Content-Type": "application/json", "X-API-KEY": "default123"}
     data_json = encrypt_json(DATA_JSON)
     requests.post(url, headers=headers, json=data_json, timeout=1.5)
 
 
-def send_data_to_server():
-    """Replicate sending plain text data to the App"""
+def send_encrypted_data_to_prod_server():
+    """Replicate sending encrypted data to the App"""
     url = "http://127.0.0.1:80/update_private_repositories"
-    # url = "http://127.0.0.1:4567/update_private_repositories"
     headers = {"Content-Type": "application/json", "X-API-KEY": "default123"}
-    requests.post(url, headers=headers, json=DATA_JSON, timeout=1.5)
+    data_json = encrypt_json(DATA_JSON)
+    requests.post(url, headers=headers, json=data_json, timeout=1.5)
 
 
 def main():
@@ -341,9 +338,8 @@ def main():
     print("Start")
 
     example_encrypt_decrypt()
-    # encrypt_decrypt_data()
-    # send_data_to_server()
-    # send_encrypted_data_to_server()
+    encrypt_decrypt_data()
+    send_encrypted_data_to_server()
 
     print("Finished")
     print("-" * 88)

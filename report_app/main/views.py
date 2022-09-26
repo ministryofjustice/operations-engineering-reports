@@ -19,6 +19,8 @@ main = Blueprint("main", __name__)
 
 logger = logging.getLogger(__name__)
 
+AUTHLIB_CLIENT = "authlib.integrations.flask_client"
+
 
 @main.record
 def setup_auth0(setup_state):
@@ -31,7 +33,7 @@ def setup_auth0(setup_state):
     logger.debug("setup_auth0()")
     app = setup_state.app
     OAuth(app)
-    auth0 = app.extensions.get("authlib.integrations.flask_client")
+    auth0 = app.extensions.get(AUTHLIB_CLIENT)
     auth0.register(
         "auth0",
         client_id=os.getenv("AUTH0_CLIENT_ID"),
@@ -100,7 +102,7 @@ def login():
         Creates a redirect to /callback if succesful
     """
     logger.debug("login()")
-    auth0 = current_app.extensions.get("authlib.integrations.flask_client")
+    auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
     return auth0.auth0.authorize_redirect(
         redirect_uri=url_for("main.callback", _external=True)
     )
@@ -115,7 +117,7 @@ def callback():
     """
     logger.debug("callback()")
     try:
-        auth0 = current_app.extensions.get("authlib.integrations.flask_client")
+        auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
         token = auth0.auth0.authorize_access_token()
         session["user"] = token
     except (Exception,):  # pylint: disable=W0703
@@ -257,34 +259,49 @@ def private_repos_page():
     )
 
 
-def apply_data_to_table(item_type, new_request):
-    """Either add or update the data of an item within the database
+def is_request_correct(the_request):
+    """Check request is a POST and has the correct API key
 
     Args:
-        item_type (string): either public or private
+        new_request (the_request): the incoming data request object
+    """
+    correct = False
+    if (
+        the_request.method == "POST"
+        and "X-API-KEY" in the_request.headers
+        and the_request.headers.get("X-API-KEY") == os.getenv("API_KEY")
+    ):
+        logger.debug("is_request_correct(): api key correct")
+        correct = True
+    else:
+        logger.warning("is_request_correct(): incorrect api key")
+    return correct
+
+
+def apply_public_data(new_request):
+    """Add public data item to the table
+
+    Args:
         new_request (request): the incoming data request object
     """
-    logger.debug("apply_data_to_table()")
-    if new_request.method == "POST":
-        if "X-API-KEY" in new_request.headers:
-            if new_request.headers.get("X-API-KEY") == os.getenv("API_KEY"):
-                logger.debug("apply_data_to_table(): api key correct")
+    logger.debug("apply_public_data()")
 
-                if item_type == "public":
-                    repository = Repositories("public")
-                elif item_type == "private":
-                    repository = Repositories("private")
-                else:
-                    repository = None
+    if is_request_correct(new_request):
+        repository = Repositories("public")
+        repository.update_data(new_request.json)
 
-                if repository.is_database_ready():
-                    repository.update_item_in_table(new_request.json)
-                elif repository.is_item_missing():
-                    repository.add_item_to_table(new_request.json)
-                else:
-                    logger.warning("apply_data_to_table(): Did not update")
-            else:
-                logger.warning("apply_data_to_table(): incorrect api key")
+
+def apply_private_data(new_request):
+    """Add private data item to the table
+
+    Args:
+        new_request (request): the incoming data request object
+    """
+    logger.debug("apply_private_data()")
+
+    if is_request_correct(new_request):
+        repository = Repositories("private")
+        repository.update_data(new_request.json)
 
 
 @main.route("/update_private_repositories", methods=["POST"])
@@ -296,7 +313,7 @@ def update_private_repositories():
         N/A: N/A
     """
     logger.debug("update_private_repositories()")
-    apply_data_to_table("private", request)
+    apply_private_data(request)
     return ""
 
 
@@ -309,5 +326,5 @@ def update_public_repositories():
         N/A: N/A
     """
     logger.debug("update_public_repositories()")
-    apply_data_to_table("public", request)
+    apply_public_data(request)
     return ""

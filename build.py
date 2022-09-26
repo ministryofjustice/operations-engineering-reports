@@ -17,6 +17,7 @@ css_path = dirpath / "stylesheets"
 js_path = dirpath / "javascript"
 image_path = dirpath / "images"
 zip_file = "govuk_frontend.zip"
+css = "*.css"
 urlretrieve(
     (
         "https://github.com/alphagov/govuk-frontend/releases/download/"
@@ -37,12 +38,12 @@ assets_path = str(dirpath / "assets")
 shutil.rmtree(assets_path)
 
 css_path.mkdir(parents=True, exist_ok=True)
-for each_file in Path(dirpath).glob("*.css"):
+for each_file in Path(dirpath).glob(css):
     path = str(css_path / each_file.name)
     shutil.move(str(each_file), path)
 
 # Rename asset to static in *.css files
-for each_file in Path(css_path).glob("*.css"):
+for each_file in Path(css_path).glob(css):
     print(each_file)
     with open(each_file, "r", encoding="utf-8") as file:
         filedata = file.read()
@@ -54,7 +55,7 @@ for each_file in Path(css_path).glob("*.css"):
     with open(each_file, "w", encoding="utf-8") as file:
         file.write(filedata)
 
-for each_file in Path(assets_css_path).glob("*.css"):
+for each_file in Path(assets_css_path).glob(css):
     shutil.copy(each_file, css_path / each_file.name)
 
 js_path.mkdir(parents=True, exist_ok=True)

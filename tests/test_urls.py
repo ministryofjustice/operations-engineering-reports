@@ -4,6 +4,7 @@ import report_app
 
 
 class TestURLs(unittest.TestCase):
+
     """_summary_
 
     Args:
@@ -16,13 +17,14 @@ class TestURLs(unittest.TestCase):
         self.ctx = app.app_context()
         self.ctx.push()
         self.client = app.test_client()
+        self.index = "/index"
 
     def tearDown(self):
         self.ctx.pop()
 
     def test_index(self):
         """_summary_"""
-        assert self.client.get("/index").status_code == 200
+        assert self.client.get(self.index).status_code == 200
 
     def test_default(self):
         """_summary_"""
@@ -31,12 +33,12 @@ class TestURLs(unittest.TestCase):
     def test_home_with_no_auth(self):
         """_summary_"""
         assert self.client.get("/home").status_code == 302
-        assert self.client.get("/home").headers.get("location") == "/index"
+        assert self.client.get("/home").headers.get("location") == self.index
 
     def test_start_with_no_auth(self):
         """_summary_"""
         assert self.client.get("/start").status_code == 302
-        assert self.client.get("/start").headers.get("location") == "/index"
+        assert self.client.get("/start").headers.get("location") == self.index
 
     def test_login_with_no_auth(self):
         """_summary_"""

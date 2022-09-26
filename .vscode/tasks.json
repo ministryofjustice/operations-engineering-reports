@@ -4,7 +4,7 @@
     {
       "label": "stop_db",
       "type": "shell",
-      "command": ["docker stop dynamodb-local || echo 0"]
+      "command": ["docker stop dynamodb-local || echo 0 && exit"]
     },
     {
       "label": "create_table",

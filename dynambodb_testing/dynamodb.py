@@ -216,8 +216,6 @@ def main():
     """
     Main function
     """
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
     print("-" * 88)
     print("Start")
 
@@ -237,7 +235,7 @@ def main():
         print(result)
         dynamodb.list_tables()
         CONTENT["last_push"] = "2028-02-01"
-        result = dynamodb.update_item(filename, CONTENT)
+        dynamodb.update_item(filename, CONTENT)
         repo_data = dynamodb.get_item(filename)
         print(repo_data["filename"])
         print(repo_data["stored_at"])

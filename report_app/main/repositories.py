@@ -16,14 +16,7 @@ class Repositories:
         :param repository_permission_type: public or private
         """
         logger.debug("Repositories.init()")
-        self.file_name = None
-        if (
-            "public" in repository_permission_type
-            or "private" in repository_permission_type
-        ):
-            self.file_name = (
-                "data/" + repository_permission_type + "_github_repositories"
-            )
+        self.file_name = "data/" + repository_permission_type + "_github_repositories"
         self.repo_data = None
         self.stored_at = None
         self.database_exists = False
@@ -231,3 +224,16 @@ class Repositories:
             logger.warning(
                 "Repositories.add_item_to_table(): Could not connect to database"
             )
+
+    def update_data(self, json_data):
+        """Either add or update the data item within the table
+
+        Args:
+            json_data (json): the data to add to the item
+        """
+        if self.is_database_ready():
+            self.update_item_in_table(json_data)
+        elif self.is_item_missing():
+            self.add_item_to_table(json_data)
+        else:
+            logger.warning("Repositories.update_data(): Did not update")

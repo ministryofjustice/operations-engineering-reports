@@ -54,4 +54,4 @@ app.register_error_handler(404, page_not_found)
 app.register_error_handler(500, unknown_server_error)
 
 # Security and Protection extenstions
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "send_wildcard": "False"}})
