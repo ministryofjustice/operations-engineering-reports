@@ -1,20 +1,48 @@
-dev-server:
-	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
+SHELL=bash
 
-docker-dev-server:
-	docker run --rm \
-		-v $$(pwd)/data:/app/data \
-		-e API_KEY=soopersekrit \
-		-e RACK_ENV=production \
-		-p 4567:4567 \
-		foo
+setup:
+	python3 -m venv venv
+	@venv/bin/pip3 install --upgrade pip
+	@venv/bin/pip3 install -r requirements.txt
 
-test:
-	rspec
+venv: requirements.txt requirements-test.txt
+	python3 -m venv venv
+	@venv/bin/pip3 install --upgrade pip
+	@venv/bin/pip3 install -r requirements.txt
+	@venv/bin/pip3 install -r requirements-test.txt
 
-start-development-server:
-	docker build -t foo .
-	mkdir data || true
-	echo '{"updated_at":"2020-11-10 16:46:15 +0000","data":[]}' > data/github_collaborators.json
-	make docker-dev-server
-	# Now visit http://localhost:4567/github_collaborators
+source_files = ./instance ./report_app ./tests ./dynambodb_testing setup.py operations_engineering_reports.py build.py
+lint: venv
+	@venv/bin/flake8 --ignore=E501,W503 $(source_files)
+	@venv/bin/mypy --ignore-missing-imports $(source_files)
+	@venv/bin/pylint --recursive=y $(source_files)
+
+format: venv
+	@venv/bin/black $(source_files)
+
+clean-test:
+	rm -fr venv
+	rm -fr .tox/
+	rm -fr .pytest_cache
+	rm -fr .mypy_cache
+	rm -fr .coverage
+	rm -fr htmlcov/
+	rm -fr .pytest_cache
+
+test: venv
+
+all:
+
+local:
+	bash scripts/start-local.sh
+
+prod: lint
+	bash scripts/start-prod.sh
+
+dev:
+	bash scripts/start-dev.sh
+
+stop:
+	docker-compose down -v --remove-orphans
+
+.PHONY: setup dev stop venv lint test format local prod clean-test all

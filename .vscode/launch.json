@@ -1,0 +1,27 @@
+{
+  "configurations": [
+    {
+      "name": "Python: App",
+      "type": "python",
+      "python": "${workspaceFolder}/venv/bin/python3",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceFolder}/operations_engineering_reports.py",
+      // "program": "${workspaceFolder}/dynambodb_testing/dynamodb.py",
+      // "program": "${workspaceFolder}/dynambodb_testing/helper_code.py",
+      "console": "integratedTerminal",
+      "args": [""],
+      "preLaunchTask": "build_db",
+      "postDebugTask": "quit_db",
+      "env": {
+        "FLASK_CONFIGURATION": "development",
+        "FLASK_DEBUG": "true",
+        "AWS_ACCESS_KEY_ID": "DUMMYIDEXAMPLE",
+        "AWS_SECRET_ACCESS_KEY": "DUMMYEXAMPLEKEY",
+        "AWS_DEFAULT_REGION": "eu-west-2",
+        "DYNAMODB_TABLE_NAME": "cp-637250fa84046ef0",
+        "API_KEY": "default123"
+      }
+    }
+  ]
+}
