@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build
-        run: docker build -t foo .
+        run: docker build -t foo -f Dockerfile.prod .
       - name: Push to ECR
         id: ecr
         uses: jwalton/gh-ecr-push@v1
