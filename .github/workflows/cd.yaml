@@ -29,7 +29,7 @@ jobs:
           local-image: foo
           image: ${ECR_NAME}:${{ github.sha }}
       - name: Update image tag
-        run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes_deployment/live/deployment.tpl | envsubst > kubernetes_deployment/live/deployment.yaml
+        run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes_deployment/deployment.tpl | envsubst > kubernetes_deployment/deployment.yaml
       - name: Authenticate to the cluster
         env:
           KUBE_CERT: ${{ secrets.KUBE_CERT }}
@@ -43,7 +43,7 @@ jobs:
           kubectl config use-context ${KUBE_CLUSTER}
       - name: Apply the updated manifest
         run: |
-          kubectl -n ${KUBE_NAMESPACE} apply -f kubernetes_deployment/live/
+          kubectl -n ${KUBE_NAMESPACE} apply -f kubernetes_deployment/
       - name: Report failure to Slack
         if: always()
         uses: ravsamhq/notify-slack-action@v2
