@@ -18,7 +18,7 @@ spec:
           image: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME}:${IMAGE_TAG}
           env:
             - name: FLASK_DEBUG
-              value: false
+              value: "false"
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
