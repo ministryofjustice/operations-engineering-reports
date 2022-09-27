@@ -1,6 +1,7 @@
 FROM python:3.10.6-slim
 
-RUN addgroup -gid 1000 --system appgroup && adduser -uid 1000 --system appuser
+RUN addgroup --gid 1017 --system appgroup \
+  && adduser --system --uid 1017 --group appgroup
 
 RUN apt update -y && apt dist-upgrade -y && apt install -y
 
@@ -17,6 +18,6 @@ ENV PYTHONUNBUFFERED 1
 
 EXPOSE 4567
 
-USER appuser
+USER 1017
 
 ENTRYPOINT FLASK_APP=operations_engineering_reports flask run --host=0.0.0.0 --port=4567
