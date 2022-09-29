@@ -328,3 +328,23 @@ def update_public_repositories():
     logger.debug("update_public_repositories()")
     apply_public_data(request)
     return ""
+
+
+@main.route('/api/v1/compliant_public_repositories/<repository_name>', methods=['GET'])
+def compliant_repository(repository_name):
+    """Find a repository in compliant repositories list
+
+    Args:
+        repository_name (string): name of repository to find
+
+    Returns:
+        dict: json result true if find repository in compliant repositories list
+    """
+    logger.debug("compliant_repository()")
+    repository = Repositories("public")
+    if repository.is_database_ready():
+        compliant_repos = repository.get_compliant_repositories()
+        for compliant_repo in compliant_repos:
+            if compliant_repo.get("name") == repository_name:
+                return {"result": "PASS"}
+    return {"result": "FAIL"}
