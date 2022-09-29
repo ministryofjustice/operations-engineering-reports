@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/bin/bash scripts/start-db-dev.sh
+/bin/bash scripts/start-db-local.sh
 
 export AWS_ACCESS_KEY_ID=DUMMYIDEXAMPLE
 export AWS_SECRET_ACCESS_KEY=DUMMYEXAMPLEKEY
