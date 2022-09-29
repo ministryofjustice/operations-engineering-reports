@@ -69,3 +69,4 @@ node_modules/
 docker
 *.sha256
 
+secrets.yaml
