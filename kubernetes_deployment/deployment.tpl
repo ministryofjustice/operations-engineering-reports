@@ -19,11 +19,6 @@ spec:
           env:
             - name: FLASK_DEBUG
               value: "false"
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: operations-engineering-reports-api-key
-                  key: token
             - name: DYNAMODB_REGION
               value: "eu-west-2"
             - name: DYNAMODB_ACCESS_KEY_ID
@@ -41,27 +36,10 @@ spec:
                 secretKeyRef:
                   name: opseng-reports-table
                   key: table_name
-            - name: AUTH0_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: opseng-reports-table
-                  key: auth0_client_id
-            - name: AUTH0_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: opseng-reports-table
-                  key: auth0_secret
             - name: AUTH0_DOMAIN
               value: "operations-engineering.eu.auth0.com"
-            - name: APP_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: opseng-reports-table
-                  key: flask_app_secret
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: opseng-reports-table
-                  key: opseng_reports_encrypt_key
+          envFrom:
+            - secretRef:
+                name: app-secrets
           ports:
           - containerPort: 4567
