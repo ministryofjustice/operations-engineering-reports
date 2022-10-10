@@ -10,6 +10,11 @@ env:
   KUBE_CLUSTER: ${{ secrets.KUBE_CLUSTER }}
   KUBE_NAMESPACE: ${{ secrets.KUBE_NAMESPACE }}
   ECR_NAME: ${{ secrets.ECR_NAME }}
+  AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+  AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+  FLASK_APP_SECRET: ${{ secrets.FLASK_APP_SECRET }}
+  OPS_ENG_REPORTS_ENCRYPT_KEY: ${{ secrets.OPS_ENG_REPORTS_ENCRYPT_KEY }}
+  OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
 
 jobs:
   main:
@@ -28,8 +33,10 @@ jobs:
           region: eu-west-2
           local-image: foo
           image: ${ECR_NAME}:${{ github.sha }}
-      - name: Update image tag
-        run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes_deployment/deployment.tpl | envsubst > kubernetes_deployment/deployment.yaml
+      - name: Update image tag and Template out any kube objects
+        run: |
+          export IMAGE_TAG=${{ github.sha }} && cat kubernetes_deployment/deployment.tpl | envsubst > kubernetes_deployment/deployment.yaml
+          cat kubernetes_deployment/app_secrets.tpl | envsubst > kubernetes_deployment/app_secrets.yaml
       - name: Authenticate to the cluster
         env:
           KUBE_CERT: ${{ secrets.KUBE_CERT }}
