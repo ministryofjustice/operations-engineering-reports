@@ -45,11 +45,9 @@ Operations Engineering Reports
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
+      <h2 class="govuk-heading-m" id="private-github-repositories"><a href="/login">Private GitHub Repositories</a></h2>
       {% if session %}
         <a href="/logout" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
-        Logout
-      {% else %}
-        <h2 class="govuk-heading-m" id="private-github-repositories"><a href="/login">Private GitHub Repositories</a></h2>
       {% endif %}
       </a>
     </div>
