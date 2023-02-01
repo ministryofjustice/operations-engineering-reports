@@ -348,3 +348,23 @@ def compliant_repository(repository_name):
             if compliant_repo.get("name") == repository_name:
                 return {"result": "PASS"}
     return {"result": "FAIL"}
+
+
+@main.route('/api/v1/compliant_public_repositories/endpoint/<repository_name>', methods=['GET'])
+def compliant_repository_endpoint(repository_name):
+    """Find a repository in compliant repositories list
+
+    Args:
+        repository_name (string): name of repository to find
+
+    Returns:
+        dict: json result true if find repository in compliant repositories list
+    """
+    logger.debug("compliant_repository_endpoint()")
+    repository = Repositories("public")
+    if repository.is_database_ready():
+        compliant_repos = repository.get_compliant_repositories()
+        for compliant_repo in compliant_repos:
+            if compliant_repo.get("name") == repository_name:
+                return {"schemaVersion": 1, "label": "MoJ Compliant", "message": "PASS"}
+    return {"schemaVersion": 1, "label": "MoJ Compliant", "message": "FAIL", "color": "d4351c"}
