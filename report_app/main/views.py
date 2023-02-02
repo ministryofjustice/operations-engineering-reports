@@ -366,5 +366,5 @@ def compliant_repository_endpoint(repository_name):
         compliant_repos = repository.get_compliant_repositories()
         for compliant_repo in compliant_repos:
             if compliant_repo.get("name") == repository_name:
-                return {"schemaVersion": 1, "label": "MoJ Compliant", "message": "PASS"}
-    return {"schemaVersion": 1, "label": "MoJ Compliant", "message": "FAIL", "color": "d4351c"}
+                return {"schemaVersion": 1, "label": "MoJ Compliant", "message": "PASS", "color": "005ea5"}
+    return {"schemaVersion": 1, "label": "MoJ Compliant", "message": "FAIL", "color": "d4351c", "isError": "true"}
