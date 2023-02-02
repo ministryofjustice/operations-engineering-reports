@@ -361,7 +361,6 @@ def compliant_repository_endpoint(repository_name):
         dict: json result true if find repository in compliant repositories list
     """
     logger.debug("compliant_repository_endpoint()")
-
     repository = Repositories("public")
     if repository.is_database_ready():
         compliant_repos = repository.get_compliant_repositories()
