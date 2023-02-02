@@ -393,17 +393,17 @@ OllFX/i53P5P9a/gNkKpsCMFRuFAAAAABJRU5ErkJggg=="""
         for compliant_repo in compliant_repos:
             if compliant_repo.get("name") == repository_name:
                 return {
-                         "schemaVersion": 1,
-                         "label": "MoJ Compliant",
-                         "message": "PASS",
-                         "color": "005ea5",
-                         "namedLogo": moj_crest
-                       }
+                    "schemaVersion": 1,
+                    "label": "MoJ Compliant",
+                    "message": "PASS",
+                    "color": "005ea5",
+                    "namedLogo": moj_crest
+                }
     return {
-             "schemaVersion": 1,
-             "label": "MoJ Compliant",
-             "message": "FAIL",
-             "color": "d4351c",
-             "isError": "true",
-             "namedLogo": moj_crest
-           }
+        "schemaVersion": 1,
+        "label": "MoJ Compliant",
+        "message": "FAIL",
+        "color": "d4351c",
+        "isError": "true",
+        "namedLogo": moj_crest
+    }
