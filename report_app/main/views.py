@@ -371,6 +371,7 @@ def compliant_repository_endpoint(repository_name):
                     "label": "MoJ Compliant",
                     "message": "PASS",
                     "color": "005ea5",
+                    "labelColor": "231f20",
                     "style": "for-the-badge"
                 }
     return {
