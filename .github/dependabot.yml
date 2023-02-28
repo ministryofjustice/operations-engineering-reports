@@ -10,6 +10,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "pip"
-    directory: "/scripts/python/"
+    directory: "/"
     schedule:
       interval: "daily"
