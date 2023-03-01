@@ -104,7 +104,7 @@ class Repositories:
                 )
         return compliant_repos
 
-    def get_fail_reasons(self, repo_checks, default_branch):
+    def get_fail_reasons(self, repo_checks):
         """Return a list of the failure reasons
 
         Args:
@@ -119,20 +119,20 @@ class Repositories:
             reasons.append("The default branch is not `main`")
 
         if not repo_checks.get("has_default_branch_protection"):
-            msg = "Branch protection is not enabled for " + default_branch
+            msg = "Branch protection is not enabled on the `main` branch"
             reasons.append(msg)
 
         if not repo_checks.get("requires_approving_reviews"):
-            reasons.append("Pull request reviews are not required")
+            reasons.append("Pull request require reviews is not enabled")
 
         if not repo_checks.get("administrators_require_review"):
-            reasons.append("Administrator pull requests do not require reviews")
+            reasons.append("Administrator pull requests require a review is not enabled")
 
         if not repo_checks.get("issues_section_enabled"):
             reasons.append("The issues section is not enabled")
 
         if not repo_checks.get("has_require_approvals_enabled"):
-            reasons.append("Pull request review approvals are not required")
+            reasons.append("The number of pull request approvers is not enabled ie `Require approvals`")
 
         if not repo_checks.get("has_license"):
             reasons.append("License is not MIT")
@@ -155,9 +155,7 @@ class Repositories:
                 non_compliant_repos.append(
                     {
                         "name": repository.get("name"),
-                        "fail_reasons": self.get_fail_reasons(
-                            repository.get("report"), repository.get("default_branch")
-                        ),
+                        "fail_reasons": self.get_fail_reasons(repository.get("report")),
                         "url": repository.get("url"),
                         "last_push": repository.get("last_push"),
                     }
