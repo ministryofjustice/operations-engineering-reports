@@ -122,18 +122,20 @@ def callback():
         session["user"] = token
     except (Exception,):  # pylint: disable=W0703
         return render_template("500.html"), 500
-    else:
-        user_email = session["user"]["userinfo"]["email"]
-        if (
-            "@digital.justice.gov.uk" in user_email
-            or "@justice.gov.uk" in user_email
-            or "@cica.gov.uk" in user_email
-            or "@hmcts.net" in user_email
-        ):
-            logger.info("User has approved email domain")
-            return redirect("/home")
-        logger.warning("User does not have an approved email domain")
-        return redirect("/logout")
+
+    user_email = session["user"]["userinfo"]["email"]
+
+    if (
+        "@digital.justice.gov.uk" in user_email
+        or "@justice.gov.uk" in user_email
+        or "@cica.gov.uk" in user_email
+        or "@hmcts.net" in user_email
+    ):
+        logger.info("User has approved email domain")
+        return redirect("/home")
+
+    logger.warning("User does not have an approved email domain")
+    return redirect("/logout")
 
 
 @main.route("/logout")
@@ -330,7 +332,7 @@ def update_public_repositories():
     return ""
 
 
-@main.route('/api/v1/compliant_public_repositories/<repository_name>', methods=['GET'])
+@main.route("/api/v1/compliant_public_repositories/<repository_name>", methods=["GET"])
 def compliant_repository(repository_name):
     """Find a repository in compliant repositories list
 
@@ -350,7 +352,9 @@ def compliant_repository(repository_name):
     return {"result": "FAIL"}
 
 
-@main.route('/api/v1/compliant_public_repositories/endpoint/<repository_name>', methods=['GET'])
+@main.route(
+    "/api/v1/compliant_public_repositories/endpoint/<repository_name>", methods=["GET"]
+)
 def compliant_repository_endpoint(repository_name):
     """Find a repository in compliant repositories list
 
@@ -372,7 +376,7 @@ def compliant_repository_endpoint(repository_name):
                     "message": "PASS",
                     "color": "005ea5",
                     "labelColor": "231f20",
-                    "style": "for-the-badge"
+                    "style": "for-the-badge",
                 }
     return {
         "schemaVersion": 1,
@@ -380,5 +384,5 @@ def compliant_repository_endpoint(repository_name):
         "message": "FAIL",
         "color": "d4351c",
         "style": "for-the-badge",
-        "isError": "true"
+        "isError": "true",
     }

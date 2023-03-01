@@ -144,8 +144,7 @@ class DynamoDB:
                 err.response["Error"]["Message"],
             )
             return None
-        else:
-            return response.get("Item")
+        return response.get("Item")
 
     def update_item(self, filename, content):
         """
@@ -174,5 +173,4 @@ class DynamoDB:
                 err.response["Error"]["Message"],
             )
             return None
-        else:
-            return response.get("Attributes")
+        return response.get("Attributes")

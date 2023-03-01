@@ -61,8 +61,7 @@ class DynamoDB:
                 err.response["Error"]["Message"],
             )
             return None
-        else:
-            return tables
+        return tables
 
     def add_item(self, filename, content):
         """
@@ -100,8 +99,7 @@ class DynamoDB:
                 err.response["Error"]["Message"],
             )
             return None
-        else:
-            return response["Item"]
+        return response["Item"]
 
     def update_item(self, filename, content):
         """
@@ -128,8 +126,7 @@ class DynamoDB:
                 err.response["Error"]["Message"],
             )
             return None
-        else:
-            return response["Attributes"]
+        return response["Attributes"]
 
     def scan_db(self):
         """
