@@ -96,11 +96,11 @@ class Repositories:
         for repository in self.repo_data:
             if repository.get("status") == "PASS":
                 compliant_repos.append(
-                    dict(
-                        name=repository.get("name"),
-                        url=repository.get("url"),
-                        last_push=repository.get("last_push"),
-                    )
+                    {
+                        "name": repository.get("name"),
+                        "url": repository.get("url"),
+                        "last_push": repository.get("last_push"),
+                    }
                 )
         return compliant_repos
 
@@ -153,14 +153,14 @@ class Repositories:
         for repository in self.repo_data:
             if repository.get("status") == "FAIL":
                 non_compliant_repos.append(
-                    dict(
-                        name=repository.get("name"),
-                        fail_reasons=self.get_fail_reasons(
+                    {
+                        "name": repository.get("name"),
+                        "fail_reasons": self.get_fail_reasons(
                             repository.get("report"), repository.get("default_branch")
                         ),
-                        url=repository.get("url"),
-                        last_push=repository.get("last_push"),
-                    )
+                        "url": repository.get("url"),
+                        "last_push": repository.get("last_push"),
+                    }
                 )
         return non_compliant_repos
 
