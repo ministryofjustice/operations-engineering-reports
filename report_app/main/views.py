@@ -221,7 +221,7 @@ def public_repos_page():
         return render_template(
             "public-github-repositories.html",
             updated_at=repository.get_stored_at_date(),
-            total_repos=repository.get_total_repositories(),
+            total_repos=(len(compliant_repos) + len(non_compliant_repos)),
             number_compliant_repos=len(compliant_repos),
             number_non_compliant_repos=len(non_compliant_repos),
             compliant_repos=compliant_repos,
@@ -249,7 +249,7 @@ def private_repos_page():
         return render_template(
             "private-github-repositories.html",
             updated_at=repository.get_stored_at_date(),
-            total_repos=repository.get_total_repositories(),
+            total_repos=(len(compliant_repos) + len(non_compliant_repos)),
             number_compliant_repos=len(compliant_repos),
             number_non_compliant_repos=len(non_compliant_repos),
             compliant_repos=compliant_repos,
