@@ -73,17 +73,6 @@ class Repositories:
         logger.debug("Repositories.get_stored_at_date()")
         return self.stored_at
 
-    def get_total_repositories(self):
-        """Return the total number of repositories in the data
-
-        Returns:
-            int: the number of repos in the data
-        """
-        logger.debug("Repositories.get_total_repositories()")
-        if self.repo_data:
-            return len(self.repo_data)
-        return 0
-
     def get_compliant_repositories(self):
         """Return the compliant repositories from the the data
 
