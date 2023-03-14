@@ -103,7 +103,7 @@ class Repositories:
                 "Repositories.get_compliant_repositories(): Duplicate repo's found in json data"
             )
 
-        return unique_compliant_repos
+        return sorted(unique_compliant_repos, key=lambda d: d['name'])
 
     def get_fail_reasons(self, repo_checks):
         """Return a list of the failure reasons
@@ -140,7 +140,7 @@ class Repositories:
             )
 
         if not repo_checks.get("has_license"):
-            reasons.append("License is not MIT")
+            reasons.append("Repository does not have a LICENSE or LICENCE file")
 
         if not repo_checks.get("has_description"):
             reasons.append("Description section is empty")
@@ -177,7 +177,7 @@ class Repositories:
                 "Repositories.get_non_compliant_repositories(): Duplicate repo's found in json data"
             )
 
-        return unique_non_compliant_repos
+        return sorted(unique_non_compliant_repos, key=lambda d: d['name'])
 
     def decrypt_data(self, payload):
         """Decrypt received data into plain text data (json)
