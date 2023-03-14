@@ -1,11 +1,11 @@
-name: code-formatter
+name: PR Lint
 
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
 
 jobs:
-  format-code:
+  pr-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
