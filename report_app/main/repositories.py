@@ -103,10 +103,16 @@ class Repositories:
                     }
                 )
 
-        unique_compliant_repos = [dict(t) for t in {tuple(i.items()) for i in compliant_repos}]
+        unique_compliant_repos = [
+            i
+            for n, i in enumerate(compliant_repos)
+            if i not in compliant_repos[n + 1:]
+        ]
 
         if len(compliant_repos) != len(unique_compliant_repos):
-            logger.warn("Repositories.get_compliant_repositories(): Duplicate repo's found in json data")
+            logger.warning(
+                "Repositories.get_compliant_repositories(): Duplicate repo's found in json data"
+            )
 
         return unique_compliant_repos
 
@@ -132,13 +138,17 @@ class Repositories:
             reasons.append("Pull request require reviews is not enabled")
 
         if not repo_checks.get("administrators_require_review"):
-            reasons.append("Administrator pull requests require a review is not enabled")
+            reasons.append(
+                "Administrator pull requests require a review is not enabled"
+            )
 
         if not repo_checks.get("issues_section_enabled"):
             reasons.append("The issues section is not enabled")
 
         if not repo_checks.get("has_require_approvals_enabled"):
-            reasons.append("The number of pull request approvers is not enabled ie `Require approvals`")
+            reasons.append(
+                "The number of pull request approvers is not enabled ie `Require approvals`"
+            )
 
         if not repo_checks.get("has_license"):
             reasons.append("License is not MIT")
@@ -167,10 +177,16 @@ class Repositories:
                     }
                 )
 
-        unique_non_compliant_repos = [dict(t) for t in {tuple(i.items()) for i in non_compliant_repos}]
+        unique_non_compliant_repos = [
+            i
+            for n, i in enumerate(non_compliant_repos)
+            if i not in non_compliant_repos[n + 1:]
+        ]
 
         if len(non_compliant_repos) != len(unique_non_compliant_repos):
-            logger.warn("Repositories.get_non_compliant_repositories(): Duplicate repo's found in json data")
+            logger.warning(
+                "Repositories.get_non_compliant_repositories(): Duplicate repo's found in json data"
+            )
 
         return unique_non_compliant_repos
 
