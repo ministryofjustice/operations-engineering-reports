@@ -106,7 +106,7 @@ class Repositories:
         unique_compliant_repos = [
             i
             for n, i in enumerate(compliant_repos)
-            if i not in compliant_repos[n + 1 :]
+            if i not in compliant_repos[n + 1:]
         ]
 
         if len(compliant_repos) != len(unique_compliant_repos):
@@ -180,7 +180,7 @@ class Repositories:
         unique_non_compliant_repos = [
             i
             for n, i in enumerate(non_compliant_repos)
-            if i not in non_compliant_repos[n + 1 :]
+            if i not in non_compliant_repos[n + 1:]
         ]
 
         if len(non_compliant_repos) != len(unique_non_compliant_repos):
