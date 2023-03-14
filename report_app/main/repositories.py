@@ -102,7 +102,13 @@ class Repositories:
                         "last_push": repository.get("last_push"),
                     }
                 )
-        return compliant_repos
+
+        unique_compliant_repos = [dict(t) for t in {tuple(i.items()) for i in compliant_repos}]
+
+        if len(compliant_repos) != len(unique_compliant_repos):
+            logger.warn("Repositories.get_compliant_repositories(): Duplicate repo's found in json data")
+
+        return unique_compliant_repos
 
     def get_fail_reasons(self, repo_checks):
         """Return a list of the failure reasons
@@ -160,7 +166,13 @@ class Repositories:
                         "last_push": repository.get("last_push"),
                     }
                 )
-        return non_compliant_repos
+
+        unique_non_compliant_repos = [dict(t) for t in {tuple(i.items()) for i in non_compliant_repos}]
+
+        if len(non_compliant_repos) != len(unique_non_compliant_repos):
+            logger.warn("Repositories.get_non_compliant_repositories(): Duplicate repo's found in json data")
+
+        return unique_non_compliant_repos
 
     def decrypt_data(self, payload):
         """Decrypt received data into plain text data (json)
