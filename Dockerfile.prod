@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim
+FROM python:3.12.0a7-slim
 
 RUN addgroup --gid 1017 --system appgroup \
   && adduser --system --uid 1017 --group appgroup
