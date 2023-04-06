@@ -14,12 +14,6 @@ This is the current list of reports, with links to the source repositories:
 
 - [GitHub Repository Standards](https://github.com/ministryofjustice/github-repository-standards)
 
-## Updating
-
-Changes merged to the `main` branch will be deployed via github actions.
-
-See `.github/workflows/cd.yaml` for details.
-
 ## Development
 
 There are multiple ways to run the Flask App with or without an AWS DynamoDB local instance running in a Docker container.
@@ -67,3 +61,9 @@ With the database use the AWS scan command to see if the database exists and has
 ## Production
 
 In production the `Dockerfile.prod` file is used to run a [Gunicorn](https://gunicorn.org/) server, which is a Python WSGI HTTP Server for UNIX.
+
+## Deployment
+
+The production App is deployed to the Cloud Platform using the [Cloud Platform User Guide](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/deploying-an-app/app-deploy-helm.html#deploying-to-the-cloud-platform). This is triggered through a GitHub Action that will populate the templates in `./kubernetes_deploy/` with the correct values and apply them to the cluster.
+
+To trigger a deployment you must create a new GitHub release by first creating a new tag. The tag must be in semantic versioning format, e.g. `v1.0.0`. The GitHub Action will then run and deploy the App to the Cloud Platform.
