@@ -2,10 +2,11 @@ name: code-formatter
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize, ready_for_review]
 
 jobs:
   format-code:
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
