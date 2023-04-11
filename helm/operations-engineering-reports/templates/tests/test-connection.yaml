@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "operations-engineering-reports.fullname" . }}-test-connection"
+  labels:
+    {{- include "operations-engineering-reports.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "operations-engineering-reports.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
