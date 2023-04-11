@@ -4,7 +4,7 @@ commandTests:
     command: "which"
     args: ["gunicorn"]
     expectedOutput: ["/usr/local/bin/gunicorn"]
-  - name:  "apt-get upgrade"
+  - name: "apt-get upgrade"
     command: "apt-get"
     args: ["-qqs", "upgrade"]
     excludedOutput: [".*Inst.*Security.* | .*Security.*Inst.*"]
