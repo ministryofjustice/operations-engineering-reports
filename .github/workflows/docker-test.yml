@@ -1,4 +1,4 @@
-name: Test Dockerfile on Pull Request
+name: Test Dockerfile
 on: pull_request
 
 jobs:
