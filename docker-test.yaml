@@ -1,0 +1,33 @@
+schemaVersion: "2.0.0"
+commandTests:
+  - name: "gunicorn flask"
+    command: "which"
+    args: ["gunicorn"]
+    expectedOutput: ["/usr/local/bin/gunicorn"]
+  - name:  "apt-get upgrade"
+    command: "apt-get"
+    args: ["-qqs", "upgrade"]
+    excludedOutput: [".*Inst.*Security.* | .*Security.*Inst.*"]
+    excludedError: [".*Inst.*Security.* | .*Security.*Inst.*"]
+  - name: "python"
+    command: "which"
+    args: ["python"]
+    expectedOutput: ["/usr/local/bin/python"]
+  - name: "pip3"
+    command: "which"
+    args: ["pip3"]
+    expectedOutput: ["/usr/local/bin/pip3"]
+  - name: "pwd"
+    command: "pwd"
+    expectedOutput: ["/home/operations-engineering-reports"]
+metadataTest:
+  envVars:
+  exposedPorts: ["4567"]
+containerRunOptions:
+  user: "appgroup"
+  privileged: false
+globalEnvVars:
+  - key: "PYTHONDONTWRITEBYTECODE"
+    value: 1
+  - key: "PYTHONUNBUFFERED"
+    value: 1
