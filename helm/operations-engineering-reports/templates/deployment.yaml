@@ -33,18 +33,33 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            # The secrets for these environment variables are stored in the
+            # cloud-platform-environment terraform state file. Accessed via the namespace.
+            - name: FLASK_DEBUG
+              value: {{ .Values.application.flaskDebug | quote }}
+            - name: DYNAMODB_REGION
+              value: "eu-west-2"
+            - name: DYNAMODB_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: opseng-reports-table
+                  key: access_key_id
+            - name: DYNAMODB_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: opseng-reports-table
+                  key: secret_access_key
+            - name: DYNAMODB_TABLE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: opseng-reports-table
+                  key: table_name
+            - name: AUTH0_DOMAIN
+              value: {{ .Values.application.auth0Domain | quote }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
