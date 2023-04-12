@@ -9,15 +9,19 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+      time: "09:00" # UTC
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"
+      time: "09:00" # UTC
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "daily"
+      time: "09:00" # UTC
   - package-ecosystem: "docker"
     directory: "/nginx"
     schedule:
       interval: "daily"
+      time: "09:00" # UTC
