@@ -5,11 +5,9 @@ metadata:
   labels:
     {{- include "operations-engineering-reports.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+      targetPort: 4567
+      name: https
   selector:
     {{- include "operations-engineering-reports.selectorLabels" . | nindent 4 }}
