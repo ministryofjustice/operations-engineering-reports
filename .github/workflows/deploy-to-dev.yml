@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "helm-deploy-2"
+      - "main"
 
 env:
     KUBE_CLUSTER: ${{ secrets.DEV_KUBE_CLUSTER }}
@@ -28,15 +28,16 @@ jobs:
         id: ecr
         uses: jwalton/gh-ecr-push@v1
         with:
-          access-key-id: ${{ secrets.DEV_ECR_AWS_ACCESS_KEY_ID }}
-          secret-access-key: ${{ secrets.DEV_ECR_AWS_SECRET_ACCESS_KEY }}
+          access-key-id: ${{ secrets.DEV_ECR_ACCESS_KEY }}
+          secret-access-key: ${{ secrets.DEV_ECR_SECRET_KEY }}
           region: eu-west-2
           local-image: image
           image: ${ECR_NAME}:${{ github.sha }}
 
   deploy-to-dev:
     needs: build-push
-    runs-on: alpine/k8s:1.23.17
+    runs-on: ubuntu-latest
+    containers: alpine/k8s:1.23.17
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -60,11 +61,11 @@ jobs:
             --wait \
             --timeout 10m \
             --namespace operations-engineering-reports-dev \
-            --set image.tag=${{github.sha}} \
+            --set image.tag=${{ github.sha }} \
             --set application.auth0ClientId=${AUTH0_CLIENT_ID} \
             --set application.auth0ClientSecret=${AUTH0_CLIENT_SECRET} \
             --set application.appSecretKey=${FLASK_APP_SECRET} \
             --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
             --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
-            --set image.repository=${ECR_NAME} \
+            --set image.repository=754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME} \
             --set ingress.host=operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk
