@@ -60,7 +60,7 @@ jobs:
             --force \
             --wait \
             --timeout 10m \
-            --namespace operations-engineering-reports-dev \
+            --namespace ${KUBE_NAMESPACE} \
             --set image.tag=${{ github.sha }} \
             --set application.auth0ClientId=${AUTH0_CLIENT_ID} \
             --set application.auth0ClientSecret=${AUTH0_CLIENT_SECRET} \
