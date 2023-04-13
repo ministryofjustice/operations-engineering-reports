@@ -5,16 +5,6 @@ on:
     tags:
       - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
-env:
-  KUBE_CLUSTER: ${{ secrets.KUBE_CLUSTER }}
-  KUBE_NAMESPACE: ${{ secrets.KUBE_NAMESPACE }}
-  ECR_NAME: ${{ secrets.ECR_NAME }}
-  AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
-  AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
-  FLASK_APP_SECRET: ${{ secrets.FLASK_APP_SECRET }}
-  OPS_ENG_REPORTS_ENCRYPT_KEY: ${{ secrets.OPS_ENG_REPORTS_ENCRYPT_KEY }}
-  OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
-
 jobs:
   main:
     runs-on: ubuntu-latest
