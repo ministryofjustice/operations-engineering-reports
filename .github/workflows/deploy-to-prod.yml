@@ -1,0 +1,79 @@
+name: Deploy to Prod
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  KUBE_CLUSTER: ${{ secrets.PROD_KUBE_CLUSTER }}
+  KUBE_NAMESPACE: ${{ secrets.PROD_KUBE_NAMESPACE }}
+  ECR_NAME: ${{ secrets.PROD_ECR_NAME }}
+  AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+  AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+  FLASK_APP_SECRET: ${{ secrets.PROD_FLASK_APP_SECRET }}
+  OPS_ENG_REPORTS_ENCRYPT_KEY: ${{ secrets.PROD_OPS_ENG_REPORTS_ENCRYPT_KEY }}
+  OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.PROD_OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: docker build -t image -f Dockerfile.prod .
+      - name: Push to ECR
+        id: ecr
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ secrets.PROD_ECR_ACCESS_KEY }}
+          secret-access-key: ${{ secrets.PROD_ECR_SECRET_KEY }}
+          region: eu-west-2
+          local-image: image
+          image: ${ECR_NAME}:${{ github.ref_name }}
+
+  deploy-to-prod:
+    needs: build-push
+    runs-on: ubuntu-latest
+    container: alpine/k8s:1.23.17
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Authenticate to the cluster
+        env:
+          KUBE_CERT: ${{ secrets.DEV_KUBE_CERT }}
+          KUBE_TOKEN: ${{ secrets.DEV_KUBE_TOKEN }}
+        run: |
+          echo "${KUBE_CERT}" > ca.crt
+          kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://${KUBE_CLUSTER}
+          kubectl config set-credentials deploy-user --token=${KUBE_TOKEN}
+          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${KUBE_NAMESPACE}
+          kubectl config get-contexts
+          kubectl config use-context ${KUBE_CLUSTER}
+      - name: Helm install
+        run: |
+          helm upgrade operations-engineering-reports-prod \
+            helm/operations-engineering-reports \
+            --install \
+            --force \
+            --wait \
+            --timeout 10m \
+            --namespace ${KUBE_NAMESPACE} \
+            --set image.tag=${{ github.ref_name }} \
+            --set application.auth0ClientId=${AUTH0_CLIENT_ID} \
+            --set application.auth0ClientSecret=${AUTH0_CLIENT_SECRET} \
+            --set application.appSecretKey=${FLASK_APP_SECRET} \
+            --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
+            --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
+            --set image.repository=754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME} \
+            --set ingress.host=operations-engineering-reports-prod.cloud-platform.service.justice.gov.uk
+      - name: Report failure to Slack
+        if: always()
+        uses: ravsamhq/notify-slack-action@v2
+        with:
+          status: ${{ job.status }}
+          notify_when: "failure"
+          notification_title: "Failed to deploy to operations-engineering-reports-prod"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
