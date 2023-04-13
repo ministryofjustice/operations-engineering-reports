@@ -37,7 +37,7 @@ jobs:
   deploy-to-dev:
     needs: build-push
     runs-on: ubuntu-latest
-    containers: alpine/k8s:1.23.17
+    container: alpine/k8s:1.23.17
     steps:
       - name: Checkout
         uses: actions/checkout@v3
