@@ -35,7 +35,6 @@ jobs:
           image: ${ECR_NAME}:${{ github.sha }}
 
   deploy-to-dev:
-    if: ${{ always() }}
     needs: build-push
     runs-on: alpine/helm:3.11.2
     steps:
