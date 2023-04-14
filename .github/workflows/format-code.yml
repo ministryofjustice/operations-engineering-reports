@@ -2,6 +2,8 @@ name: code-formatter
 
 on:
   pull_request:
+    paths-ignore:
+      - 'helm/**'
     types: [opened, edited, reopened, synchronize, ready_for_review]
 
 jobs:
