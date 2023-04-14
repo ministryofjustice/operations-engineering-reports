@@ -56,10 +56,11 @@ jobs:
           helm upgrade operations-engineering-reports-prod \
             helm/operations-engineering-reports \
             --install \
+            --atomic \
             --force \
             --wait \
-            --timeout 10m \
             --namespace ${KUBE_NAMESPACE} \
+            --set replicaCount=3 \
             --set image.tag=${{ github.ref_name }} \
             --set application.auth0ClientId=${AUTH0_CLIENT_ID} \
             --set application.auth0ClientSecret=${AUTH0_CLIENT_SECRET} \
@@ -74,6 +75,6 @@ jobs:
         with:
           status: ${{ job.status }}
           notify_when: "failure"
-          notification_title: "Failed to deploy to operations-engineering-reports-prod"
+          notification_title: "Failed to deploy reports to operations-engineering-reports-prod"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
