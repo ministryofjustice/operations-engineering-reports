@@ -42,8 +42,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Authenticate to the cluster
         env:
-          KUBE_CERT: ${{ secrets.DEV_KUBE_CERT }}
-          KUBE_TOKEN: ${{ secrets.DEV_KUBE_TOKEN }}
+          KUBE_CERT: ${{ secrets.PROD_KUBE_CERT }}
+          KUBE_TOKEN: ${{ secrets.PROD_KUBE_TOKEN }}
         run: |
           echo "${KUBE_CERT}" > ca.crt
           kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://${KUBE_CLUSTER}
