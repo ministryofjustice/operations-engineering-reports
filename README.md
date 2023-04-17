@@ -66,11 +66,11 @@ In production the `Dockerfile.prod` file is used to run a [Gunicorn](https://gun
 
 #### Development
 
-There is a development namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/getting-started/kube-dev.html) for this project. The namespace [operations-engineering-reports-dev](https://github.com/ministryofjustice/cloud-platform-environments/tree/main/namespaces/live.cloud-platform.service.justice.gov.uk/operations-engineering-reports-dev) contains a small dynamodb, and ECR registry and some space to compute.
+There is a development namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/what-is-the-cloud-platform.html) contains a small dynamodb, and ECR registry and some space to compute.
 
 To deploy the app to the development namespace, simply push to the `main` branch. The deployment will trigger a `helm upgrade` command to update the deployment.
 
-If you wish to deploy manually, follow the steps outlined in the [deploy-to-dev](https://github.com/ministryofjustice/operations-engineering-reports/blob/main/.github/workflows/deploy-to-dev.yml) github action.
+If you wish to deploy manually, follow the steps outlined in the [deploy-to-dev](https://github.com/ministryofjustice/operations-engineering-reports/blob/main/.github/workflows/deploy-to-dev.yml) GitHub Action.
 
 You can see the development app running at: https://operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk/
 
@@ -89,7 +89,7 @@ helm history -n operations-engineering-reports-dev operations-engineering-report
 
 #### Production
 
-The production namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/getting-started/kube-dev.html) for this project is called `operations-engineering-reports-prod`.
+The production namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/what-is-the-cloud-platform.html) for this project is called `operations-engineering-reports-prod`.
 
 You can see the production app running at: https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/
 
