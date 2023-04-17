@@ -64,6 +64,41 @@ In production the `Dockerfile.prod` file is used to run a [Gunicorn](https://gun
 
 ## Deployment
 
-The production App is deployed to the Cloud Platform using the [Cloud Platform User Guide](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/deploying-an-app/app-deploy-helm.html#deploying-to-the-cloud-platform). This is triggered through a GitHub Action that will populate the templates in `./kubernetes_deploy/` with the correct values and apply them to the cluster.
+#### Development
 
-To trigger a deployment you must create a new GitHub release by first creating a new tag. The tag must be in semantic versioning format, e.g. `v1.0.0`. The GitHub Action will then run and deploy the App to the Cloud Platform.
+There is a development namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/getting-started/kube-dev.html) for this project. The namespace [operations-engineering-reports-dev](https://github.com/ministryofjustice/cloud-platform-environments/tree/main/namespaces/live.cloud-platform.service.justice.gov.uk/operations-engineering-reports-dev) contains a small dynamodb, and ECR registry and some space to compute.
+
+To deploy the app to the development namespace, simply push to the `main` branch. The deployment will trigger a `helm upgrade` command to update the deployment.
+
+If you wish to deploy manually, follow the steps outlined in the [deploy-to-dev](https://github.com/ministryofjustice/operations-engineering-reports/blob/main/.github/workflows/deploy-to-dev.yml) github action.
+
+You can see the development app running at: https://operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk/
+
+and access Cloud Platform's namespace using:
+
+```bash
+kubectl get pods -n operations-engineering-reports-dev
+```
+
+or using the Helm commands:
+
+```bash
+helm list -n operations-engineering-reports-dev
+helm history -n operations-engineering-reports-dev operations-engineering-reports-dev
+```
+
+#### Production
+
+The production namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/getting-started/kube-dev.html) for this project is called `operations-engineering-reports-prod`.
+
+You can see the production app running at: https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/
+
+To deploy the app to the production namespace do the following:
+
+- push to the `main` branch.
+- create a new tag using `git tag vn.n.n` where `n.n.n` is the version number. Please follow [semantic versioning](https://semver.org/).
+- push the tag to the remote repository using `git push origin --tags`
+
+This will trigger a GitHub Action that will create a release.
+
+The release will trigger a `helm upgrade` command to update the deployment with the new tag.
