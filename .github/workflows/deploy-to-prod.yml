@@ -16,7 +16,7 @@ env:
   OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.PROD_OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
 
 jobs:
-  main:
+  build-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
