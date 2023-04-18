@@ -5,6 +5,10 @@ from flask import Flask
 def create_app(test_config=None):
     # Create and configure an app using the application factory pattern.
     app = Flask(__name__, instance_relative_config=True)
+    app.config.from_mapping(
+        SECRET_KEY="dev",
+        DATABASE=os.path.join(app.instance_path, "flaskr.sqlite"),
+    )
     if os.environ.get("FLASK_CONFIGURATION") == "development":
         app.config.from_object("report_app.config.development")
     else:
