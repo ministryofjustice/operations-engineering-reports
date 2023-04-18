@@ -1,9 +1,9 @@
 name: Deploy to Prod
 
 on:
-  workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
 env:
   KUBE_CLUSTER: ${{ secrets.PROD_KUBE_CLUSTER }}
@@ -16,11 +16,15 @@ env:
   OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.PROD_OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
 
 jobs:
-  build-push:
+  main:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
       - name: Build
         run: docker build -t image -f Dockerfile.prod .
       - name: Push to ECR
