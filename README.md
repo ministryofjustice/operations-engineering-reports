@@ -66,7 +66,7 @@ In production the `Dockerfile.prod` file is used to run a [Gunicorn](https://gun
 
 #### Development
 
-There is a development namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/what-is-the-cloud-platform.html) contains a small dynamodb, and ECR registry and some space to compute.
+The development namespace for this project is called `operations-engineering-reports-dev`.
 
 To deploy the app to the development namespace, simply push to the `main` branch. The deployment will trigger a `helm upgrade` command to update the deployment.
 
@@ -99,6 +99,4 @@ To deploy the app to the production namespace do the following:
 - create a new tag using `git tag vn.n.n` where `n.n.n` is the version number. Please follow [semantic versioning](https://semver.org/).
 - push the tag to the remote repository using `git push origin --tags`
 
-This will trigger a GitHub Action that will create a release.
-
-The release will trigger a `helm upgrade` command to update the deployment with the new tag.
+This will trigger a GitHub Action that will create a release and deploy the app to the production namespace.
