@@ -69,3 +69,7 @@ jobs:
             --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
             --set image.repository=754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME} \
             --set ingress.host=operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk
+
+      - name: Helm test
+        run: |
+          helm test operations-engineering-reports-dev --namespace ${KUBE_NAMESPACE}
