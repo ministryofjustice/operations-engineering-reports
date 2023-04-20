@@ -18,7 +18,14 @@ This is the current list of reports, with links to the source repositories:
 
 There are multiple ways to run the Flask App with or without an AWS DynamoDB local instance running in a Docker container.
 
-Once running the the App can be opened in a browser `http://127.0.0.1:4567` for the development server or `http://127.0.0.1` when running the production server locally.
+Without a database you can use you can execute:
+
+```bash
+# Install flask i.e. brew install flask
+flask --app report_app run --debug
+```
+
+Once running the App can be opened in a browser `http://127.0.0.1:4567` for the development server or `http://127.0.0.1` when running the production server locally.
 
 To be able to use the login feature and see the private repository report requires creating a `.env` file at the root of the repository, obtaining two AUTH0 values from the AUTH0 [site](https://auth0.com/) and creating an encryption key using `dynambodb_testing/helper_code.py/example_encrypt_decrypt`.
 
