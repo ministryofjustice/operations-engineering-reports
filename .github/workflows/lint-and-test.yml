@@ -16,21 +16,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - uses: ricardochaves/python-lint@v1.4.0
-        with:
-          python-root-list: "report_app tests"
-          use-pylint: true
-          use-pycodestyle: false
-          use-flake8: true
-          use-black: false
-          use-mypy: true
-          use-isort: false
-          extra-pylint-options: "recursive=y"
-          extra-pycodestyle-options: ""
-          extra-flake8-options: "ignore=E501,W503"
-          extra-black-options: ""
-          extra-mypy-options: "ignore_missing_imports"
-          extra-isort-options: ""
+      - name: wemake-python-styleguide
+        uses: wemake-services/wemake-python-styleguide@0.17.0
       - name: Test with pytest
         run: |
-          make test
+          python -m pytest
