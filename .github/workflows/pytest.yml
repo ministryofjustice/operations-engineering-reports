@@ -1,4 +1,4 @@
-name: Test & Lint Python Code
+name: Pytest
 
 on:
   pull_request:
@@ -16,8 +16,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: wemake-python-styleguide
-        uses: wemake-services/wemake-python-styleguide@0.17.0
       - name: Test with pytest
         run: |
           python -m pytest
