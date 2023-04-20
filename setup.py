@@ -21,7 +21,7 @@ setup(
     author="Operations-Engineering team",
     author_email="operations-engineering@digital.justice.gov.uk",
     packages=["report_app"],
-    url="http://pypi.python.org/pypi/PackageName/",
+    url="http://pypi.python.org/pypi/operations-engineering-reports/",
     license=read_file("LICENSE"),
     description="Web application to receive JSON data via authenticated POSTs, & serve reports as HTML/JSON",
     long_description=read_file("README.md"),
