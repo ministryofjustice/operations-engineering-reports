@@ -20,6 +20,9 @@ lint: venv
 format: venv
 	@venv/bin/black $(source_files)
 
+test:
+	python3 -m pytest -v
+
 clean-test:
 	rm -fr venv
 	rm -fr .tox/
@@ -29,7 +32,6 @@ clean-test:
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-test: venv
 
 all:
 
