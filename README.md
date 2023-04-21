@@ -9,6 +9,7 @@ The intention of this app is to provide a centralised location for all reports t
 The live site is published [here](https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/).
 
 ## Table of Contents
+
 1. [Prerequisites](#prerequisites)
 1. [Installation](#installation)
 1. [Usage](#usage)
@@ -20,7 +21,6 @@ The live site is published [here](https://operations-engineering-reports.cloud-p
 1. [Troubleshooting](#troubleshooting)
 1. [Production](#production)
 1. [Deployment](#deployment)
-
 
 ## Prerequisites
 
