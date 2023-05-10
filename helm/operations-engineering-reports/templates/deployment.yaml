@@ -57,6 +57,16 @@ spec:
                   key: table_name
             - name: AUTH0_DOMAIN
               value: {{ .Values.application.auth0Domain | quote }}
+            - name: AUTH0_CLIENT_ID
+              value: {{ .Values.application.auth0ClientId | quote }}
+            - name: AUTH0_CLIENT_SECRET
+              value: {{ .Values.application.auth0ClientSecret | quote }}
+            - name: APP_SECRET_KEY
+              value: {{ .Values.application.appSecretKey | quote }}
+            - name: ENCRYPTION_KEY
+              value: {{ .Values.application.encryptionKey | quote }}
+            - name: API_KEY
+              value: {{ .Values.application.apiKey | quote }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
