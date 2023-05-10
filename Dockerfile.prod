@@ -20,4 +20,4 @@ USER 1017
 
 EXPOSE 4567
 
-ENTRYPOINT gunicorn --bind 0.0.0.0:4567 operations_engineering_reports:app
+ENTRYPOINT gunicorn --bind 0.0.0.0:4567 'report_app:create_app()'
