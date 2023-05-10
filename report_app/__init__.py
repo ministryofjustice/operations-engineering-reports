@@ -10,6 +10,7 @@ from report_app.main.views import (
     unknown_server_error,
 )
 
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
