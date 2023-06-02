@@ -44,6 +44,9 @@ prod: lint
 dev:
 	bash scripts/start-dev.sh
 
+ui:
+	bash scripts/start-ui.sh
+
 stop:
 	docker-compose down -v --remove-orphans
 
