@@ -307,12 +307,9 @@ def apply_private_data(new_request):
 
 @main.route("/update_repositories", methods=["POST"])
 def update_repositories():
-    """Receive data to either add or update the public and private repo report items in the table
-    """
+    """Receive data to either add or update the public and private repo report items in the table"""
     logger.debug("update_repositories()")
-
-    is_request_correct(request)
-    print(request.json)
+    apply_public_data(request)
     return ""
 
 @main.route("/update_private_repositories", methods=["POST"])

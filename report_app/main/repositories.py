@@ -241,14 +241,15 @@ class Repositories:
             )
 
     def update_data(self, json_data):
-        """Either add or update the data item within the table
+        logger.debug("Repositories.update_data()")
+        json_data = self.decrypt_data(json_data)
 
-        Args:
-            json_data (json): the data to add to the item
-        """
-        if self.is_database_ready():
-            self.update_item_in_table(json_data)
-        elif self.is_item_missing():
-            self.add_item_to_table(json_data)
-        else:
-            logger.warning("Repositories.update_data(): Did not update")
+        #loop over the list
+        dynamo_db = DynamoDB.from_context()
+
+        for repository in json_data:
+            name = json.dumps(repository['name'])
+            # TODO: Dump the repository name and pass it as a key. Everything else can be the value
+            dynamo_db.add_item(name, repository)
+
+            print(repository)
