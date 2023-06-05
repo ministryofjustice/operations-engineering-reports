@@ -27,7 +27,7 @@ class Repositories:
         if dynamodb:
             self.database_exists = True
             if self.table_name:
-                if dynamodb.exists(self.table_name):
+                if dynamodb.database_exists(self.table_name):
                     self.table_exists = True
                     db_data = dynamodb.get_item(self.file_name)
                     if db_data:
@@ -241,15 +241,41 @@ class Repositories:
             )
 
     def update_data(self, json_data):
+        """Update the data within the database"""
+
         logger.debug("Repositories.update_data()")
         decrypted_data = self.decrypt_data(json_data)
 
-        # dynamo_db = DynamoDB.from_context()
-
-        logger.debug("Repositories.update_data()")
         for repository in decrypted_data:
             repo = json.loads(repository)
-            # TODO: Add repo name as the key and the data as the value
-            print(repo["name"])
+            name = repo["name"]
+            if self.__repository_exists(name):
+                self.__amend_repository_data(repo)
+            else:
+                self.__add_repository_data(repo)
 
-            print(repo)
+    def __add_repository_data(self, new_value: dict) -> None:
+        db = DynamoDB.from_context()
+        db.add_item(new_value["name"], new_value)
+
+
+    def __repository_exists(self, name: str) -> bool:
+        db = DynamoDB.from_context()
+        if db.get_item(name):
+            return True
+
+        return False
+
+
+    def __amend_repository_data(self, new_value: dict) -> None:
+        db = DynamoDB.from_context()
+        db_value = db.get_item(new_value["name"])
+
+        if db_value == new_value:
+            logger.info(f"Repository {new_value['name']} already up to date")
+            return
+
+        else:
+            logger.info(f"Updating repository {new_value['name']}")
+            db.update_item(new_value["name"], new_value)
+

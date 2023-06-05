@@ -79,7 +79,7 @@ class DynamoDB:
             )
         return storage
 
-    def exists(self, table_name):
+    def database_exists(self, table_name):
         """
         Determines whether a table exists. As a side effect, stores the table in
         a member variable.
@@ -105,18 +105,13 @@ class DynamoDB:
             self.table = table
         return exists
 
-    def add_item(self, filename, content):
-        """
-        Adds a item to the table.
-        :param filename: The name of the file in db
-        :param content: The data
-        """
+    def add_item(self, key, value):
         logger.debug("DynamoDB.add_item()")
         try:
             self.table.put_item(
                 Item={
-                    "filename": filename,
-                    "content": content,
+                    "name": key,
+                    "data": value,
                     "stored_at": f"{datetime.now():%d-%m-%Y %H:%M:%S}",
                 }
             )
@@ -128,15 +123,10 @@ class DynamoDB:
                 err.response["Error"]["Message"],
             )
 
-    def get_item(self, filename):
-        """
-        Gets item data from the table.
-        :param filename: The name of the file.
-        :return: The requested data.
-        """
+    def get_item(self, key_name):
         logger.debug("DynamoDB.get_item()")
         try:
-            response = self.table.get_item(Key={"filename": filename})
+            response = self.table.get_item(Key={"name": key_name})
         except ClientError as err:
             logger.error(
                 "Couldn't get item from table. Here's why: %s: %s",
@@ -146,21 +136,15 @@ class DynamoDB:
             return None
         return response.get("Item")
 
-    def update_item(self, filename, content):
-        """
-        Updates the item in the table.
-        :param filename: The name of the file to update.
-        :param content: The data to update.
-        :return: The fields that were updated, with their new values.
-        """
+    def update_item(self, key, value):
         logger.debug("DynamoDB.update_item()")
         stored_at = f"{datetime.now():%d-%m-%Y %H:%M:%S}"
         try:
             response = self.table.update_item(
-                Key={"filename": filename},
+                Key={"filename": key},
                 UpdateExpression="set content=:content, stored_at=:stored_at",
                 ExpressionAttributeValues={
-                    ":content": content,
+                    ":content": value,
                     ":stored_at": stored_at,
                 },
                 ReturnValues="UPDATED_NEW",
