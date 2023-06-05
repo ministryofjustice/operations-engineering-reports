@@ -242,14 +242,14 @@ class Repositories:
 
     def update_data(self, json_data):
         logger.debug("Repositories.update_data()")
-        json_data = self.decrypt_data(json_data)
+        decrypted_data = self.decrypt_data(json_data)
 
-        #loop over the list
-        dynamo_db = DynamoDB.from_context()
+        # dynamo_db = DynamoDB.from_context()
 
-        for repository in json_data:
-            name = json.dumps(repository['name'])
-            # TODO: Dump the repository name and pass it as a key. Everything else can be the value
-            dynamo_db.add_item(name, repository)
+        logger.debug("Repositories.update_data()")
+        for repository in decrypted_data:
+            repo = json.loads(repository)
+            # TODO: Add repo name as the key and the data as the value
+            print(repo["name"])
 
-            print(repository)
+            print(repo)
