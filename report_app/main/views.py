@@ -309,7 +309,13 @@ def apply_private_data(new_request):
 def update_repositories():
     """Receive data to either add or update the public and private repo report items in the table"""
     logger.debug("update_repositories()")
-    apply_public_data(request)
+    try:
+        if is_request_correct(request):
+            # It doesn't matter if this is public or private, this parameter is ignored
+            Repositories("public").update_data(request.json)
+    except Exception as err:
+        logger.error("update_repositories(): %s", err)
+
     return ""
 
 @main.route("/update_private_repositories", methods=["POST"])

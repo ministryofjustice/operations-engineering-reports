@@ -4,6 +4,8 @@ import logging
 import json
 from cryptography.fernet import Fernet
 from report_app.main.dynamodb import DynamoDB
+from botocore.exceptions import ClientError
+
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +194,7 @@ class Repositories:
         key_hex = os.getenv("ENCRYPTION_KEY")
         if not key_hex:
             raise ValueError(
-                "ENCRYPTION_KEY environment variable not set"
+                "ENCRYPTION_KEY environment variable not set at runtime"
             )
 
         if key_hex and payload:
@@ -203,7 +205,7 @@ class Repositories:
             data_as_string = decrypted_data_as_bytes.decode()
             data = json.loads(data_as_string)
             return data
-        return None
+        return ""
 
     def update_item_in_table(self, received_json):
         """Update an item within the table of the database with new data
@@ -246,49 +248,28 @@ class Repositories:
             )
 
     def update_data(self, json_data):
-        """Update the data within the database"""
+        """Update the data within the database regardless of status"""
         logger.debug("Repositories.update_data()")
         try:
             decrypted_data = self.decrypt_data(json_data)
-        except ValueError as value_error:
-            logger.error("Repositories.update_data(): %s", {value_error})
-            return
+        except ValueError as v:
+            raise ValueError(v)
 
         for repository in decrypted_data:
-            repo = json.loads(repository)
-            name = repo["name"]
-            print(f"Processing {name}, checking if it exists in db")
-            if self.__repository_exists(name):
-                print("Repository exists, amending the data")
-                self.__amend_repository_data(repo)
-            else:
-                print("Repository does not exist, adding the data")
-                self.__add_repository_data(repo)
+            try:
+                self.__add_repository_data(json.loads(repository))
+            except Exception as e:
+                raise Exception(e)
 
     @staticmethod
     def __add_repository_data(new_value: dict) -> None:
         dynamo_db = DynamoDB.from_context()
-        dynamo_db.add_item(new_value["name"], new_value)
+        if dynamo_db is None:
+            raise Exception("Could not connect to database")
+        try:
+            dynamo_db.add_item(new_value["name"], new_value)
+        except ClientError:
+            raise Exception("Could not add item %s to database", new_value["name"])
 
-
-    @staticmethod
-    def __repository_exists(name: str) -> bool:
-        dynamo_db = DynamoDB.from_context()
-        if dynamo_db.get_item(name):
-            return True
-
-        return False
-
-
-    @staticmethod
-    def __amend_repository_data(new_value: dict) -> None:
-        dynamo_db = DynamoDB.from_context()
-        db_value = dynamo_db.get_item(new_value["name"])
-
-        if db_value == new_value:
-            logger.info("Repository %s is up to date", new_value["name"])
-            return
-
-        logger.info("Repository %s is out of date", new_value["name"])
-        dynamo_db.update_item(new_value["name"], new_value)
+        return None
 

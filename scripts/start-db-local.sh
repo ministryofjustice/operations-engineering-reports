@@ -15,5 +15,3 @@ docker pull amazon/$container_name
 docker run --rm -d --name $container_name -p 8000:8000 amazon/$container_name &
 
 aws dynamodb create-table --cli-input-json file://dynambodb_testing/create-table.json --endpoint-url http://localhost:8000
-aws dynamodb batch-write-item --request-items file://dynambodb_testing/add-public-data.json --endpoint-url http://localhost:8000
-aws dynamodb batch-write-item --request-items file://dynambodb_testing/add-private-data.json --endpoint-url http://localhost:8000
