@@ -179,7 +179,7 @@ class Repositories:
 
         return sorted(unique_non_compliant_repos, key=lambda d: d['name'])
 
-    def decrypt_data(self, payload):
+    def decrypt_data(self, payload) -> str:
         """Decrypt received data into plain text data (json)
 
         Args:
@@ -190,6 +190,11 @@ class Repositories:
         """
         logger.debug("Repositories.decrypt_data()")
         key_hex = os.getenv("ENCRYPTION_KEY")
+        if not key_hex:
+            raise ValueError(
+                "ENCRYPTION_KEY environment variable not set"
+            )
+
         if key_hex and payload:
             key = bytes.fromhex(key_hex)
             fernet = Fernet(key)
@@ -198,7 +203,7 @@ class Repositories:
             data_as_string = decrypted_data_as_bytes.decode()
             data = json.loads(data_as_string)
             return data
-        return 0
+        return None
 
     def update_item_in_table(self, received_json):
         """Update an item within the table of the database with new data
@@ -242,40 +247,48 @@ class Repositories:
 
     def update_data(self, json_data):
         """Update the data within the database"""
-
         logger.debug("Repositories.update_data()")
-        decrypted_data = self.decrypt_data(json_data)
+        try:
+            decrypted_data = self.decrypt_data(json_data)
+        except ValueError as value_error:
+            logger.error("Repositories.update_data(): %s", {value_error})
+            return
 
         for repository in decrypted_data:
             repo = json.loads(repository)
             name = repo["name"]
+            print(f"Processing {name}, checking if it exists in db")
             if self.__repository_exists(name):
+                print("Repository exists, amending the data")
                 self.__amend_repository_data(repo)
             else:
+                print("Repository does not exist, adding the data")
                 self.__add_repository_data(repo)
 
-    def __add_repository_data(self, new_value: dict) -> None:
-        db = DynamoDB.from_context()
-        db.add_item(new_value["name"], new_value)
+    @staticmethod
+    def __add_repository_data(new_value: dict) -> None:
+        dynamo_db = DynamoDB.from_context()
+        dynamo_db.add_item(new_value["name"], new_value)
 
 
-    def __repository_exists(self, name: str) -> bool:
-        db = DynamoDB.from_context()
-        if db.get_item(name):
+    @staticmethod
+    def __repository_exists(name: str) -> bool:
+        dynamo_db = DynamoDB.from_context()
+        if dynamo_db.get_item(name):
             return True
 
         return False
 
 
-    def __amend_repository_data(self, new_value: dict) -> None:
-        db = DynamoDB.from_context()
-        db_value = db.get_item(new_value["name"])
+    @staticmethod
+    def __amend_repository_data(new_value: dict) -> None:
+        dynamo_db = DynamoDB.from_context()
+        db_value = dynamo_db.get_item(new_value["name"])
 
         if db_value == new_value:
-            logger.info(f"Repository {new_value['name']} already up to date")
+            logger.info("Repository %s is up to date", new_value["name"])
             return
 
-        else:
-            logger.info(f"Updating repository {new_value['name']}")
-            db.update_item(new_value["name"], new_value)
+        logger.info("Repository %s is out of date", new_value["name"])
+        dynamo_db.update_item(new_value["name"], new_value)
 
