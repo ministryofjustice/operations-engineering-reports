@@ -1,12 +1,11 @@
 """ Routes and OAuth code """
 import logging
 import os
-from http import HTTPStatus
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
 from authlib.integrations.flask_client import OAuth
-from flask import abort, jsonify
 from flask import (
+    abort,
     Blueprint,
     redirect,
     render_template,
@@ -208,61 +207,6 @@ def unknown_server_error(err):
     return render_template("500.html"), 500
 
 
-# @main.route("/public-github-repositories.html")
-# def public_repos_page():
-#     """The public repository report page
-#
-#     Returns:
-#         Loads the templates/public-github-repositories.html page
-#     """
-#     logger.debug("public_repos_page()")
-#     repository = Repositories("public")
-#     if repository.is_database_ready():
-#         compliant_repos = repository.get_compliant_repositories()
-#         non_compliant_repos = repository.get_non_compliant_repositories()
-#         return render_template(
-#             "public-github-repositories.html",
-#             updated_at=repository.get_stored_at_date(),
-#             total_repos=(len(compliant_repos) + len(non_compliant_repos)),
-#             number_compliant_repos=len(compliant_repos),
-#             number_non_compliant_repos=len(non_compliant_repos),
-#             compliant_repos=compliant_repos,
-#             non_compliant_repos=non_compliant_repos,
-#             session=session.get("user"),
-#         )
-#     return render_template(
-#         "public-github-repositories.html", session=session.get("user")
-#     )
-
-
-# @main.route("/private-github-repositories.html")
-# @requires_auth
-# def private_repos_page():
-#     """The private repo report page
-#
-#     Returns:
-#         Loads the templates/private-github-repositories.html page
-#     """
-#     logger.debug("private_repos_page()")
-#     repository = Repositories("private")
-#     if repository.is_database_ready():
-#         compliant_repos = repository.get_compliant_repositories()
-#         non_compliant_repos = repository.get_non_compliant_repositories()
-#         return render_template(
-#             "private-github-repositories.html",
-#             updated_at=repository.get_stored_at_date(),
-#             total_repos=(len(compliant_repos) + len(non_compliant_repos)),
-#             number_compliant_repos=len(compliant_repos),
-#             number_non_compliant_repos=len(non_compliant_repos),
-#             compliant_repos=compliant_repos,
-#             non_compliant_repos=non_compliant_repos,
-#             session=session.get("user"),
-#         )
-#     return render_template(
-#         "private-github-repositories.html", session=session.get("user")
-#     )
-
-
 def __is_request_correct(the_request):
     """Check request is a POST and has the correct API key
 
@@ -284,6 +228,12 @@ def __is_request_correct(the_request):
 
 @main.route("/update_repositories", methods=["POST"])
 def update_repositories():
+    """Update all repository reports we hold
+
+    This will overwrite any existing reports storing each report
+    in the database as a new record.
+    """
+
     if __is_request_correct(request) is False:
         abort(400)
     try:
@@ -293,32 +243,6 @@ def update_repositories():
         abort(500)
 
     return "ok"
-
-# @main.route("/update_private_repositories", methods=["POST"])
-# def update_private_repositories():
-#     """Receive data to either add or update the private repo report item in the table
-#        within the database
-#
-#     Returns:
-#         N/A: N/A
-#     """
-#     logger.debug("update_private_repositories()")
-#     apply_private_data(request)
-#     return ""
-
-
-# @main.route("/update_public_repositories", methods=["POST"])
-# def update_public_repositories():
-#     """Receive data to either add or update the public repo report item in the table
-#        within the database
-#
-#     Returns:
-#         N/A: N/A
-#     """
-#     logger.debug("update_public_repositories()")
-#     apply_public_data(request)
-#     return ""
-
 
 # @main.route("/api/v1/compliant_public_repositories/<repository_name>", methods=["GET"])
 # def compliant_repository(repository_name):
