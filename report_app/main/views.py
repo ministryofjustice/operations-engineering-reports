@@ -4,8 +4,11 @@ import os
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
 from authlib.integrations.flask_client import OAuth
+
+from report_app.main.dynamodb import DynamoDB
 from flask import (
     abort,
+    jsonify,
     Blueprint,
     redirect,
     render_template,
@@ -214,6 +217,7 @@ def __is_request_correct(the_request):
         the_request: the incoming data request object
     """
     correct = False
+    print(the_request.headers)
     if (
         the_request.method == "POST"
         and "X-API-KEY" in the_request.headers
@@ -244,9 +248,43 @@ def update_github_reports():
 
     return "ok"
 
-# @main.route("/api/v1/compliant_public_repositories/<repository_name>", methods=["GET"])
-# def compliant_repository(repository_name):
-#     """Find a repository in compliant repositories list
+@main.route("/api/v1/compliant-public-repository/<repository_name>", methods=["GET"])
+def display_badge_if_compliant(repository_name) -> dict:
+    dynamo_db = DynamoDB.from_context()
+    if dynamo_db is None:
+        raise Exception("Could not connect to database")
+
+    repository = dynamo_db.get_item(repository_name)
+
+    if repository is None:
+        abort(404)
+
+    if repository.get("private") is True:
+        abort(403)
+
+    if repository.get("archived") is True:
+        abort(403)
+
+    if repository.get("status"):
+        return {
+            "schemaVersion": 1,
+            "label": "MoJ Compliant",
+            "message": "PASS",
+            "color": "005ea5",
+            "labelColor": "231f20",
+            "style": "for-the-badge",
+        }
+
+    return {
+        "schemaVersion": 1,
+        "label": "MoJ Compliant",
+        "message": "FAIL",
+        "color": "d4351c",
+        "style": "for-the-badge",
+        "isError": "true",
+    }
+
+
 #
 #     Args:
 #         repository_name (string): name of repository to find
