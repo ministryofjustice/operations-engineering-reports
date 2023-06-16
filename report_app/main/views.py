@@ -226,9 +226,9 @@ def __is_request_correct(the_request):
     return correct
 
 
-@main.route("/update_repositories", methods=["POST"])
-def update_repositories():
-    """Update all repository reports we hold
+@main.route("/api/v1/update-github-reports", methods=["POST"])
+def update_github_reports():
+    """Update all GitHub repository reports we hold
 
     This will overwrite any existing reports storing each report
     in the database as a new record.

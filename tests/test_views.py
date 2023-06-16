@@ -34,12 +34,12 @@ class TestViews(unittest.TestCase):
 
     @patch('report_app.main.views.__is_request_correct', return_value=False)
     def test_bad_request(self, mock_is_request_correct):
-        response = self.client.post('/update_repositories')
+        response = self.client.post('/api/v1/update-github-reports')
         self.assertEqual(response.status_code, 400)
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
     def test_no_json(self, mock_is_request_correct):
-        response = self.client.post('/update_repositories', json=None)
+        response = self.client.post('/api/v1/update-github-reports', json=None)
         self.assertEqual(response.status_code, 500)
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
@@ -49,7 +49,7 @@ class TestViews(unittest.TestCase):
         mock_db_context.return_value.add_item = Mock()  # Mock the add_item method
 
         mock_report.return_value.update_all_github_reports.return_value = None
-        response = self.client.post('/update_repositories', json=['{"name": "value"}'])
+        response = self.client.post('/api/v1/update-github-reports', json=['{"name": "value"}'])
         self.assertEqual(response.data, b'ok')
         self.assertEqual(response.status_code, 200)
 
