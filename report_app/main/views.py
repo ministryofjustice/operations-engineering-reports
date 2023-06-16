@@ -284,13 +284,8 @@ def __is_request_correct(the_request):
 
 @main.route("/update_repositories", methods=["POST"])
 def update_repositories():
-    logger.debug("update_repositories()")
-    # if the incoming request is None, then return a 400 error
     if __is_request_correct(request) is False:
         abort(400)
-    if request.json is None:
-        abort(400)
-    # It doesn't matter if this is public or private, this parameter is ignored
     try:
         RepositoryReport(request.json).update_all_github_reports()
     except Exception as err:
