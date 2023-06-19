@@ -55,13 +55,3 @@ class RepositoryReport:
             self.database_client.add_item(report_name, new_report)
         except Exception as exception:
             raise exception
-
-    # def get_all_github_reports(self) -> list[dict]:
-    #     """Retrieve all reports from the database"""
-    #     logger.debug("Repositories.get_all_reports()")
-    #     try:
-    #         return self.database_client.get_all_items()
-    #     except ClientError:
-    #         raise ClientError("Could not retrieve all items from database")
-    #
-
