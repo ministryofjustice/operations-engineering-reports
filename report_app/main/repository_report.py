@@ -39,7 +39,11 @@ class RepositoryReport:
 
     def update_all_github_reports(self) -> None:
         for report in self.report_data:
-            json_report = json.loads(report)
+            try:
+                json_report = json.loads(report)
+            except json.JSONDecodeError as exception:
+                logger.error("Could not decode JSON: %s", exception)
+                raise exception
             try:
                 self._add_report_to_db(json_report)
             except Exception as exception:
