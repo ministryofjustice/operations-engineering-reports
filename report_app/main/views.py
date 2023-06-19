@@ -1,11 +1,11 @@
-""" Routes and OAuth code """
 import logging
 import os
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
 from authlib.integrations.flask_client import OAuth
+from botocore.exceptions import ClientError
 
-from report_app.main.dynamodb import DynamoDB
+from report_app.main.report_database import ReportDatabase
 from flask import (
     abort,
     Blueprint,
@@ -256,13 +256,21 @@ def display_badge_if_compliant(repository_name: str) -> dict:
     Args:
         repository_name: the name of the repository to check
     """
-    dynamo_db = DynamoDB.from_context()
-    if dynamo_db is None:
-        raise Exception("Could not connect to database")
+    try:
+        dynamo_db = ReportDatabase(
+            table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+            access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+            secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+            region=os.getenv("DYNAMODB_REGION"),
+        )
+    except KeyError as exception:
+        logger.error("Failed to create database client: %s", exception)
+        raise exception
 
-    repository = dynamo_db.get_item(repository_name)
-
-    if repository is None:
+    try:
+        repository = dynamo_db.get_repository_report(repository_name)
+    except KeyError as exception:
+        logger.error("Failed to get repository report: %s", exception)
         abort(404)
 
     if repository['data']['is_private']:

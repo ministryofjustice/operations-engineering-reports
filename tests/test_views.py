@@ -1,6 +1,9 @@
 from unittest.mock import patch, Mock
 import unittest
+from botocore.exceptions import ClientError
 import report_app
+from moto import mock_dynamodb
+import boto3
 
 
 class TestViews(unittest.TestCase):
@@ -54,16 +57,20 @@ class TestGitHubReports(unittest.TestCase):
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
     @patch('report_app.main.repository_report.RepositoryReport')
-    @patch('report_app.main.dynamodb.DynamoDB.from_context')
+    @patch('report_app.main.report_database.ReportDatabase')
     def test_update_all_github_reports(self, mock_db_context, mock_report, mock_is_request_correct):
-        mock_db_context.return_value.add_item = Mock()  # Mock the add_item method
+        mock_db_context.return_value.add_repository_report = Mock()  # Mock the add_item method
 
         mock_report.return_value.update_all_github_reports.return_value = None
-        response = self.client.post('/api/v1/update-github-reports', json=['{"name": "value"}'])
+        response = self.client.post('/api/v1/update-github-reports', json=['{"name": "{test-public-repository}"}'])
         self.assertEqual(response.data, b'ok')
         self.assertEqual(response.status_code, 200)
 
 
+@patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': 'TEST_TABLE'})
+@patch.dict('os.environ', {'DYNAMODB_REGION': 'eu-west-2'})
+@patch.dict('os.environ', {'DYNAMODB_ACCESS_KEY_ID': 'FAKE'})
+@patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': 'FAKE'})
 class TestDisplayBadgeIfCompliant(unittest.TestCase):
     def setUp(self):
         app = report_app.app
@@ -72,6 +79,28 @@ class TestDisplayBadgeIfCompliant(unittest.TestCase):
         self.ctx.push()
         self.client = app.test_client()
         self.index = "/index"
+
+        self.dyanmodb = mock_dynamodb()
+        self.dyanmodb.start()
+        boto3.resource('dynamodb', region_name='eu-west-2').create_table(
+            TableName='TEST_TABLE',
+            KeySchema=[
+                {
+                    'AttributeName': 'name',
+                    'KeyType': 'HASH'
+                }
+            ],
+            AttributeDefinitions=[
+                {
+                    'AttributeName': 'name',
+                    'AttributeType': 'S'
+                }
+            ],
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 5,
+                'WriteCapacityUnits': 5
+            }
+        )
 
         self.test_public_repository = {
             'name': 'test-public-repository',
@@ -110,33 +139,35 @@ class TestDisplayBadgeIfCompliant(unittest.TestCase):
             'stored_at': '19-06-2023 08:49:32'
         }
 
-    @patch('report_app.main.dynamodb.DynamoDB.from_context', return_value=None)
-    def test_no_db(self, mock_from_context):
-        with self.assertRaises(Exception):
+        boto3.resource('dynamodb', region_name='eu-west-2').Table('TEST_TABLE').put_item(
+            Item=self.test_public_repository)
+        boto3.resource('dynamodb', region_name='eu-west-2').Table('TEST_TABLE').put_item(
+            Item=self.test_private_repository)
+
+    @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': ''})
+    @patch.dict('os.environ', {'DYNAMODB_REGION': ''})
+    @patch.dict('os.environ', {'DYNAMODB_ACCESS_KEY_ID': ''})
+    @patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': ''})
+    def test_no_db(self):
+        with self.assertRaises(ValueError):
             self.client.get('/api/v1/compliant-repository/test')
 
-    @patch('report_app.main.dynamodb.DynamoDB.from_context')
+    @patch('report_app.main.report_database.ReportDatabase')
     def test_no_repository(self, mock_from_context):
-        mock_from_context.return_value.get_item.return_value = None
+        mock_from_context.return_value.get_repository_report.return_value = None
         response = self.client.get('/api/v1/compliant-repository/test')
         self.assertEqual(response.status_code, 404)
 
-    @patch('report_app.main.dynamodb.DynamoDB.from_context')
-    def test_private_repository(self, mock_from_context):
-        mock_from_context.return_value.get_item.return_value = self.test_private_repository
+    def test_private_repository(self):
         response = self.client.get('/api/v1/compliant-repository/test-private-repository')
         self.assertEqual(response.status_code, 403)
 
-    @patch('report_app.main.dynamodb.DynamoDB.from_context')
-    def test_compliant_repository(self, mock_from_context):
-        mock_from_context.return_value.get_item.return_value = self.test_public_repository
+    def test_compliant_repository(self):
         response = self.client.get('/api/v1/compliant-repository/test-public-repository')
         self.assertEqual(response.status_code, 200)
 
-    @patch('report_app.main.dynamodb.DynamoDB.from_context')
-    def test_non_compliant_repository(self, mock_from_context):
-        mock_from_context.return_value.get_item.return_value = self.test_public_repository
-        response = self.client.get('/api/v1/compliant-repository/test')
+    def test_non_compliant_repository(self):
+        response = self.client.get('/api/v1/compliant-repository/test-public-repository')
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response.data, b'{"color":"d4351c","isError":"true","label":"MoJ Compliant","message":"FAIL",'
