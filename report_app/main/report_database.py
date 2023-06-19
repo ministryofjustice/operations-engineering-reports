@@ -13,6 +13,9 @@ class ReportDatabase:
         self._table = None
         self._client = None
 
+        if not table_name:
+            raise ValueError("The table name cannot be empty")
+
         try:
             self._client = self.__create_client(access_key, secret_key, region)
         except ValueError as err:
