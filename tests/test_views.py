@@ -1,12 +1,11 @@
 from unittest.mock import patch, Mock
 import unittest
-from botocore.exceptions import ClientError
 import report_app
 from moto import mock_dynamodb
 import boto3
 
 
-class TestViews(unittest.TestCase):
+class TestFunctionalViews(unittest.TestCase):
     def setUp(self):
         app = report_app.app
         app.config["TESTING"] = True
@@ -36,42 +35,11 @@ class TestViews(unittest.TestCase):
         assert self.client.get("/callback").status_code == 500
 
 
-class TestGitHubReports(unittest.TestCase):
-    def setUp(self):
-        app = report_app.app
-        app.config["TESTING"] = True
-        self.ctx = app.app_context()
-        self.ctx.push()
-        self.client = app.test_client()
-        self.index = "/index"
-
-    @patch('report_app.main.views.__is_request_correct', return_value=False)
-    def test_bad_request(self, mock_is_request_correct):
-        response = self.client.post('/api/v1/update-github-reports')
-        self.assertEqual(response.status_code, 400)
-
-    @patch('report_app.main.views.__is_request_correct', return_value=True)
-    def test_no_json(self, mock_is_request_correct):
-        response = self.client.post('/api/v1/update-github-reports', json=None)
-        self.assertEqual(response.status_code, 500)
-
-    @patch('report_app.main.views.__is_request_correct', return_value=True)
-    @patch('report_app.main.repository_report.RepositoryReport')
-    @patch('report_app.main.report_database.ReportDatabase')
-    def test_update_all_github_reports(self, mock_db_context, mock_report, mock_is_request_correct):
-        mock_db_context.return_value.add_repository_report = Mock()  # Mock the add_item method
-
-        mock_report.return_value.update_all_github_reports.return_value = None
-        response = self.client.post('/api/v1/update-github-reports', json=['{"name": "{test-public-repository}"}'])
-        self.assertEqual(response.data, b'ok')
-        self.assertEqual(response.status_code, 200)
-
-
 @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': 'TEST_TABLE'})
 @patch.dict('os.environ', {'DYNAMODB_REGION': 'eu-west-2'})
 @patch.dict('os.environ', {'DYNAMODB_ACCESS_KEY_ID': 'FAKE'})
 @patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': 'FAKE'})
-class TestDisplayBadgeIfCompliant(unittest.TestCase):
+class TestGitHubReports(unittest.TestCase):
     def setUp(self):
         app = report_app.app
         app.config["TESTING"] = True
@@ -143,6 +111,27 @@ class TestDisplayBadgeIfCompliant(unittest.TestCase):
             Item=self.test_public_repository)
         boto3.resource('dynamodb', region_name='eu-west-2').Table('TEST_TABLE').put_item(
             Item=self.test_private_repository)
+
+    @patch('report_app.main.views.__is_request_correct', return_value=False)
+    def test_bad_request(self, mock_is_request_correct):
+        response = self.client.post('/api/v1/update-github-reports')
+        self.assertEqual(response.status_code, 400)
+
+    @patch('report_app.main.views.__is_request_correct', return_value=True)
+    def test_no_json(self, mock_is_request_correct):
+        response = self.client.post('/api/v1/update-github-reports', json=None)
+        self.assertEqual(response.status_code, 500)
+
+    @patch('report_app.main.views.__is_request_correct', return_value=True)
+    @patch('report_app.main.repository_report.RepositoryReport')
+    @patch('report_app.main.report_database.ReportDatabase')
+    def test_update_all_github_reports(self, mock_db_context, mock_report, mock_is_request_correct):
+        mock_db_context.return_value.add_repository_report.return_value = None
+
+        mock_report.return_value.update_all_github_reports.return_value = None
+        response = self.client.post('/api/v1/update-github-reports', json=['{"name": "{test-public-repository}"}'])
+        self.assertEqual(response.data, b'ok')
+        self.assertEqual(response.status_code, 200)
 
     @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': ''})
     @patch.dict('os.environ', {'DYNAMODB_REGION': ''})
