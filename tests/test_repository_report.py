@@ -42,15 +42,24 @@ class TestRepositoryReport(unittest.TestCase):
         )
 
         self.repository_report = RepositoryReport(self.report_data)
+        print("test", self.repository_report.database_client)
 
     def test_init(self):
         self.assertEqual(self.repository_report.report_data, self.report_data)
         self.assertIsNotNone(self.repository_report.database_client)
 
+    @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': ''})
+    @patch.dict('os.environ', {'DYNAMODB_REGION': ''})
+    @patch.dict('os.environ', {'DYNAMODB_ACCESS_KEY_ID': ''})
+    @patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': ''})
+    def test_init_no_db(self):
+        self.assertRaises(ValueError, RepositoryReport, self.report_data)
+
     def test_update_all_github_reports(self):
         self.repository_report.update_all_github_reports()
-        test_data = self.repository_report.database_client.get_item("A")
-        self.assertEqual("A", test_data['name'])
+        test_data = self.repository_report.database_client.get_all_repository_reports()
+        print(test_data)
+        self.assertDictContainsSubset({"name": "A"}, test_data[0])
 
     def test_database_client_error(self):
         self.repository_report.database_client = None
@@ -81,16 +90,11 @@ class TestRepositoryReport(unittest.TestCase):
 
     @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': 'NO_TABLE'})
     def test_fail_to_create_db_client_no_table(self):
-        self.assertRaises(Exception, RepositoryReport(self.report_data))
+        self.assertRaises(ValueError, RepositoryReport, self.report_data)
 
-    def test_fail_to_start_report_with_no_client(self):
-        new_report = RepositoryReport(self.report_data)
-        new_report.database_client = None
-        self.assertRaises(Exception, new_report.update_all_github_reports)
-
-    @patch('report_app.main.dynamodb.DynamoDB.from_context', return_value=None)
+    @patch('report_app.main.report_database.ReportDatabase', return_value=None)
     def test_create_db_client_failure(self, mock_from_context):
-        self.assertRaises(Exception, RepositoryReport(self.report_data))
+        self.assertRaises(ValueError, RepositoryReport, self.report_data)
 
     def tearDown(self):
         self.dyanmodb.stop()

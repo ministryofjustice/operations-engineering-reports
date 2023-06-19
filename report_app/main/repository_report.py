@@ -1,7 +1,9 @@
 """ The interface between the App and the AWS DynamoDB table """
 import logging
 import json
-from report_app.main.dynamodb import DynamoDB
+from report_app.main.report_database import ReportDatabase
+from botocore.exceptions import ClientError
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -16,21 +18,31 @@ class RepositoryReport:
         report_data (list[any): A list of repository reports
     """
     def __init__(self, report_data: list[any]) -> None:
-        logger.debug("Repositories.init()")
         self._report_data = report_data
-        self.database_client = None
+        self.database_client = self._create_db_client
 
-        try:
-            self._create_db_client()
-        except Exception as exception:
-            logger.error("Failed to create database client: %s", exception)
+        if not self.database_client:
+            raise ValueError("Could not create database client")
 
     @property
-    def _create_db_client(self):
-        dynamo_db = DynamoDB.from_context()
-        if dynamo_db is None:
-            raise Exception("Could not connect to database")
-        self.database_client = dynamo_db
+    def _create_db_client(self) -> ReportDatabase:
+        # TODO: Find a nicer way to pass these values to the ReportDatabase class
+        access_key = os.environ.get("DYNAMODB_ACCESS_KEY_ID")
+        secret_key = os.environ.get("DYNAMODB_SECRET_ACCESS_KEY")
+        region = os.environ.get("DYNAMODB_REGION")
+        table = os.environ.get("DYNAMODB_TABLE_NAME")
+        try:
+            dynamo_db = ReportDatabase(
+                table_name=table,
+                access_key=access_key,
+                secret_key=secret_key,
+                region=region,
+            )
+        except ClientError as exception:
+            logger.error("Failed to create database client: %s", exception)
+            raise exception
+
+        return dynamo_db
 
     @property
     def report_data(self) -> list[str]:
@@ -52,6 +64,6 @@ class RepositoryReport:
     def _add_report_to_db(self, new_report: dict) -> None:
         report_name = new_report["name"]
         try:
-            self.database_client.add_item(report_name, new_report)
+            self.database_client.add_repository_report(report_name, new_report)
         except Exception as exception:
             raise exception
