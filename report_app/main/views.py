@@ -8,7 +8,6 @@ from authlib.integrations.flask_client import OAuth
 from report_app.main.dynamodb import DynamoDB
 from flask import (
     abort,
-    jsonify,
     Blueprint,
     redirect,
     render_template,
@@ -248,8 +247,15 @@ def update_github_reports():
 
     return "ok"
 
-@main.route("/api/v1/compliant-public-repository/<repository_name>", methods=["GET"])
-def display_badge_if_compliant(repository_name) -> dict:
+
+@main.route("/api/v1/compliant-repository/<repository_name>", methods=["GET"])
+def display_badge_if_compliant(repository_name: str) -> dict:
+    """Display a badge if a repository is considered compliant.
+    Compliance is determined by the status field in the database.
+
+    Args:
+        repository_name: the name of the repository to check
+    """
     dynamo_db = DynamoDB.from_context()
     if dynamo_db is None:
         raise Exception("Could not connect to database")
@@ -259,13 +265,10 @@ def display_badge_if_compliant(repository_name) -> dict:
     if repository is None:
         abort(404)
 
-    if repository.get("private") is True:
-        abort(403)
+    if repository['data']['is_private']:
+        abort(403, "Private repository")
 
-    if repository.get("archived") is True:
-        abort(403)
-
-    if repository.get("status"):
+    if repository["data"]["status"]:
         return {
             "schemaVersion": 1,
             "label": "MoJ Compliant",
@@ -283,56 +286,3 @@ def display_badge_if_compliant(repository_name) -> dict:
         "style": "for-the-badge",
         "isError": "true",
     }
-
-
-#
-#     Args:
-#         repository_name (string): name of repository to find
-#
-#     Returns:
-#         dict: json result true if find repository in compliant repositories list
-#     """
-#     logger.debug("compliant_repository()")
-#     repository = Repositories("public")
-#     if repository.is_database_ready():
-#         compliant_repos = repository.get_compliant_repositories()
-#         for compliant_repo in compliant_repos:
-#             if compliant_repo.get("name") == repository_name:
-#                 return {"result": "PASS"}
-#     return {"result": "FAIL"}
-#
-#
-# @main.route(
-#     "/api/v1/compliant_public_repositories/endpoint/<repository_name>", methods=["GET"]
-# )
-# def compliant_repository_endpoint(repository_name):
-#     """Find a repository in compliant repositories list
-#
-#     Args:
-#         repository_name (string): name of repository to find
-#
-#     Returns:
-#         dict: json result true if find repository in compliant repositories list
-#     """
-#     logger.debug("compliant_repository_endpoint()")
-#     repository = Repositories("public")
-#     if repository.is_database_ready():
-#         compliant_repos = repository.get_compliant_repositories()
-#         for compliant_repo in compliant_repos:
-#             if compliant_repo.get("name") == repository_name:
-#                 return {
-#                     "schemaVersion": 1,
-#                     "label": "MoJ Compliant",
-#                     "message": "PASS",
-#                     "color": "005ea5",
-#                     "labelColor": "231f20",
-#                     "style": "for-the-badge",
-#                 }
-#     return {
-#         "schemaVersion": 1,
-#         "label": "MoJ Compliant",
-#         "message": "FAIL",
-#         "color": "d4351c",
-#         "style": "for-the-badge",
-#         "isError": "true",
-#     }
