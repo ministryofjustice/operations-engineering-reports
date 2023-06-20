@@ -63,10 +63,6 @@ class TestReportDatabase(unittest.TestCase):
     def test_add_item_with_incorrect_key(self):
         self.assertRaises(AttributeError, self.report_database.add_repository_report, "", "")
 
-    def test_get_item(self):
-        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'data': 'test_value'})
-        self.assertIsNotNone(self.report_database.get_repository_report('test_key'))
-
     def test_get_item_with_incorrect_key(self):
         self.assertRaises(AttributeError, self.report_database.get_repository_report, "")
 

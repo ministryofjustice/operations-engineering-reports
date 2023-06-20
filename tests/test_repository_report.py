@@ -42,7 +42,6 @@ class TestRepositoryReport(unittest.TestCase):
         )
 
         self.repository_report = RepositoryReport(self.report_data)
-        print("test", self.repository_report.database_client)
 
     def test_init(self):
         self.assertEqual(self.repository_report.report_data, self.report_data)
@@ -95,9 +94,6 @@ class TestRepositoryReport(unittest.TestCase):
     @patch('report_app.main.report_database.ReportDatabase', return_value=None)
     def test_create_db_client_failure(self, mock_from_context):
         self.assertRaises(ValueError, RepositoryReport, self.report_data)
-
-    def tearDown(self):
-        self.dyanmodb.stop()
 
 
 if __name__ == '__main__':

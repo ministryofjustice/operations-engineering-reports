@@ -47,6 +47,7 @@ class TestGitHubReports(unittest.TestCase):
         self.ctx.push()
         self.client = app.test_client()
         self.index = "/index"
+        self.endpoint = "/api/v1/update-github-reports"
 
         self.dyanmodb = mock_dynamodb()
         self.dyanmodb.start()
@@ -114,12 +115,12 @@ class TestGitHubReports(unittest.TestCase):
 
     @patch('report_app.main.views.__is_request_correct', return_value=False)
     def test_bad_request(self, mock_is_request_correct):
-        response = self.client.post('/api/v1/update-github-reports')
+        response = self.client.post(self.endpoint, json=None)
         self.assertEqual(response.status_code, 400)
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
     def test_no_json(self, mock_is_request_correct):
-        response = self.client.post('/api/v1/update-github-reports', json=None)
+        response = self.client.post(self.endpoint, json=None)
         self.assertEqual(response.status_code, 500)
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
@@ -129,7 +130,7 @@ class TestGitHubReports(unittest.TestCase):
         mock_db_context.return_value.add_repository_report.return_value = None
 
         mock_report.return_value.update_all_github_reports.return_value = None
-        response = self.client.post('/api/v1/update-github-reports', json=['{"name": "{test-public-repository}"}'])
+        response = self.client.post(self.endpoint, json=['{"name": "{test-public-repository}"}'])
         self.assertEqual(response.data, b'ok')
         self.assertEqual(response.status_code, 200)
 

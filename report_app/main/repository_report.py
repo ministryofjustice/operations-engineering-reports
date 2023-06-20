@@ -59,11 +59,13 @@ class RepositoryReport:
             try:
                 self._add_report_to_db(json_report)
             except Exception as exception:
+                logger.error("Could not add report to database: %s", exception)
                 raise Exception("Could not add report to database: %s", exception)
 
     def _add_report_to_db(self, new_report: dict) -> None:
         report_name = new_report["name"]
         try:
             self.database_client.add_repository_report(report_name, new_report)
-        except Exception as exception:
-            raise exception
+        except ClientError as exception:
+            logger.error("Could not add report %s to database: %s", report_name, exception)
+            raise ClientError("Could not add report %s to database", report_name)
