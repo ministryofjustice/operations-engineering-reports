@@ -17,6 +17,7 @@ class RepositoryReport:
     Attributes:
         report_data (list[any): A list of repository reports
     """
+
     def __init__(self, report_data: list[any]) -> None:
         self._report_data = report_data
         self.database_client = self._create_db_client

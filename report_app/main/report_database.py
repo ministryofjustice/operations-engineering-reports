@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 class ReportDatabase:
     """The report database is a client layer that allows you to perform CRUD operations on the DynamoDB table."""
+
     def __init__(self, table_name: str, access_key: str, secret_key: str, region: str):
         self._table_name = table_name
         self._table = None
