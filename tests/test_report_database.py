@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, MagicMock
 from report_app.main.report_database import ReportDatabase
 from moto import mock_dynamodb
 import boto3
@@ -48,6 +49,29 @@ class TestReportDatabase(unittest.TestCase):
 
     def test_init_without_region(self):
         self.assertRaises(ValueError, ReportDatabase, 'MOCK_TABLE', 'test_access_key', 'test_secret_key', '')
+
+    @patch('report_app.main.report_database.boto3.resource')
+    @patch('report_app.main.report_database.os.getenv')
+    def test_create_client_with_docker_compose_dev(self, mock_getenv, mock_boto_resource):
+        # Arrange
+        mock_boto_resource.return_value = MagicMock()
+        mock_getenv.return_value = '1'
+        access_key = 'test_access_key'
+        secret_key = 'test_secret_key'
+        region = 'test_region'
+
+        # Act
+        client = ReportDatabase._ReportDatabase__create_client(access_key, secret_key, region)
+
+        # Assert
+        mock_boto_resource.assert_called_once_with(
+            "dynamodb",
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            region_name=region,
+            endpoint_url="http://dynamodb-local:8000",
+        )
+        self.assertEqual(client, mock_boto_resource.return_value)
 
     def test_check_table_exists_with_correct_table(self):
         self.report_database._check_table_exists('MOCK_TABLE')

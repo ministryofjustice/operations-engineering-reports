@@ -2,6 +2,7 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 import datetime
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,17 @@ class ReportDatabase:
 
         if not region:
             raise ValueError("Region is empty")
+
+        # TODO: Find a way to do this implicitly
+        if os.getenv("DOCKER_COMPOSE_DEV"):
+            return boto3.resource(
+                "dynamodb",
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key,
+                region_name=region,
+                endpoint_url="http://dynamodb-local:8000",
+            )
+
         return boto3.resource(
             "dynamodb",
             aws_access_key_id=access_key,

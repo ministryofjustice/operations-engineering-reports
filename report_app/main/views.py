@@ -216,7 +216,6 @@ def __is_request_correct(the_request):
         the_request: the incoming data request object
     """
     correct = False
-    print(the_request.headers)
     if (
         the_request.method == "POST"
         and "X-API-KEY" in the_request.headers
@@ -236,7 +235,6 @@ def update_github_reports():
     This will overwrite any existing reports storing each report
     in the database as a new record.
     """
-
     if __is_request_correct(request) is False:
         abort(400)
     try:

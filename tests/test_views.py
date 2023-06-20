@@ -1,4 +1,4 @@
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 import unittest
 import report_app
 from moto import mock_dynamodb
