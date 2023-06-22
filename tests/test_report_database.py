@@ -74,11 +74,10 @@ class TestReportDatabase(unittest.TestCase):
         self.assertEqual(client, mock_boto_resource.return_value)
 
     def test_check_table_exists_with_correct_table(self):
-        self.report_database._check_table_exists('MOCK_TABLE')
         self.assertEqual(self.report_database._table_name, 'MOCK_TABLE')
 
     def test_check_table_exists_with_incorrect_table(self):
-        self.assertRaises(Exception, self.report_database._check_table_exists, 'INCORRECT_TABLE')
+        self.assertRaises(Exception, self.report_database._check_table_and_assign, 'INCORRECT_TABLE')
 
     def test_add_item(self):
         self.report_database.add_repository_report('test_key', {'name': 'test_key', 'data': 'test_value'})
