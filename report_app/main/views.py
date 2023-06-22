@@ -3,11 +3,11 @@ import os
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
 from authlib.integrations.flask_client import OAuth
-from botocore.exceptions import ClientError
 
 from report_app.main.report_database import ReportDatabase
 from flask import (
     abort,
+    jsonify,
     Blueprint,
     redirect,
     render_template,
@@ -228,7 +228,7 @@ def __is_request_correct(the_request):
     return correct
 
 
-@main.route("/api/v1/update-github-reports", methods=["POST"])
+@main.route("/api/v2/update-github-reports", methods=["POST"])
 def update_github_reports():
     """Update all GitHub repository reports we hold
 
@@ -237,42 +237,32 @@ def update_github_reports():
     """
     if __is_request_correct(request) is False:
         abort(400)
-    try:
-        RepositoryReport(request.json).update_all_github_reports()
-    except Exception as err:
-        logger.error("update_repositories(): %s", err)
-        abort(500)
 
-    return "ok"
+    RepositoryReport(request.json).update_all_github_reports()
+
+    return jsonify({"message": "GitHub reports updated"}), 200
 
 
-@main.route("/api/v1/compliant-repository/<repository_name>", methods=["GET"])
+@main.route("/api/v2/compliant-repository/<repository_name>", methods=["GET"])
 def display_badge_if_compliant(repository_name: str) -> dict:
     """Display a badge if a repository is considered compliant.
     Compliance is determined by the status field in the database.
 
+    Private repositories are not supported and will return a 403 error.
+
     Args:
         repository_name: the name of the repository to check
     """
-    try:
-        dynamo_db = ReportDatabase(
-            table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-            access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-            secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-            region=os.getenv("DYNAMODB_REGION"),
-        )
-    except KeyError as exception:
-        logger.error("Failed to create database client: %s", exception)
-        raise exception
+    dynamo_db = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    )
 
-    try:
-        repository = dynamo_db.get_repository_report(repository_name)
-    except KeyError as exception:
-        logger.error("Failed to get repository report: %s", exception)
-        abort(404)
-
+    repository = dynamo_db.get_repository_report(repository_name)
     if repository['data']['is_private']:
-        abort(403, "Private repository")
+        abort(403, "Private repositories are not supported, and %s is private" % repository_name)
 
     if repository["data"]["status"]:
         return {
