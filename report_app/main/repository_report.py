@@ -1,8 +1,6 @@
-""" The interface between the App and the AWS DynamoDB table """
 import logging
 import json
 from report_app.main.report_database import ReportDatabase
-from botocore.exceptions import ClientError
 import os
 
 
@@ -28,22 +26,12 @@ class RepositoryReport:
     @property
     def _create_db_client(self) -> ReportDatabase:
         # TODO: Find a nicer way to pass these values to the ReportDatabase class
-        access_key = os.environ.get("DYNAMODB_ACCESS_KEY_ID")
-        secret_key = os.environ.get("DYNAMODB_SECRET_ACCESS_KEY")
-        region = os.environ.get("DYNAMODB_REGION")
-        table = os.environ.get("DYNAMODB_TABLE_NAME")
-        try:
-            dynamo_db = ReportDatabase(
-                table_name=table,
-                access_key=access_key,
-                secret_key=secret_key,
-                region=region,
-            )
-        except ClientError as exception:
-            logger.error("Failed to create database client: %s", exception)
-            raise exception
-
-        return dynamo_db
+        return ReportDatabase(
+            table_name=os.environ.get("DYNAMODB_TABLE_NAME"),
+            access_key=os.environ.get("DYNAMODB_ACCESS_KEY_ID"),
+            secret_key=os.environ.get("DYNAMODB_SECRET_ACCESS_KEY"),
+            region=os.environ.get("DYNAMODB_REGION")
+        )
 
     @property
     def report_data(self) -> list[str]:
@@ -51,22 +39,14 @@ class RepositoryReport:
         return self._report_data
 
     def update_all_github_reports(self) -> None:
+        """Update all the reports in the database after converting the report to json"""
         for report in self.report_data:
             try:
-                json_report = json.loads(report)
-            except json.JSONDecodeError as exception:
-                logger.error("Could not decode JSON: %s", exception)
-                raise exception
-            try:
-                self._add_report_to_db(json_report)
-            except Exception as exception:
-                logger.error("Could not add report to database: %s", exception)
-                raise Exception("Could not add report to database: %s", exception)
+                report = json.loads(report)
+                self._add_report_to_db(report)
+            except Exception as err:
+                logger.error("Could not add report to database: %s", err)
 
     def _add_report_to_db(self, new_report: dict) -> None:
         report_name = new_report["name"]
-        try:
-            self.database_client.add_repository_report(report_name, new_report)
-        except ClientError as exception:
-            logger.error("Could not add report %s to database: %s", report_name, exception)
-            raise ClientError("Could not add report %s to database", report_name)
+        self.database_client.add_repository_report(report_name, new_report)

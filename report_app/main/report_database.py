@@ -18,19 +18,10 @@ class ReportDatabase:
         if not table_name:
             raise ValueError("The table name cannot be empty")
 
-        try:
-            self._client = self.__create_client(access_key, secret_key, region)
-        except ValueError as err:
-            logger.error("Failed to create database client: %s", err)
-            raise ValueError("An error occurred while creating the database client: %s", err)
+        self._client = self.__create_client(access_key, secret_key, region)
+        self._table = self._check_table_and_assign(table_name)
 
-        try:
-            self._check_table_exists(table_name)
-        except ClientError as err:
-            logger.error("The table %s does not exist: %s", self._table_name, err)
-            raise ClientError("An error occurred while checking if the table exists: %s", err)
-
-    def _check_table_exists(self, table_name) -> None:
+    def _check_table_and_assign(self, table_name) -> any:
         try:
             table = self._client.Table(table_name)
             table.load()
@@ -44,7 +35,7 @@ class ReportDatabase:
                     err.response['Error']['Code'], err.response['Error']['Message'])
                 raise
         else:
-            self._table = table
+            return table
 
     @staticmethod
     def __create_client(access_key, secret_key, region) -> boto3.resource:
