@@ -47,7 +47,7 @@ class TestGitHubReports(unittest.TestCase):
         self.ctx.push()
         self.client = app.test_client()
         self.index = "/index"
-        self.endpoint = "/api/v1/update-github-reports"
+        self.endpoint = "/api/v2/update-github-reports"
 
         self.dyanmodb = mock_dynamodb()
         self.dyanmodb.start()
@@ -121,7 +121,7 @@ class TestGitHubReports(unittest.TestCase):
     @patch('report_app.main.views.__is_request_correct', return_value=True)
     def test_no_json(self, mock_is_request_correct):
         response = self.client.post(self.endpoint, json=None)
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 415)
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
     @patch('report_app.main.repository_report.RepositoryReport')
@@ -131,7 +131,7 @@ class TestGitHubReports(unittest.TestCase):
 
         mock_report.return_value.update_all_github_reports.return_value = None
         response = self.client.post(self.endpoint, json=['{"name": "{test-public-repository}"}'])
-        self.assertEqual(response.data, b'ok')
+        self.assertEqual(response.data, b'{"message":"GitHub reports updated"}\n')
         self.assertEqual(response.status_code, 200)
 
     @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': ''})
@@ -140,24 +140,24 @@ class TestGitHubReports(unittest.TestCase):
     @patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': ''})
     def test_no_db(self):
         with self.assertRaises(ValueError):
-            self.client.get('/api/v1/compliant-repository/test')
+            self.client.get('/api/v2/compliant-repository/test')
 
     @patch('report_app.main.report_database.ReportDatabase')
     def test_no_repository(self, mock_from_context):
         mock_from_context.return_value.get_repository_report.return_value = None
-        response = self.client.get('/api/v1/compliant-repository/test')
+        response = self.client.get('/api/v2/compliant-repository/test')
         self.assertEqual(response.status_code, 404)
 
     def test_private_repository(self):
-        response = self.client.get('/api/v1/compliant-repository/test-private-repository')
+        response = self.client.get('/api/v2/compliant-repository/test-private-repository')
         self.assertEqual(response.status_code, 403)
 
     def test_compliant_repository(self):
-        response = self.client.get('/api/v1/compliant-repository/test-public-repository')
+        response = self.client.get('/api/v2/compliant-repository/test-public-repository')
         self.assertEqual(response.status_code, 200)
 
     def test_non_compliant_repository(self):
-        response = self.client.get('/api/v1/compliant-repository/test-public-repository')
+        response = self.client.get('/api/v2/compliant-repository/test-public-repository')
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response.data, b'{"color":"d4351c","isError":"true","label":"MoJ Compliant","message":"FAIL",'

@@ -260,7 +260,10 @@ def display_badge_if_compliant(repository_name: str) -> dict:
         region=os.getenv("DYNAMODB_REGION"),
     )
 
-    repository = dynamo_db.get_repository_report(repository_name)
+    try:
+        repository = dynamo_db.get_repository_report(repository_name)
+    except KeyError:
+        abort(404)
     if repository['data']['is_private']:
         abort(403, "Private repositories are not supported, and %s is private" % repository_name)
 
