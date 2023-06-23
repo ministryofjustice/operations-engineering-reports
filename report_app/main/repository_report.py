@@ -20,9 +20,6 @@ class RepositoryReport:
         self._report_data = report_data
         self.database_client = self._create_db_client
 
-        if not self.database_client:
-            raise ValueError("Could not create database client")
-
     @property
     def _create_db_client(self) -> ReportDatabase:
         # TODO: Find a nicer way to pass these values to the ReportDatabase class

@@ -96,10 +96,6 @@ class TestRepositoryReport(unittest.TestCase):
     def test_fail_to_create_db_client_no_table(self):
         self.assertRaises(ValueError, RepositoryReport, self.report_data)
 
-    @patch('report_app.main.report_database.ReportDatabase', return_value=None)
-    def test_create_db_client_failure(self, mock_from_context):
-        self.assertRaises(AttributeError, RepositoryReport, self.report_data)
-
 
 if __name__ == '__main__':
     unittest.main()
