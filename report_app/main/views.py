@@ -1,10 +1,13 @@
-""" Routes and OAuth code """
 import logging
 import os
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
 from authlib.integrations.flask_client import OAuth
+
+from report_app.main.report_database import ReportDatabase
 from flask import (
+    abort,
+    jsonify,
     Blueprint,
     redirect,
     render_template,
@@ -13,7 +16,7 @@ from flask import (
     request,
     current_app,
 )
-from report_app.main.repositories import Repositories
+from report_app.main.repository_report import RepositoryReport
 
 main = Blueprint("main", __name__)
 
@@ -206,66 +209,11 @@ def unknown_server_error(err):
     return render_template("500.html"), 500
 
 
-@main.route("/public-github-repositories.html")
-def public_repos_page():
-    """The public repository report page
-
-    Returns:
-        Loads the templates/public-github-repositories.html page
-    """
-    logger.debug("public_repos_page()")
-    repository = Repositories("public")
-    if repository.is_database_ready():
-        compliant_repos = repository.get_compliant_repositories()
-        non_compliant_repos = repository.get_non_compliant_repositories()
-        return render_template(
-            "public-github-repositories.html",
-            updated_at=repository.get_stored_at_date(),
-            total_repos=(len(compliant_repos) + len(non_compliant_repos)),
-            number_compliant_repos=len(compliant_repos),
-            number_non_compliant_repos=len(non_compliant_repos),
-            compliant_repos=compliant_repos,
-            non_compliant_repos=non_compliant_repos,
-            session=session.get("user"),
-        )
-    return render_template(
-        "public-github-repositories.html", session=session.get("user")
-    )
-
-
-@main.route("/private-github-repositories.html")
-@requires_auth
-def private_repos_page():
-    """The private repo report page
-
-    Returns:
-        Loads the templates/private-github-repositories.html page
-    """
-    logger.debug("private_repos_page()")
-    repository = Repositories("private")
-    if repository.is_database_ready():
-        compliant_repos = repository.get_compliant_repositories()
-        non_compliant_repos = repository.get_non_compliant_repositories()
-        return render_template(
-            "private-github-repositories.html",
-            updated_at=repository.get_stored_at_date(),
-            total_repos=(len(compliant_repos) + len(non_compliant_repos)),
-            number_compliant_repos=len(compliant_repos),
-            number_non_compliant_repos=len(non_compliant_repos),
-            compliant_repos=compliant_repos,
-            non_compliant_repos=non_compliant_repos,
-            session=session.get("user"),
-        )
-    return render_template(
-        "private-github-repositories.html", session=session.get("user")
-    )
-
-
-def is_request_correct(the_request):
+def __is_request_correct(the_request):
     """Check request is a POST and has the correct API key
 
     Args:
-        new_request (the_request): the incoming data request object
+        the_request: the incoming data request object
     """
     correct = False
     if (
@@ -280,104 +228,58 @@ def is_request_correct(the_request):
     return correct
 
 
-def apply_public_data(new_request):
-    """Add public data item to the table
+@main.route("/api/v2/update-github-reports", methods=["POST"])
+def update_github_reports():
+    """Update all GitHub repository reports we hold
 
-    Args:
-        new_request (request): the incoming data request object
+    This will overwrite any existing reports storing each report
+    in the database as a new record.
     """
-    logger.debug("apply_public_data()")
+    if __is_request_correct(request) is False:
+        abort(400)
 
-    if is_request_correct(new_request):
-        repository = Repositories("public")
-        repository.update_data(new_request.json)
+    RepositoryReport(request.json).update_all_github_reports()
 
-
-def apply_private_data(new_request):
-    """Add private data item to the table
-
-    Args:
-        new_request (request): the incoming data request object
-    """
-    logger.debug("apply_private_data()")
-
-    if is_request_correct(new_request):
-        repository = Repositories("private")
-        repository.update_data(new_request.json)
+    return jsonify({"message": "GitHub reports updated"}), 200
 
 
-@main.route("/update_private_repositories", methods=["POST"])
-def update_private_repositories():
-    """Receive data to either add or update the private repo report item in the table
-       within the database
-
-    Returns:
-        N/A: N/A
-    """
-    logger.debug("update_private_repositories()")
-    apply_private_data(request)
-    return ""
-
-
-@main.route("/update_public_repositories", methods=["POST"])
-def update_public_repositories():
-    """Receive data to either add or update the public repo report item in the table
-       within the database
-
-    Returns:
-        N/A: N/A
-    """
-    logger.debug("update_public_repositories()")
-    apply_public_data(request)
-    return ""
-
-
+@main.route("/api/v2/compliant-repository/<repository_name>", methods=["GET"])
+# Deprecated API endpoints: These will be removed in a future release
+@main.route("/api/v1/compliant_public_repositories/endpoint/<repository_name>", methods=["GET"])
 @main.route("/api/v1/compliant_public_repositories/<repository_name>", methods=["GET"])
-def compliant_repository(repository_name):
-    """Find a repository in compliant repositories list
+def display_badge_if_compliant(repository_name: str) -> dict:
+    """Display a badge if a repository is considered compliant.
+    Compliance is determined by the status field in the database.
+
+    Private repositories are not supported and will return a 403 error.
 
     Args:
-        repository_name (string): name of repository to find
-
-    Returns:
-        dict: json result true if find repository in compliant repositories list
+        repository_name: the name of the repository to check
     """
-    logger.debug("compliant_repository()")
-    repository = Repositories("public")
-    if repository.is_database_ready():
-        compliant_repos = repository.get_compliant_repositories()
-        for compliant_repo in compliant_repos:
-            if compliant_repo.get("name") == repository_name:
-                return {"result": "PASS"}
-    return {"result": "FAIL"}
+    dynamo_db = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    )
 
+    try:
+        repository = dynamo_db.get_repository_report(repository_name)
+    except KeyError:
+        abort(404)
+    if repository['data']['is_private']:
+        abort(403, "Private repositories are not supported, and %s is private" % repository_name)
 
-@main.route(
-    "/api/v1/compliant_public_repositories/endpoint/<repository_name>", methods=["GET"]
-)
-def compliant_repository_endpoint(repository_name):
-    """Find a repository in compliant repositories list
+    if repository["data"]["status"]:
+        return {
+            "schemaVersion": 1,
+            "label": "MoJ Compliant",
+            "message": "PASS",
+            "color": "005ea5",
+            "labelColor": "231f20",
+            "style": "for-the-badge",
+        }
 
-    Args:
-        repository_name (string): name of repository to find
-
-    Returns:
-        dict: json result true if find repository in compliant repositories list
-    """
-    logger.debug("compliant_repository_endpoint()")
-    repository = Repositories("public")
-    if repository.is_database_ready():
-        compliant_repos = repository.get_compliant_repositories()
-        for compliant_repo in compliant_repos:
-            if compliant_repo.get("name") == repository_name:
-                return {
-                    "schemaVersion": 1,
-                    "label": "MoJ Compliant",
-                    "message": "PASS",
-                    "color": "005ea5",
-                    "labelColor": "231f20",
-                    "style": "for-the-badge",
-                }
     return {
         "schemaVersion": 1,
         "label": "MoJ Compliant",

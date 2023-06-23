@@ -21,12 +21,12 @@ services:
       FLASK_CONFIGURATION: "development"
       FLASK_DEBUG: "true"
       FLASK_APP: "operations_engineering_reports"
-      AWS_ACCESS_KEY_ID: "DUMMYIDEXAMPLE"
-      AWS_SECRET_ACCESS_KEY: "DUMMYEXAMPLEKEY"
-      AWS_DEFAULT_REGION: "eu-west-2"
+      DYNAMODB_ACCESS_KEY_ID: "DUMMYIDEXAMPLE"
+      DYNAMODB_SECRET_ACCESS_KEY: "DUMMYEXAMPLEKEY"
+      DYNAMODB_REGION: "eu-west-2"
       DYNAMODB_TABLE_NAME: "cp-637250fa84046ef0"
       DOCKER_COMPOSE_DEV: "true"
-      API_KEY: "default123"
+      API_KEY: "fake"
     ports:
       - "4567:4567"
     env_file: .env
