@@ -244,6 +244,9 @@ def update_github_reports():
 
 
 @main.route("/api/v2/compliant-repository/<repository_name>", methods=["GET"])
+# Deprecated API endpoints: These will be removed in a future release
+@main.route("/api/v1/compliant_public_repositories/endpoint/<repository_name>", methods=["GET"])
+@main.route("/api/v1/compliant_public_repositories/<repository_name>", methods=["GET"])
 def display_badge_if_compliant(repository_name: str) -> dict:
     """Display a badge if a repository is considered compliant.
     Compliance is determined by the status field in the database.
