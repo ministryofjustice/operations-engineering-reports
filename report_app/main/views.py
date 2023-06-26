@@ -14,6 +14,7 @@ from flask import (
     session,
     url_for,
     request,
+    render_template_string,
     current_app,
 )
 from report_app.main.repository_report import RepositoryReport
@@ -292,4 +293,38 @@ def display_badge_if_compliant(repository_name: str) -> dict:
 
 @main.route("/public-github-repositories.html")
 def public_github_repositories():
-    return render_template("public-github-repositories.html", value1=1, value2=2)
+    return render_template("public-github-repositories.html",
+                           last_updated="today",
+                           compliant=1,
+                           non_compliant=2)
+
+
+@main.route('/search')
+def search():
+    query = request.args.get('q')
+    search_results = []
+
+    compliant_repos = [
+        {
+            "name": "moj-analytical-services",
+            "description": "The repository for the MoJ Analytical Services team",
+            "url": ""
+        },
+    ]
+    for repo in compliant_repos:
+        if query.lower() in repo['name'].lower():
+            search_results.append(repo)
+
+    # Render the search results to a string and return it
+    return render_template_string(
+        """
+        <ul class="govuk-list">
+            {% for repo in search_results %}
+                <p><a href="{{ repo.url }}">{{ repo.name }}</a></p>
+            {% else %}
+                <p>No results found</p>
+            {% endfor %}
+        </ul>
+        """,
+        search_results=search_results
+    )
