@@ -288,3 +288,8 @@ def display_badge_if_compliant(repository_name: str) -> dict:
         "style": "for-the-badge",
         "isError": "true",
     }
+
+
+@main.route("/public-github-repositories.html")
+def public_github_repositories():
+    return render_template("public-github-repositories.html", value1=1, value2=2)
