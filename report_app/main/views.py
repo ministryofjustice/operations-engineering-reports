@@ -2,21 +2,13 @@ import logging
 import os
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
+
 from authlib.integrations.flask_client import OAuth
+from flask import (Blueprint, abort, current_app, jsonify, redirect,
+                   render_template, render_template_string, request, session,
+                   url_for)
 
 from report_app.main.report_database import ReportDatabase
-from flask import (
-    abort,
-    jsonify,
-    Blueprint,
-    redirect,
-    render_template,
-    session,
-    url_for,
-    request,
-    render_template_string,
-    current_app,
-)
 from report_app.main.repository_report import RepositoryReport
 
 main = Blueprint("main", __name__)
