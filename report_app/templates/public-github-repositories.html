@@ -4,15 +4,23 @@
 <h1 class="govuk-heading-l">
     <span class="govuk-caption-xl">Repositories report</span>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0-rc.1"></script>
 
-
-  {% if updated_at %}
+    {% if updated_at %}
     <span class="govuk-caption-m">Updated: {{ updated_at }} UTC</span>
-  {% endif %}
+    {% endif %}
 </h1>
+
+<p class="govuk-body">
+    Out of {{ total }} repositories, {{ compliant }} are compliant and {{ non_compliant }} are non-compliant.
+</p>
+
+<p class="govuk-body">
+    Please note that this report is based on the latest data from GitHub and may not reflect the current state of the
+    repositories.
+</p>
+
 
 <form action="/search" method="get" class="govuk-form-group">
     <div class="govuk-form-group">
@@ -20,74 +28,70 @@
     </div>
     <button class="govuk-button" type="submit" style="margin-top: 10px;">Search</button>
 </form>
-    <div id="search-results"></div>
+<div id="search-results"></div>
 <script>
-$(document).ready(function(){
-  $('input[type="text"]').on('keyup', function(){
-    let query = $(this).val();
-    if (!query) {
-      // If the search bar is empty, clear the search results
-      $("#search-results").html("");
-      return;
-    }
-    $.get("/search", {q: query}, function(data){
-      $("#search-results").html(data);
+    $(document).ready(function () {
+        $('input[type="text"]').on('keyup', function () {
+            let query = $(this).val();
+            if (!query) {
+                // If the search bar is empty, clear the search results
+                $("#search-results").html("");
+                return;
+            }
+            $.get("/search", { q: query }, function (data) {
+                $("#search-results").html(data);
+            });
+        });
     });
-  });
-});
 </script>
 
 <canvas id="myChart"></canvas>
 <script>
-var ctx = document.getElementById('myChart').getContext('2d');
-var myChart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-        labels: ['Compliant', 'Non-compliant'],
-        datasets: [{
-            data: [{{ compliant }}, {{ non_compliant }}],
-            backgroundColor: [
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(255, 99, 132, 0.2)'
-            ],
-            borderColor: [
-                'rgba(75, 192, 192, 1)',
-                'rgba(255, 99, 132, 1)'
-            ],
-            borderWidth: 1
-        }]
+    // Register the plugin to all charts:
+    Chart.register(ChartDataLabels);
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Compliant', 'Non-Compliant'],
+            datasets: [{
+                data: [{{ compliant }}, {{ non_compliant }}],
+        backgroundColor: [
+            '#4daf4a',
+            '#e41a1c'
+        ],
+        borderColor: [
+            '#4daf4a',
+            '#e41a1c'
+        ],
+        borderWidth: 1
+    }]
     },
     options: {
         responsive: true,
-        legend: {
-            position: 'top',
-        },
-        plugins: {
+            plugins: {
             datalabels: {
-                formatter: (value, ctx) => {
-                    let sum = 0;
-                    let dataArr = ctx.chart.data.datasets[0].data;
-                    dataArr.map(data => {
-                        sum += data;
-                    });
-                    let percentage = (value*100 / sum).toFixed(2)+"%";
-                    return percentage;
-                },
-                color: '#fff',
+                color: '#000000',
+                    formatter: (value, ctx) => {
+                        let datasets = ctx.chart.data.datasets;
+
+                        if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
+                            let sum = datasets[0].data.reduce((a, b) => a + b, 0);
+                            let percentage = Math.round((value / sum) * 100) + '%';
+                            return ctx.chart.data.labels[ctx.dataIndex] + ": " + percentage;
+                        } else {
+                            return percentage;
+                        }
+                    },
             }
         },
         onClick: function(evt, activeElements) {
-            if(activeElements.length > 0) {
-                var idx = activeElements[0].index;
-                var label = myChart.data.labels[idx];
-                var value = myChart.data.datasets[0].data[idx];
-                var URL = label == "Compliant" ? "/compliant" : "/noncompliant";
-                window.open(URL, '_blank');  // Open the new URL in a new tab
-            }
+            var elementIndex = activeElements[0].index;
+            var url = this.data.labels[elementIndex] === "Compliant" ? '/compliant' : '/non-compliant';
+            window.location.href = url;
         }
     }
 });
-
 </script>
 
 {{ super() }}
