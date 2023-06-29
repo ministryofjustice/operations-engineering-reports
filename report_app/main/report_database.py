@@ -1,8 +1,9 @@
+import datetime
 import logging
+import os
+
 import boto3
 from botocore.exceptions import ClientError
-import datetime
-import os
 
 logger = logging.getLogger(__name__)
 

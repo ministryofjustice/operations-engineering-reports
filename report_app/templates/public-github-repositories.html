@@ -38,7 +38,7 @@
                 $("#search-results").html("");
                 return;
             }
-            $.get("/search", { q: query }, function (data) {
+            $.get("/search-public-repositories", { q: query }, function (data) {
                 $("#search-results").html(data);
             });
         });
