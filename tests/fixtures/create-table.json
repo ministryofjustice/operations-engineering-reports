@@ -1,7 +1,17 @@
 {
   "TableName": "cp-637250fa84046ef0",
-  "KeySchema": [{ "AttributeName": "name", "KeyType": "HASH" }],
-  "AttributeDefinitions": [{ "AttributeName": "name", "AttributeType": "S" }],
+  "KeySchema": [
+    {
+      "AttributeName": "name",
+      "KeyType": "HASH"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "name",
+      "AttributeType": "S"
+    }
+  ],
   "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5

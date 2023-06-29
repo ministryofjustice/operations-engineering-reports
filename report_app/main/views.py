@@ -285,28 +285,47 @@ def display_badge_if_compliant(repository_name: str) -> dict:
 
 @main.route("/public-github-repositories.html")
 def public_github_repositories():
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
+
+    public_repositories = [repo for repo in all_reports if not repo['data']['is_private']]
+
+    compliant_repos = [repo for repo in public_repositories if repo['data']['status']]
+    non_compliant_repos = [repo for repo in public_repositories if not repo['data']['status']]
+
+    compliant = len(compliant_repos)
+    non_compliant = len(non_compliant_repos)
+
     return render_template("public-github-repositories.html",
                            last_updated="today",
-                           compliant=1,
-                           non_compliant=2)
+                           total=len(public_repositories),
+                           compliant=compliant,
+                           non_compliant=non_compliant)
 
 
-@main.route('/search')
-def search():
+@main.route('/search-public-repositories', methods=['GET'])
+def search_public_repositories():
     query = request.args.get('q')
     search_results = []
 
-    compliant_repos = [
-        {
-            "name": "moj-analytical-services",
-            "description": "The repository for the MoJ Analytical Services team",
-            "url": ""
-        },
-    ]
-    for repo in compliant_repos:
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
+
+    public_repositories = [repo for repo in all_reports if not repo['data']['is_private']]
+
+    for repo in public_repositories:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
+    logger.debug("search_public_repositories(): %s results found", len(search_results))
     # Render the search results to a string and return it
     return render_template_string(
         """

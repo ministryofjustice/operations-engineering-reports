@@ -26,6 +26,7 @@ services:
       DYNAMODB_REGION: "eu-west-2"
       DYNAMODB_TABLE_NAME: "cp-637250fa84046ef0"
       DOCKER_COMPOSE_DEV: "true"
+      AWS_REGION: "eu-west-2"
       API_KEY: "fake"
     ports:
       - "4567:4567"
