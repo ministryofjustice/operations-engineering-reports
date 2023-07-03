@@ -190,8 +190,25 @@ class TestGitHubReports(unittest.TestCase):
 
     def test_successful_github_repositories_return(self):
         response = self.client.get(self.landing_endpoint)
-        self.assertIn(b'0 are compliant', response.data)
-        self.assertIn(b'1 are non-compliant', response.data)
+        self.assertIn(b'0 are <a href="/compliant', response.data)
+        self.assertIn(b'1 are <a href="/non-compliant', response.data)
+
+    def test_display_compliant_public_repositories(self):
+        response = self.client.get("/compliant-public-repositories.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b'test-public-repository', response.data)
+
+    def test_display_noncompliant_public_repositories(self):
+        response = self.client.get("/non-compliant-public-repositories.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'test-public-repository', response.data)
+        self.assertNotIn(b'test-private-repository', response.data)
+
+    def test_display_all_public_repositories(self):
+        response = self.client.get("/all-public-repositories.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'test-public-repository', response.data)
+        self.assertNotIn(b'test-private-repository', response.data)
 
 
 if __name__ == "__main__":
