@@ -325,7 +325,6 @@ def search_public_repositories():
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
-    logger.debug("search_public_repositories(): %s results found", len(search_results))
     # Render the search results to a string and return it
     return render_template_string(
         """
