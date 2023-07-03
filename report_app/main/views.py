@@ -1,4 +1,5 @@
 import logging
+import datetime
 import os
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
@@ -301,7 +302,7 @@ def public_github_repositories():
     non_compliant = len(non_compliant_repos)
 
     return render_template("public-github-repositories.html",
-                           last_updated="today",
+                           last_updated=datetime.datetime.now().strftime("%d %B %Y"),
                            total=len(public_repositories),
                            compliant=compliant,
                            non_compliant=non_compliant)
