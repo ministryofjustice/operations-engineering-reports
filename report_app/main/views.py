@@ -356,7 +356,7 @@ def display_individual_public_report(repository_name: str):
     return render_template("/github-report.html", report=report)
 
 @main.route("/compliant-public-repositories.html", methods=["GET"])
-def display_all_compliant_public_repositories():
+def display_compliant_public_repositories():
     """View all repositories that adhere to the MoJ GitHub standards"""
     compliant_repositories = ReportDatabase(
         table_name=os.getenv("DYNAMODB_TABLE_NAME"),
@@ -368,7 +368,7 @@ def display_all_compliant_public_repositories():
     return render_template("/compliant-public-repositories.html", compliant_repos=compliant_repositories)
 
 @main.route("/non-compliant-public-repositories.html", methods=["GET"])
-def display_all_noncompliant_public_repositories():
+def display_noncompliant_public_repositories():
     """View all repositories that do not adhere to the MoJ GitHub standards"""
     non_compliant = ReportDatabase(
         table_name=os.getenv("DYNAMODB_TABLE_NAME"),
