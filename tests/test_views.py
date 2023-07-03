@@ -47,7 +47,8 @@ class TestGitHubReports(unittest.TestCase):
         self.ctx.push()
         self.client = app.test_client()
         self.index = "/index"
-        self.endpoint = "/api/v2/update-github-reports"
+        self.update_endpoint = "/api/v2/update-github-reports"
+        self.landing_endpoint = "/public-github-repositories.html"
 
         self.dyanmodb = mock_dynamodb()
         self.dyanmodb.start()
@@ -115,12 +116,12 @@ class TestGitHubReports(unittest.TestCase):
 
     @patch('report_app.main.views.__is_request_correct', return_value=False)
     def test_bad_request(self, mock_is_request_correct):
-        response = self.client.post(self.endpoint, json=None)
+        response = self.client.post(self.update_endpoint, json=None)
         self.assertEqual(response.status_code, 400)
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
     def test_no_json(self, mock_is_request_correct):
-        response = self.client.post(self.endpoint, json=None)
+        response = self.client.post(self.update_endpoint, json=None)
         self.assertEqual(response.status_code, 415)
 
     @patch('report_app.main.views.__is_request_correct', return_value=True)
@@ -130,7 +131,7 @@ class TestGitHubReports(unittest.TestCase):
         mock_db_context.return_value.add_repository_report.return_value = None
 
         mock_report.return_value.update_all_github_reports.return_value = None
-        response = self.client.post(self.endpoint, json=['{"name": "{test-public-repository}"}'])
+        response = self.client.post(self.update_endpoint, json=['{"name": "{test-public-repository}"}'])
         self.assertEqual(response.data, b'{"message":"GitHub reports updated"}\n')
         self.assertEqual(response.status_code, 200)
 
@@ -171,6 +172,26 @@ class TestGitHubReports(unittest.TestCase):
         response = self.client.get('/public-report/obviously-not-a-repo')
         self.assertEqual(response.status_code, 404)
 
+    def test_search_public_repositories(self):
+        response = self.client.get('/search-public-repositories', query_string={'q': 'repo'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'test-public-repository', response.data)
+
+    def test_bad_search_public_repositories(self):
+        bad_request = 'zzz'
+        response = self.client.get('/search-public-repositories', query_string={'q': bad_request})
+
+        self.assertNotIn(b'${bad_request}', response.data)
+
+    def test_public_github_repositories(self):
+        response = self.client.get(self.landing_endpoint)
+        self.assertEqual(response.status_code, 200)
+
+    def test_successful_github_repositories_return(self):
+        response = self.client.get(self.landing_endpoint)
+        self.assertIn(b'0 are compliant', response.data)
+        self.assertIn(b'1 are non-compliant', response.data)
 
 if __name__ == "__main__":
     unittest.main()
