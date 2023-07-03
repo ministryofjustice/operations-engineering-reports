@@ -13,7 +13,7 @@
 </p>
 
 <p class="govuk-body">
-    Out of {{ total }} repositories, {{ compliant }} are compliant and {{ non_compliant }} are non-compliant.
+Out of {{ total }} <a href="/all-public-repositories.html">public repositories</a>, {{ compliant }} are <a href="/compliant-public-repositories.html">compliant</a> and {{ non_compliant }} are <a href="/non-compliant-public-repositories.html">non-compliant<a>.
 </p>
 
 <p class="govuk-body">
@@ -87,7 +87,7 @@
         },
         onClick: function(evt, activeElements) {
             var elementIndex = activeElements[0].index;
-            var url = this.data.labels[elementIndex] === "Compliant" ? '/compliant' : '/non-compliant';
+            var url = this.data.labels[elementIndex] === "Compliant" ? '/compliant-public-repositories.html' : '/non-compliant-public-repositories.html';
             window.location.href = url;
         }
     }
