@@ -341,14 +341,16 @@ def search_public_repositories():
 
 
 @main.route("/public-report/<repository_name>", methods=["GET"])
-def get_github_report(repository_name: str):
+def display_individual_public_report(repository_name: str):
     """View the GitHub standards report for a repository"""
-    report = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
-    ).get_repository_report(repository_name)
-    if report is None:
+    try:
+        report = ReportDatabase(
+            table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+            access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+            secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+            region=os.getenv("DYNAMODB_REGION"),
+        ).get_repository_report(repository_name)
+    except KeyError:
+        logger.warning("display_individual_public_report(): repository not found")
         abort(404)
     return render_template("/github-report.html", report=report)

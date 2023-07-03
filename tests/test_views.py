@@ -163,6 +163,14 @@ class TestGitHubReports(unittest.TestCase):
         self.assertEqual(response.data, b'{"color":"d4351c","isError":"true","label":"MoJ Compliant","message":"FAIL",'
                                         b''b'"schemaVersion":1,"style":"for-the-badge"}\n')
 
+    def test_display_individual_public_report(self):
+        response = self.client.get('/public-report/test-public-repository')
+        self.assertEqual(response.status_code, 200)
+
+    def test_fail_display_individual_public_report(self):
+        response = self.client.get('/public-report/obviously-not-a-repo')
+        self.assertEqual(response.status_code, 404)
+
 
 if __name__ == "__main__":
     unittest.main()
