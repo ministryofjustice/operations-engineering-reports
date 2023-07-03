@@ -340,7 +340,6 @@ def search_public_repositories():
         search_results=search_results
     )
 
-
 @main.route("/public-report/<repository_name>", methods=["GET"])
 def display_individual_public_report(repository_name: str):
     """View the GitHub standards report for a repository"""
@@ -355,3 +354,46 @@ def display_individual_public_report(repository_name: str):
         logger.warning("display_individual_public_report(): repository not found")
         abort(404)
     return render_template("/github-report.html", report=report)
+
+@main.route("/compliant-public-repositories.html", methods=["GET"])
+def display_all_compliant_public_repositories():
+    """View all repositories that adhere to the MoJ GitHub standards"""
+    compliant_repositories = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_compliant_repository_reports()
+
+    return render_template("/compliant-public-repositories.html", compliant_repos=compliant_repositories)
+
+@main.route("/non-compliant-public-repositories.html", methods=["GET"])
+def display_all_noncompliant_public_repositories():
+    """View all repositories that do not adhere to the MoJ GitHub standards"""
+    non_compliant = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_non_compliant_repository_reports()
+
+
+    non_compliant_repositories = [repo for repo in non_compliant if not repo['data']['is_private']]
+
+    return render_template("/non-compliant-public-repositories.html", non_compliant_repos=non_compliant_repositories)
+
+@main.route("/all-public-repositories.html", methods=["GET"])
+def display_all_public_repositories():
+    """View all repositories that do not adhere to the MoJ GitHub standards"""
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
+
+
+    public_reports = [repo for repo in all_reports if not repo['data']['is_private']]
+
+    return render_template("/all-public-repositories.html", public_reports=public_reports)
+
