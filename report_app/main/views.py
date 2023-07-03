@@ -235,6 +235,7 @@ def update_github_reports():
 
     return jsonify({"message": "GitHub reports updated"}), 200
 
+
 @main.route("/api/v2/compliant-repository/<repository_name>", methods=["GET"])
 # Deprecated API endpoints: These will be removed in a future release
 @main.route("/api/v1/compliant_public_repositories/endpoint/<repository_name>", methods=["GET"])
@@ -338,6 +339,7 @@ def search_public_repositories():
         search_results=search_results
     )
 
+
 @main.route("/public-report/<repository_name>", methods=["GET"])
 def get_github_report(repository_name: str):
     """View the GitHub standards report for a repository"""
@@ -350,4 +352,3 @@ def get_github_report(repository_name: str):
     if report is None:
         abort(404)
     return render_template("/github-report.html", report=report)
-
