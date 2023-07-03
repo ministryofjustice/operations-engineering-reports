@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="govuk-heading-l">
-    <span class="govuk-caption-xl">Repositories report</span>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<h1 class="govuk-heading-l">Repositories report</h1>
 
-    {% if updated_at %}
-    <span class="govuk-caption-m">Updated: {{ updated_at }} UTC</span>
-    {% endif %}
-</h1>
+<h2 class="govuk-heading-m">Last updated: {{ last_updated }}</h2>
+
+<p class="govuk-body">
+	 This report shows the number of repositories that are compliant and non-compliant with the Ministry of Justice technical standards.
+</p>
 
 <p class="govuk-body">
     Out of {{ total }} repositories, {{ compliant }} are compliant and {{ non_compliant }} are non-compliant.
@@ -94,6 +94,8 @@
 });
 </script>
 
+
 {{ super() }}
 
 {% endblock %}
+
