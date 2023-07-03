@@ -193,5 +193,6 @@ class TestGitHubReports(unittest.TestCase):
         self.assertIn(b'0 are compliant', response.data)
         self.assertIn(b'1 are non-compliant', response.data)
 
+
 if __name__ == "__main__":
     unittest.main()
