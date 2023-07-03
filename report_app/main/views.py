@@ -331,7 +331,7 @@ def search_public_repositories():
         """
         <ul class="govuk-list">
             {% for repo in search_results %}
-                <p><a href="{{ repo.url }}">{{ repo.name }}</a></p>
+                <p><a href="/public-report/{{ repo.name }}">{{ repo.name }}</a></p>
             {% else %}
                 <p>No results found</p>
             {% endfor %}
