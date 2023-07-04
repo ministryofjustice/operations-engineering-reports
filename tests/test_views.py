@@ -17,12 +17,6 @@ class TestFunctionalViews(unittest.TestCase):
     def tearDown(self):
         self.ctx.pop()
 
-    def test_index(self):
-        assert self.client.get(self.index).status_code == 200
-
-    def test_default(self):
-        assert self.client.get("/").status_code == 200
-
     def test_home_with_no_auth(self):
         assert self.client.get("/home").status_code == 302
         assert self.client.get("/home").headers.get("location") == self.index
@@ -209,6 +203,11 @@ class TestGitHubReports(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'test-public-repository', response.data)
         self.assertNotIn(b'test-private-repository', response.data)
+
+    def test_index_page(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Non-compliant reports:</b> 2', response.data)
 
 
 if __name__ == "__main__":
