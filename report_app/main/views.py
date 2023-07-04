@@ -363,6 +363,7 @@ def private_github_repositories():
                            compliant=compliant,
                            non_compliant=non_compliant)
 
+
 @main.route('/search-public-repositories', methods=['GET'])
 def search_public_repositories():
     query = request.args.get('q')
@@ -554,4 +555,3 @@ def display_all_private_repositories():
     private_reports = [repo for repo in all_reports if repo['data']['is_private']]
 
     return render_template("/all-private-repositories.html", public_reports=private_reports)
-

@@ -169,7 +169,7 @@ class TestGitHubReports(unittest.TestCase):
 
     def test_display_individual_private_report(self):
         response = self.client.get('/private-report/test-private-repository')
-        # Requires authentication
+        #  Requires authentication
         self.assertEqual(response.status_code, 302)
 
     def test_search_public_repositories(self):
