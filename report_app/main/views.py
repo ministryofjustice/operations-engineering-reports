@@ -121,6 +121,7 @@ def index():
                            non_compliant=len(non_compliant_reports),
                            common_infractions=common_infractions)
 
+
 @main.route("/login")
 def login():
     """When click on the login button connect to Auth0
