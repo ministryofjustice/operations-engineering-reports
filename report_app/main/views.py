@@ -385,7 +385,7 @@ def display_individual_public_report(repository_name: str):
     except KeyError:
         logger.warning("display_individual_public_report(): repository not found")
         abort(404)
-    return render_template("/github-report.html", report=report)
+    return render_template("/public-report.html", report=report)
 
 
 @main.route("/compliant-public-repositories.html", methods=["GET"])
