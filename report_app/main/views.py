@@ -398,7 +398,9 @@ def display_compliant_public_repositories():
         region=os.getenv("DYNAMODB_REGION"),
     ).get_all_compliant_repository_reports()
 
-    return render_template("/compliant-public-repositories.html", compliant_repos=compliant_repositories)
+    public_compliant_repositories = [repo for repo in compliant_repositories if not repo['data']['is_private']]
+
+    return render_template("/compliant-public-repositories.html", compliant_repos=public_compliant_repositories)
 
 
 @main.route("/non-compliant-public-repositories.html", methods=["GET"])
@@ -429,3 +431,121 @@ def display_all_public_repositories():
     public_reports = [repo for repo in all_reports if not repo['data']['is_private']]
 
     return render_template("/all-public-repositories.html", public_reports=public_reports)
+
+@main.route("/private-github-repositories.html")
+def private_github_repositories():
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
+
+    private_github_repositories = [repo for repo in all_reports if repo['data']['is_private']]
+
+    compliant_repos = [repo for repo in private_github_repositories if repo['data']['status']]
+    non_compliant_repos = [repo for repo in private_github_repositories if not repo['data']['status']]
+
+    compliant = len(compliant_repos)
+    non_compliant = len(non_compliant_repos)
+
+    return render_template("private-github-repositories.html",
+                           last_updated=datetime.datetime.now().strftime("%d %B %Y"),
+                           total=len(private_github_repositories),
+                           compliant=compliant,
+                           non_compliant=non_compliant)
+
+
+@main.route('/search-private-repositories', methods=['GET'])
+def search_private_repositories():
+    query = request.args.get('q')
+    search_results = []
+
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
+
+    private_github_repositories = [repo for repo in all_reports if repo['data']['is_private']]
+
+    for repo in private_github_repositories:
+        if query.lower() in repo['name'].lower():
+            search_results.append(repo)
+
+    # Render the search results to a string and return it
+    return render_template_string(
+        """
+        <ul class="govuk-list">
+            {% for repo in search_results %}
+                <p><a href="/private-report/{{ repo.name }}">{{ repo.name }}</a></p>
+            {% else %}
+                <p>No results found</p>
+            {% endfor %}
+        </ul>
+        """,
+        search_results=search_results
+    )
+
+
+@main.route("/private-report/<repository_name>", methods=["GET"])
+def display_individual_private_report(repository_name: str):
+    """View the GitHub standards report for a private repository"""
+    try:
+        report = ReportDatabase(
+            table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+            access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+            secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+            region=os.getenv("DYNAMODB_REGION"),
+        ).get_repository_report(repository_name)
+    except KeyError:
+        logger.warning("display_individual_private_report(): repository not found")
+        abort(404)
+    return render_template("/private-report.html", report=report)
+
+
+@main.route("/compliant-private-repositories.html", methods=["GET"])
+def display_compliant_private_repositories():
+    """View all private repositories that adhere to the MoJ GitHub standards"""
+    compliant_repositories = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_compliant_repository_reports()
+
+    private_compliant_repositories = [repo for repo in compliant_repositories if repo['data']['is_private']]
+
+    return render_template("/compliant-private-repositories.html", compliant_repos=private_compliant_repositories)
+
+
+@main.route("/non-compliant-private-repositories.html", methods=["GET"])
+def display_noncompliant_private_repositories():
+    """View all repositories that do not adhere to the MoJ GitHub standards"""
+    non_compliant = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_non_compliant_repository_reports()
+
+    non_compliant_repositories = [repo for repo in non_compliant if repo['data']['is_private']]
+
+    return render_template("/non-compliant-private-repositories.html", non_compliant_repos=non_compliant_repositories)
+
+
+@main.route("/all-private-repositories.html", methods=["GET"])
+def display_all_private_repositories():
+    """View all repositories that do not adhere to the MoJ GitHub standards"""
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
+
+    private_reports = [repo for repo in all_reports if repo['data']['is_private']]
+
+    return render_template("/all-private-repositories.html", public_reports=private_reports)
+
