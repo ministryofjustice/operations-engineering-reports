@@ -357,7 +357,7 @@ def private_github_repositories():
     compliant = len(compliant_repos)
     non_compliant = len(non_compliant_repos)
 
-    return render_template("public-github-repositories.html",
+    return render_template("private-github-repositories.html",
                            last_updated=datetime.datetime.now().strftime("%d %B %Y"),
                            total=len(private_repos),
                            compliant=compliant,
