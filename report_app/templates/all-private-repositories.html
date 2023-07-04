@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="govuk-heading-xl">Private GitHub Repositories Status</h1>
+
+<div class="govuk-grid-row">
+    {% for repo in private_reports %}
+        <div class="govuk-grid-column-one-third">
+            <div class="govuk-card" style="margin-bottom: 20px;">
+                <div class="govuk-card__body">
+                    <h3 class="govuk-card__heading govuk-heading-m">
+                        <a class="govuk-link" href="/private-report/{{ repo.name }}">{{ repo.name }}</a>
+                    </h3>
+                    <p class="govuk-body {{ 'govuk-tag govuk-tag--green' if repo.data.status else 'govuk-tag govuk-tag--red' }}">
+                        {{ "Compliant" if repo.data.status else "Non-Compliant" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

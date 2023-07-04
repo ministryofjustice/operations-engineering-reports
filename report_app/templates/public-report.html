@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="govuk-heading-xl">
+	 <a href="{{ report.data.url }}" style="text-decoration: none; color: inherit;">Report: {{ report.name }}</a>
+
+    {% if report.data.status %}
+        <i class="fa fa-check-circle" style="color:green;"></i>
+    {% else %}
+        <i class="fa fa-times-circle" style="color:red;"></i>
+    {% endif %}
+</h1>
+
+<p class="govuk-body">This report was generated on {{ report.stored_at }} UTC.</p>
+
+<table class="govuk-table">
+	 <caption class="govuk-table__caption">A GitHub standards report showing whether a repository meets the defined criteria</caption>
+
+    <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Attribute</th>
+            <th scope="col" class="govuk-table__header">Value</th>
+        </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+        {% for key, value in report.data.report.items() %}
+            <tr class="govuk-table__row" {% if value == False %} style="background-color: #fddcdc;" {% endif %}>
+                <td class="govuk-table__cell">{{ key }}</td>
+                <td class="govuk-table__cell">{{ value }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2 class="govuk-heading-l">Infractions</h2>
+<div class="list-group">
+    {% for infraction in report.data.infractions %}
+	   <div class="govuk-inset-text">
+	     {{ infraction }}
+		</div>
+    {% endfor %}
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+{% endblock %}
+
