@@ -103,5 +103,6 @@ class TestReportDatabase(unittest.TestCase):
         self.assertEqual(len(self.report_database.get_all_compliant_repository_reports()), 1)
         self.assertEqual(len(self.report_database.get_all_non_compliant_repository_reports()), 1)
 
+
 if __name__ == '__main__':
     unittest.main()
