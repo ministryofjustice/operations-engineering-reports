@@ -3,6 +3,7 @@ import datetime
 import os
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
+from collections import Counter
 
 from authlib.integrations.flask_client import OAuth
 from flask import (Blueprint, abort, current_app, jsonify, redirect,
@@ -79,17 +80,46 @@ def home():
 @main.route("/index")
 @main.route("/")
 def index():
-    """Display the landing page for the application
+    '''Entrypoint into the application'''
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
 
-    Returns:
-        Loads the templates/index.html page
-    """
-    logger.debug("index()")
-    return render_template(
-        "index.html",
-        session=session.get("user"),
-    )
+    compliant_reports = [report for report in all_reports if report['data']['status']]
+    non_compliant_reports = [report for report in all_reports if not report['data']['status']]
 
+    all_infractions = [infraction for report in non_compliant_reports for infraction in report['data']['infractions']]
+    human_readable_infractions = []
+    for infraction in all_infractions:
+        match infraction:
+            case "administrators_require_review equalling False is not compliant":
+                human_readable_infractions.append("Administrators require review")
+            case "default_branch_main equalling False is not compliant":
+                human_readable_infractions.append("Default branch is not main")
+            case "has_default_branch_protection equalling False is not compliant":
+                human_readable_infractions.append("Default branch is not protected")
+            case "has_description equalling False is not compliant":
+                human_readable_infractions.append("Repository has no description")
+            case "has_license equalling False is not compliant":
+                human_readable_infractions.append("Repository has no license")
+            case "has_require_approvals_enabled equalling False is not compliant":
+                human_readable_infractions.append("Require approvals is not enabled")
+            case "issues_section_enabled equalling False is not compliant":
+                human_readable_infractions.append("Issues section is not enabled")
+            case "requires_approving_reviews equalling False is not compliant":
+                human_readable_infractions.append("Requires approving reviews is not enabled")
+            case _:
+                human_readable_infractions.append("Unknown infraction")
+    common_infractions = Counter(human_readable_infractions).most_common(3)
+
+    return render_template("home.html",
+                           total=len(all_reports),
+                           compliant=len(compliant_reports),
+                           non_compliant=len(non_compliant_reports),
+                           common_infractions=common_infractions)
 
 @main.route("/login")
 def login():
