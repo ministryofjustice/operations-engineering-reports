@@ -42,7 +42,8 @@ class TestGitHubReports(unittest.TestCase):
         self.client = app.test_client()
         self.index = "/index"
         self.update_endpoint = "/api/v2/update-github-reports"
-        self.landing_endpoint = "/public-github-repositories.html"
+        self.public_landing_endpoint = "/public-github-repositories.html"
+        self.private_landing_page = "/private-github-repositories.html"
 
         self.dyanmodb = mock_dynamodb()
         self.dyanmodb.start()
@@ -166,11 +167,21 @@ class TestGitHubReports(unittest.TestCase):
         response = self.client.get('/public-report/obviously-not-a-repo')
         self.assertEqual(response.status_code, 404)
 
+    def test_display_individual_private_report(self):
+        response = self.client.get('/private-report/test-private-repository')
+        # Requires authentication
+        self.assertEqual(response.status_code, 302)
+
     def test_search_public_repositories(self):
         response = self.client.get('/search-public-repositories', query_string={'q': 'repo'})
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'test-public-repository', response.data)
+
+    def test_search_private_repositories(self):
+        response = self.client.get('/search-private-repositories', query_string={'q': 'repo'})
+
+        self.assertEqual(response.status_code, 302)
 
     def test_bad_search_public_repositories(self):
         bad_request = 'zzz'
@@ -179,18 +190,26 @@ class TestGitHubReports(unittest.TestCase):
         self.assertNotIn(b'${bad_request}', response.data)
 
     def test_public_github_repositories(self):
-        response = self.client.get(self.landing_endpoint)
+        response = self.client.get(self.public_landing_endpoint)
         self.assertEqual(response.status_code, 200)
 
-    def test_successful_github_repositories_return(self):
-        response = self.client.get(self.landing_endpoint)
+    def test_successful_public_github_repositories_return(self):
+        response = self.client.get(self.public_landing_endpoint)
         self.assertIn(b'0 are <a href="/compliant', response.data)
         self.assertIn(b'1 are <a href="/non-compliant', response.data)
+
+    def test_successful_private_github_repositories_return(self):
+        response = self.client.get(self.private_landing_page)
+        self.assertEqual(response.status_code, 302)
 
     def test_display_compliant_public_repositories(self):
         response = self.client.get("/compliant-public-repositories.html")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(b'test-public-repository', response.data)
+
+    def test_display_compliant_private_repositories(self):
+        response = self.client.get("/compliant-private-repositories.html")
+        self.assertEqual(response.status_code, 302)
 
     def test_display_noncompliant_public_repositories(self):
         response = self.client.get("/non-compliant-public-repositories.html")
@@ -198,11 +217,19 @@ class TestGitHubReports(unittest.TestCase):
         self.assertIn(b'test-public-repository', response.data)
         self.assertNotIn(b'test-private-repository', response.data)
 
+    def test_display_noncompliant_private_repositories(self):
+        response = self.client.get("/non-compliant-private-repositories.html")
+        self.assertEqual(response.status_code, 302)
+
     def test_display_all_public_repositories(self):
         response = self.client.get("/all-public-repositories.html")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'test-public-repository', response.data)
         self.assertNotIn(b'test-private-repository', response.data)
+
+    def test_display_all_private_repositories(self):
+        response = self.client.get("/all-private-repositories.html")
+        self.assertEqual(response.status_code, 302)
 
     def test_index_page(self):
         response = self.client.get("/")
