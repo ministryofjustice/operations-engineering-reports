@@ -97,6 +97,11 @@ class TestReportDatabase(unittest.TestCase):
     def test_get_all_items_with_no_items(self):
         self.assertEqual(len(self.report_database.get_all_repository_reports()), 0)
 
+    def test_get_all_compliant_and_non_compliant_reports(self):
+        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'status': True})
+        self.report_database.add_repository_report('test_key2', {'name': 'test_key2', 'status': False})
+        self.assertEqual(len(self.report_database.get_all_compliant_repository_reports()), 1)
+        self.assertEqual(len(self.report_database.get_all_non_compliant_repository_reports()), 1)
 
 if __name__ == '__main__':
     unittest.main()
