@@ -339,6 +339,30 @@ def public_github_repositories():
                            non_compliant=non_compliant)
 
 
+@main.route("/private-github-repositories.html")
+@requires_auth
+def private_github_repositories():
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_repository_reports()
+
+    private_repos = [repo for repo in all_reports if repo['data']['is_private']]
+
+    compliant_repos = [repo for repo in private_repos if repo['data']['status']]
+    non_compliant_repos = [repo for repo in private_repos if not repo['data']['status']]
+
+    compliant = len(compliant_repos)
+    non_compliant = len(non_compliant_repos)
+
+    return render_template("public-github-repositories.html",
+                           last_updated=datetime.datetime.now().strftime("%d %B %Y"),
+                           total=len(private_repos),
+                           compliant=compliant,
+                           non_compliant=non_compliant)
+
 @main.route('/search-public-repositories', methods=['GET'])
 def search_public_repositories():
     query = request.args.get('q')
@@ -432,31 +456,9 @@ def display_all_public_repositories():
 
     return render_template("/all-public-repositories.html", public_reports=public_reports)
 
-@main.route("/private-github-repositories.html")
-def private_github_repositories():
-    all_reports = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
-    ).get_all_repository_reports()
-
-    private_github_repositories = [repo for repo in all_reports if repo['data']['is_private']]
-
-    compliant_repos = [repo for repo in private_github_repositories if repo['data']['status']]
-    non_compliant_repos = [repo for repo in private_github_repositories if not repo['data']['status']]
-
-    compliant = len(compliant_repos)
-    non_compliant = len(non_compliant_repos)
-
-    return render_template("private-github-repositories.html",
-                           last_updated=datetime.datetime.now().strftime("%d %B %Y"),
-                           total=len(private_github_repositories),
-                           compliant=compliant,
-                           non_compliant=non_compliant)
-
 
 @main.route('/search-private-repositories', methods=['GET'])
+@requires_auth
 def search_private_repositories():
     query = request.args.get('q')
     search_results = []
@@ -468,9 +470,9 @@ def search_private_repositories():
         region=os.getenv("DYNAMODB_REGION"),
     ).get_all_repository_reports()
 
-    private_github_repositories = [repo for repo in all_reports if repo['data']['is_private']]
+    private_repos = [repo for repo in all_reports if repo['data']['is_private']]
 
-    for repo in private_github_repositories:
+    for repo in private_repos:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
@@ -490,6 +492,7 @@ def search_private_repositories():
 
 
 @main.route("/private-report/<repository_name>", methods=["GET"])
+@requires_auth
 def display_individual_private_report(repository_name: str):
     """View the GitHub standards report for a private repository"""
     try:
@@ -506,6 +509,7 @@ def display_individual_private_report(repository_name: str):
 
 
 @main.route("/compliant-private-repositories.html", methods=["GET"])
+@requires_auth
 def display_compliant_private_repositories():
     """View all private repositories that adhere to the MoJ GitHub standards"""
     compliant_repositories = ReportDatabase(
@@ -521,6 +525,7 @@ def display_compliant_private_repositories():
 
 
 @main.route("/non-compliant-private-repositories.html", methods=["GET"])
+@requires_auth
 def display_noncompliant_private_repositories():
     """View all repositories that do not adhere to the MoJ GitHub standards"""
     non_compliant = ReportDatabase(
@@ -536,6 +541,7 @@ def display_noncompliant_private_repositories():
 
 
 @main.route("/all-private-repositories.html", methods=["GET"])
+@requires_auth
 def display_all_private_repositories():
     """View all repositories that do not adhere to the MoJ GitHub standards"""
     all_reports = ReportDatabase(
