@@ -150,21 +150,28 @@ def callback():
         return render_template("500.html"), 500
 
     user_email = session["user"]["userinfo"]["email"]
+    if user_email is None:
+        logger.warning("User %s does not have an email address", user_email)
+        return redirect("/logout")
 
-    if (
-        "@digital.justice.gov.uk" in user_email
-        or "@justice.gov.uk" in user_email
-        or "@cica.gov.uk" in user_email
-        or "@hmcts.net" in user_email
-    ):
-        logger.info("User has approved email domain")
+    if __is_allowed_email(user_email):
+        logger.info("User %s has approved email domain", user_email)
         return redirect("/home")
 
-    logger.warning("User does not have an approved email domain")
+    logger.warning("User %s does not have an approved email domain", user_email)
     return redirect("/logout")
 
 
-@main.route("/logout")
+def __is_allowed_email(email_address):
+    allowed_domains = (
+        "@digital.justice.gov.uk",
+        "@justice.gov.uk",
+        "@cica.gov.uk",
+        "@hmcts.net",
+    )
+    return any(email_address.endswith(domain) for domain in allowed_domains)
+
+@main.route("/logout", methods=["GET", "POST"])
 def logout():
     """When click on the logout button, clear the session, and log out of Auth0
 
