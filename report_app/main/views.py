@@ -46,12 +46,14 @@ def setup_auth0(setup_state):
         + ".well-known/openid-configuration",
     )
 
+
 def __auth0_not_configured():
     return (
         os.getenv("AUTH0_CLIENT_ID") is None
         or os.getenv("AUTH0_CLIENT_SECRET") is None
         or os.getenv("AUTH0_DOMAIN") is None
     )
+
 
 def requires_auth(function_f):
     """Redirects the web page to /index if user is not logged in
@@ -170,6 +172,7 @@ def __is_allowed_email(email_address):
         "@hmcts.net",
     )
     return any(email_address.endswith(domain) for domain in allowed_domains)
+
 
 @main.route("/logout", methods=["GET", "POST"])
 def logout():
