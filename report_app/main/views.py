@@ -74,18 +74,6 @@ def requires_auth(function_f):
 
 
 @main.route("/home")
-@main.route("/start")
-@requires_auth
-def home():
-    """Home page for the application
-
-    Returns:
-        Loads the templates/home.html page
-    """
-    logger.debug("home()")
-    return render_template("home.html")
-
-
 @main.route("/index")
 @main.route("/")
 def index():
@@ -147,12 +135,11 @@ def login():
 
 @main.route("/callback", methods=["GET", "POST"])
 def callback():
-    """If login succesful redirect to /home
+    """If login succesful redirect to /index
 
     Returns:
         Redirects to /home if user has correct email domain else redirects to /logout
     """
-    logger.debug("callback()")
     try:
         auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
         token = auth0.auth0.authorize_access_token()
