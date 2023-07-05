@@ -16,7 +16,7 @@ fullnameOverride: ""
 
 application:
     flaskDebug: "false"
-    auth0Domain: "https://moj-cloud-platforms.eu.auth0.com"
+    auth0Domain: "https://operations-engineering.eu.auth0.com"
     auth0ClientId:
     auth0ClientSecret:
     appSecretKey:
