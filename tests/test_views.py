@@ -1,32 +1,66 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import unittest
-import report_app
 from moto import mock_dynamodb
 import boto3
+from flask import current_app
+
+import report_app
 
 
-class TestFunctionalViews(unittest.TestCase):
-    def setUp(self):
+class TestAuth0Authentication(unittest.TestCase):
+    def setUp(self) -> None:
         app = report_app.app
         app.config["TESTING"] = True
         self.ctx = app.app_context()
         self.ctx.push()
         self.client = app.test_client()
-        self.index = "/index"
+        self.auth0_mock = MagicMock()
 
-    def tearDown(self):
-        self.ctx.pop()
+    def test_login_redirect(self):
+        response = self.client.get('/login')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('auth0.com', response.headers['Location'])
+        self.assertIn('response_type=code', response.headers['Location'])
+        self.assertIn('client_id', response.headers['Location'])
 
-    def test_home_with_no_auth(self):
-        assert self.client.get("/home").status_code == 302
-        assert self.client.get("/home").headers.get("location") == self.index
+    def test_login_auth0_not_found(self):
+        with patch.dict(current_app.extensions, {}, clear=True):
+            response = self.client.get('/login')
+            self.assertEqual(response.status_code, 500)
 
-    def test_start_with_no_auth(self):
-        assert self.client.get("/start").status_code == 302
-        assert self.client.get("/start").headers.get("location") == self.index
+    def test_callback_token_error(self):
+        with patch.dict(current_app.extensions, {'authlib.integrations.flask_client': self.auth0_mock}, clear=True):
+            self.auth0_mock.auth0.authorize_access_token.side_effect = KeyError()
+            response = self.client.get('/callback')
+            self.assertEqual(response.status_code, 500)
 
-    def test_callback_server_error(self):
-        assert self.client.get("/callback").status_code == 500
+    def test_callback_email_error(self):
+        with patch.dict(current_app.extensions, {'authlib.integrations.flask_client': self.auth0_mock}, clear=True):
+            self.auth0_mock.auth0.authorize_access_token.return_value = {"userinfo": {}}
+            response = self.client.get('/callback')
+            self.assertEqual(response.status_code, 500)
+
+    def test_callback_not_allowed_email(self):
+        with patch.dict(current_app.extensions, {'authlib.integrations.flask_client': self.auth0_mock}, clear=True):
+            self.auth0_mock.auth0.authorize_access_token.return_value = {"userinfo": {"email": "email@example.com"}}
+            response = self.client.get('/callback')
+            self.assertEqual(response.status_code, 302)
+            self.assertIn('Location', response.headers)
+            self.assertEqual(response.headers['Location'], '/logout')
+
+    def test_callback_allowed_email(self):
+        with patch.dict(current_app.extensions, {'authlib.integrations.flask_client': self.auth0_mock}, clear=True):
+            self.auth0_mock.auth0.authorize_access_token.return_value = {"userinfo": {"email": "email@justice.gov.uk"}}
+            response = self.client.get('/callback')
+            self.assertEqual(response.status_code, 302)
+            self.assertIn('Location', response.headers)
+            self.assertEqual(response.headers['Location'], '/home')
+
+    def test_logout(self):
+        response = self.client.get('/logout')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('Location', response.headers)
+        self.assertIn('auth0', response.headers['Location'])
 
 
 @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': 'TEST_TABLE'})

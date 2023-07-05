@@ -28,7 +28,10 @@ def setup_auth0(setup_state):
     Args:
         setup_state (Flask): The Flask app itself
     """
-    logger.debug("setup_auth0()")
+    if __auth0_not_configured():
+        logger.warning("Auth0 not configured")
+        abort(500, "Auth0 not configured")
+
     app = setup_state.app
     OAuth(app)
     auth0 = app.extensions.get(AUTHLIB_CLIENT)
@@ -41,6 +44,14 @@ def setup_auth0(setup_state):
         },
         server_metadata_url=f'https://{os.getenv("AUTH0_DOMAIN")}/'
         + ".well-known/openid-configuration",
+    )
+
+
+def __auth0_not_configured():
+    return (
+        os.getenv("AUTH0_CLIENT_ID") is None
+        or os.getenv("AUTH0_CLIENT_SECRET") is None
+        or os.getenv("AUTH0_DOMAIN") is None
     )
 
 
@@ -65,18 +76,6 @@ def requires_auth(function_f):
 
 
 @main.route("/home")
-@main.route("/start")
-@requires_auth
-def home():
-    """Home page for the application
-
-    Returns:
-        Loads the templates/home.html page
-    """
-    logger.debug("home()")
-    return render_template("home.html")
-
-
 @main.route("/index")
 @main.route("/")
 def index():
@@ -131,6 +130,8 @@ def login():
     """
     logger.debug("login()")
     auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
+    if auth0 is None:
+        abort(500, "Auth0 client not found.")
     return auth0.auth0.authorize_redirect(
         redirect_uri=url_for("main.callback", _external=True)
     )
@@ -138,35 +139,46 @@ def login():
 
 @main.route("/callback", methods=["GET", "POST"])
 def callback():
-    """If login succesful redirect to /home
+    """If login succesful redirect to /index
 
     Returns:
         Redirects to /home if user has correct email domain else redirects to /logout
     """
-    logger.debug("callback()")
     try:
         auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
         token = auth0.auth0.authorize_access_token()
         session["user"] = token
-    except (Exception,):  # pylint: disable=W0703
+    except (KeyError, AttributeError):
         return render_template("500.html"), 500
 
-    user_email = session["user"]["userinfo"]["email"]
+    try:
+        user_email = session["user"]["userinfo"]["email"]
+    except KeyError:
+        logger.warning("Unauthed User does not have an email address")
+        return render_template("500.html"), 500
+    if user_email is None:
+        logger.warning("User %s does not have an email address", user_email)
+        return redirect("/logout")
 
-    if (
-        "@digital.justice.gov.uk" in user_email
-        or "@justice.gov.uk" in user_email
-        or "@cica.gov.uk" in user_email
-        or "@hmcts.net" in user_email
-    ):
-        logger.info("User has approved email domain")
+    if __is_allowed_email(user_email):
+        logger.info("User %s has approved email domain", user_email)
         return redirect("/home")
 
-    logger.warning("User does not have an approved email domain")
+    logger.warning("User %s does not have an approved email domain", user_email)
     return redirect("/logout")
 
 
-@main.route("/logout")
+def __is_allowed_email(email_address):
+    allowed_domains = (
+        "@digital.justice.gov.uk",
+        "@justice.gov.uk",
+        "@cica.gov.uk",
+        "@hmcts.net",
+    )
+    return any(email_address.endswith(domain) for domain in allowed_domains)
+
+
+@main.route("/logout", methods=["GET", "POST"])
 def logout():
     """When click on the logout button, clear the session, and log out of Auth0
 
