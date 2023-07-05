@@ -154,7 +154,7 @@ def callback():
     try:
         user_email = session["user"]["userinfo"]["email"]
     except KeyError:
-        logger.warning("Unauthed User does not have an email address" )
+        logger.warning("Unauthed User does not have an email address")
         return render_template("500.html"), 500
     if user_email is None:
         logger.warning("User %s does not have an email address", user_email)
