@@ -128,6 +128,8 @@ def login():
     """
     logger.debug("login()")
     auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
+    if auth0 is None:
+        abort(500, "Auth0 client not found.")
     return auth0.auth0.authorize_redirect(
         redirect_uri=url_for("main.callback", _external=True)
     )
@@ -144,7 +146,7 @@ def callback():
         auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
         token = auth0.auth0.authorize_access_token()
         session["user"] = token
-    except (Exception,):  # pylint: disable=W0703
+    except (KeyError, AttributeError):
         return render_template("500.html"), 500
 
     user_email = session["user"]["userinfo"]["email"]
