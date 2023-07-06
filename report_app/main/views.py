@@ -42,6 +42,7 @@ def setup_auth0(setup_state):
         + ".well-known/openid-configuration",
     )
 
+
 def requires_auth(function_f):
     """Redirects the web page to /index if user is not logged in
 
