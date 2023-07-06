@@ -566,4 +566,4 @@ def display_all_private_repositories():
 
     private_reports = [repo for repo in all_reports if repo['data']['is_private']]
 
-    return render_template("/all-private-repositories.html", public_reports=private_reports)
+    return render_template("/all-private-repositories.html", private_reports=private_reports)
