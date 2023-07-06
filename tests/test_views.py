@@ -1,4 +1,5 @@
 from unittest.mock import patch, MagicMock
+import os
 import unittest
 from moto import mock_dynamodb
 import boto3
@@ -15,6 +16,16 @@ class TestAuth0Authentication(unittest.TestCase):
         self.ctx.push()
         self.client = app.test_client()
         self.auth0_mock = MagicMock()
+
+        os.environ['AUTH0_DOMAIN'] = 'fake'
+        os.environ['AUTH0_CLIENT_ID'] = 'FAKE'
+        os.environ['AUTH0_CLIENT_SECRET'] = 'FAKE'
+
+    def tearDown(self) -> None:
+        self.ctx.pop()
+        os.unsetenv('AUTH0_DOMAIN')
+        os.unsetenv('AUTH0_CLIENT_ID')
+        os.unsetenv('AUTH0_CLIENT_SECRET')
 
     def test_login_redirect(self):
         response = self.client.get('/login')

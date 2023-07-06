@@ -1,15 +1,22 @@
 import unittest
+import os
 from unittest.mock import patch, MagicMock
-from report_app.main.report_database import ReportDatabase
-from moto import mock_dynamodb
 import boto3
 
+from moto import mock_dynamodb
+
+from report_app.main.report_database import ReportDatabase
 
 class TestReportDatabase(unittest.TestCase):
 
     def setUp(self):
         self.mock_db = mock_dynamodb()
         self.mock_db.start()
+
+        # Set auth0 environment variables to avoid blueprint errors
+        os.environ['AUTH0_DOMAIN'] = 'fake'
+        os.environ['AUTH0_CLIENT_ID'] = 'FAKE'
+        os.environ['AUTH0_CLIENT_SECRET'] = 'FAKE'
 
         boto3.resource('dynamodb', region_name='eu-west-2').create_table(
             TableName='MOCK_TABLE',
@@ -34,6 +41,9 @@ class TestReportDatabase(unittest.TestCase):
 
     def tearDown(self):
         self.mock_db.stop()
+        os.unsetenv('AUTH0_DOMAIN')
+        os.unsetenv('AUTH0_CLIENT_ID')
+        os.unsetenv('AUTH0_CLIENT_SECRET')
 
     def test_init_with_correct_table(self):
         self.assertEqual(self.report_database._table_name, 'MOCK_TABLE')
@@ -53,17 +63,14 @@ class TestReportDatabase(unittest.TestCase):
     @patch('report_app.main.report_database.boto3.resource')
     @patch('report_app.main.report_database.os.getenv')
     def test_create_client_with_docker_compose_dev(self, mock_getenv, mock_boto_resource):
-        # Arrange
         mock_boto_resource.return_value = MagicMock()
         mock_getenv.return_value = '1'
         access_key = 'test_access_key'
         secret_key = 'test_secret_key'
         region = 'test_region'
 
-        # Act
         client = ReportDatabase._ReportDatabase__create_client(access_key, secret_key, region)
 
-        # Assert
         mock_boto_resource.assert_called_once_with(
             "dynamodb",
             aws_access_key_id=access_key,
