@@ -21,7 +21,7 @@ format: venv
 	@venv/bin/black $(source_files)
 
 test:
-	python3 -m pytest -v
+	export FLASK_CONFIGURATION=development; python3 -m pytest -v; unset FLASK_CONFIGURATION
 
 clean-test:
 	rm -fr venv
