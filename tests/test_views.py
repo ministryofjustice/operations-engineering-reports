@@ -180,10 +180,6 @@ class TestGitHubReports(unittest.TestCase):
         response = self.client.get('/api/v2/compliant-repository/test-public-repository')
         self.assertEqual(response.status_code, 200)
 
-    def test_non_compliant_repository(self):
-        response = self.client.get('/api/v2/compliant-repository/test-public-repository')
-        self.assertEqual(response.status_code, 200)
-
     def test_display_individual_public_report(self):
         response = self.client.get('/public-report/test-public-repository')
         self.assertEqual(response.status_code, 200)
