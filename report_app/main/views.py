@@ -574,6 +574,7 @@ def search_public_repositories_and_display_results():
 
     return render_template('results.html', results=search_results)
 
+
 @main.route('/search-results-private', methods=['GET'])
 def search_private_repositories_and_display_results():
     """Similar to search_private_repositories() but returns a results page instead of a string"""
