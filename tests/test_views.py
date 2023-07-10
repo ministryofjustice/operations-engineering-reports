@@ -205,6 +205,12 @@ class TestGitHubReports(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'test-public-repository', response.data)
 
+    def test_search_results_public_repositories(self):
+        response = self.client.get('/search-results-public', query_string={'q': 'repo'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'test-public-repository', response.data)
+
     def test_search_private_repositories(self):
         response = self.client.get('/search-private-repositories', query_string={'q': 'repo'})
 

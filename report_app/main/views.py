@@ -291,7 +291,7 @@ def display_badge_if_compliant(repository_name: str) -> dict:
     except KeyError:
         abort(404)
     if repository['data']['is_private']:
-        abort(403, "Private repositories are not supported, and %s is private" % repository_name)
+        abort(403, "Private repositories are not supported")
 
     if repository["data"]["status"]:
         return {
@@ -367,22 +367,21 @@ def search_public_repositories():
     query = request.args.get('q')
     search_results = []
 
-    all_reports = ReportDatabase(
+    public_reports = ReportDatabase(
         table_name=os.getenv("DYNAMODB_TABLE_NAME"),
         access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
         secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
         region=os.getenv("DYNAMODB_REGION"),
-    ).get_all_repository_reports()
+    ).get_all_public_repositories()
 
-    public_repositories = [repo for repo in all_reports if not repo['data']['is_private']]
-
-    for repo in public_repositories:
+    for repo in public_reports:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
     # Render the search results to a string and return it
     return render_template_string(
         """
+        <p class="govuk-heading-s">{{ search_results|length }} results found</p>
         <ul class="govuk-list">
             {% for repo in search_results %}
                 <p><a href="/public-report/{{ repo.name }}">{{ repo.name }}</a></p>
@@ -478,6 +477,7 @@ def search_private_repositories():
     # Render the search results to a string and return it
     return render_template_string(
         """
+        <p class="govuk-heading-s">{{ search_results|length }} results found</p>
         <ul class="govuk-list">
             {% for repo in search_results %}
                 <p><a href="/private-report/{{ repo.name }}">{{ repo.name }}</a></p>
@@ -553,3 +553,25 @@ def display_all_private_repositories():
     private_reports = [repo for repo in all_reports if repo['data']['is_private']]
 
     return render_template("/all-private-repositories.html", public_reports=private_reports)
+
+
+@main.route('/search-results-public', methods=['GET'])
+def search_public_repositories_and_display_results():
+    """Similar to search_public_repositories() but returns a results page instead of a string"""
+    query = request.args.get('q')
+    search_results = []
+    all_reports = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_public_repositories()
+
+    if query is None:
+        return render_template('results.html', results=search_results)
+
+    for repo in all_reports:
+        if query.lower() in repo['name'].lower():
+            search_results.append(repo)
+
+    return render_template('results.html', results=search_results)
