@@ -576,6 +576,7 @@ def search_public_repositories_and_display_results():
 
 
 @main.route('/search-results-private', methods=['GET'])
+@requires_auth
 def search_private_repositories_and_display_results():
     """Similar to search_private_repositories() but returns a results page instead of a string"""
     query = request.args.get('q')
