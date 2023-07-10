@@ -461,14 +461,12 @@ def search_private_repositories():
     query = request.args.get('q')
     search_results = []
 
-    all_reports = ReportDatabase(
+    private_repos = ReportDatabase(
         table_name=os.getenv("DYNAMODB_TABLE_NAME"),
         access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
         secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
         region=os.getenv("DYNAMODB_REGION"),
-    ).get_all_repository_reports()
-
-    private_repos = [repo for repo in all_reports if repo['data']['is_private']]
+    ).get_all_private_repositories()
 
     for repo in private_repos:
         if query.lower() in repo['name'].lower():
@@ -560,7 +558,7 @@ def search_public_repositories_and_display_results():
     """Similar to search_public_repositories() but returns a results page instead of a string"""
     query = request.args.get('q')
     search_results = []
-    all_reports = ReportDatabase(
+    public_repos = ReportDatabase(
         table_name=os.getenv("DYNAMODB_TABLE_NAME"),
         access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
         secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
@@ -570,7 +568,28 @@ def search_public_repositories_and_display_results():
     if query is None:
         return render_template('results.html', results=search_results)
 
-    for repo in all_reports:
+    for repo in public_repos:
+        if query.lower() in repo['name'].lower():
+            search_results.append(repo)
+
+    return render_template('results.html', results=search_results)
+
+@main.route('/search-results-private', methods=['GET'])
+def search_private_repositories_and_display_results():
+    """Similar to search_private_repositories() but returns a results page instead of a string"""
+    query = request.args.get('q')
+    search_results = []
+    private_repos = ReportDatabase(
+        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
+        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
+        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
+        region=os.getenv("DYNAMODB_REGION"),
+    ).get_all_private_repositories()
+
+    if query is None:
+        return render_template('results.html', results=search_results)
+
+    for repo in private_repos:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
