@@ -566,13 +566,13 @@ def search_public_repositories_and_display_results():
     ).get_all_public_repositories()
 
     if query is None:
-        return render_template('results.html', results=search_results)
+        return render_template('public-results.html', results=search_results)
 
     for repo in public_repos:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
-    return render_template('results.html', results=search_results)
+    return render_template('public-results.html', results=search_results)
 
 
 @main.route('/search-results-private', methods=['GET'])
@@ -588,10 +588,10 @@ def search_private_repositories_and_display_results():
     ).get_all_private_repositories()
 
     if query is None:
-        return render_template('results.html', results=search_results)
+        return render_template('private-results.html', results=search_results)
 
     for repo in private_repos:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
-    return render_template('results.html', results=search_results)
+    return render_template('private-results.html', results=search_results)
