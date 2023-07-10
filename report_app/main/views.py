@@ -556,6 +556,7 @@ def display_all_private_repositories():
 @main.route('/search-results-public', methods=['GET'])
 def search_public_repositories_and_display_results():
     """Similar to search_public_repositories() but returns a results page instead of a string"""
+    template = "public-results.html"
     query = request.args.get('q')
     search_results = []
     public_repos = ReportDatabase(
@@ -566,19 +567,20 @@ def search_public_repositories_and_display_results():
     ).get_all_public_repositories()
 
     if query is None:
-        return render_template('public-results.html', results=search_results)
+        return render_template(template, results=search_results)
 
     for repo in public_repos:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
-    return render_template('public-results.html', results=search_results)
+    return render_template(template, results=search_results)
 
 
 @main.route('/search-results-private', methods=['GET'])
 @requires_auth
 def search_private_repositories_and_display_results():
     """Similar to search_private_repositories() but returns a results page instead of a string"""
+    template = "private-results.html"
     query = request.args.get('q')
     search_results = []
     private_repos = ReportDatabase(
@@ -589,10 +591,10 @@ def search_private_repositories_and_display_results():
     ).get_all_private_repositories()
 
     if query is None:
-        return render_template('private-results.html', results=search_results)
+        return render_template(template, results=search_results)
 
     for repo in private_repos:
         if query.lower() in repo['name'].lower():
             search_results.append(repo)
 
-    return render_template('private-results.html', results=search_results)
+    return render_template(template, results=search_results)
