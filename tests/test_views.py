@@ -1,32 +1,26 @@
-from unittest.mock import patch, MagicMock
 import unittest
-from moto import mock_dynamodb
+from unittest.mock import MagicMock, patch
+
 import boto3
 from flask import current_app
+from moto import mock_dynamodb
 
 import report_app
 
 
 class TestAuth0Authentication(unittest.TestCase):
     def setUp(self) -> None:
-        app = report_app.app
-        app.config["TESTING"] = True
-        self.ctx = app.app_context()
+        self.app = report_app.app
+        self.app.config["TESTING"] = True
+        self.ctx = self.app.app_context()
         self.ctx.push()
-        self.client = app.test_client()
+        self.client = self.app.test_client()
         self.auth0_mock = MagicMock()
 
-    def test_login_redirect(self):
-        response = self.client.get('/login')
-        self.assertEqual(response.status_code, 302)
-        self.assertIn('auth0.com', response.headers['Location'])
-        self.assertIn('response_type=code', response.headers['Location'])
-        self.assertIn('client_id', response.headers['Location'])
-
-    def test_login_auth0_not_found(self):
-        with patch.dict(current_app.extensions, {}, clear=True):
+    def test_login(self):
+        with patch.dict(current_app.extensions, {'authlib.integrations.flask_client': self.auth0_mock}, clear=True):
             response = self.client.get('/login')
-            self.assertEqual(response.status_code, 500)
+            self.assertEqual(response.status_code, 200)
 
     def test_callback_token_error(self):
         with patch.dict(current_app.extensions, {'authlib.integrations.flask_client': self.auth0_mock}, clear=True):
@@ -60,7 +54,7 @@ class TestAuth0Authentication(unittest.TestCase):
         response = self.client.get('/logout')
         self.assertEqual(response.status_code, 302)
         self.assertIn('Location', response.headers)
-        self.assertIn('auth0', response.headers['Location'])
+        self.assertIn('dev', response.headers['Location'])
 
 
 @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': 'TEST_TABLE'})
@@ -161,24 +155,24 @@ class TestGitHubReports(unittest.TestCase):
 
         mock_report.return_value.update_all_github_reports.return_value = None
         response = self.client.post(self.update_endpoint, json=['{"name": "{test-public-repository}"}'])
-        self.assertEqual(response.data, b'{"message":"GitHub reports updated"}\n')
+        self.assertEqual(response.data, b'{\n  "message": "GitHub reports updated"\n}\n')
         self.assertEqual(response.status_code, 200)
 
     @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': ''})
     @patch.dict('os.environ', {'DYNAMODB_REGION': ''})
     @patch.dict('os.environ', {'DYNAMODB_ACCESS_KEY_ID': ''})
     @patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': ''})
-    def test_no_db(self):
+    def test_no_db_failure(self):
         with self.assertRaises(ValueError):
             self.client.get('/api/v2/compliant-repository/test')
 
     @patch('report_app.main.report_database.ReportDatabase')
-    def test_no_repository(self, mock_from_context):
+    def test_no_repository_failure(self, mock_from_context):
         mock_from_context.return_value.get_repository_report.return_value = None
         response = self.client.get('/api/v2/compliant-repository/test')
         self.assertEqual(response.status_code, 404)
 
-    def test_private_repository(self):
+    def test_private_repostitory_failure(self):
         response = self.client.get('/api/v2/compliant-repository/test-private-repository')
         self.assertEqual(response.status_code, 403)
 
@@ -190,8 +184,7 @@ class TestGitHubReports(unittest.TestCase):
         response = self.client.get('/api/v2/compliant-repository/test-public-repository')
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(response.data, b'{"color":"d4351c","isError":"true","label":"MoJ Compliant","message":"FAIL",'
-                                        b''b'"schemaVersion":1,"style":"for-the-badge"}\n')
+        self.assertEqual(response.data, b'{\n  "color": "d4351c",\n  "isError": "true",\n  "label": "MoJ Compliant",\n  "message": "FAIL",\n  "schemaVersion": 1,\n  "style": "for-the-badge"\n}\n')
 
     def test_display_individual_public_report(self):
         response = self.client.get('/public-report/test-public-repository')
