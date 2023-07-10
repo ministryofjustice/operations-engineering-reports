@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <h1 class="govuk-heading-l">Public Repositories report</h1>
 
 <h2 class="govuk-heading-m">Last updated: {{ last_updated }}</h2>
 
 <p class="govuk-body">
-	 This report shows the number of public GitHub repositories that are compliant and non-compliant with the Ministry of Justice technical standards.
+    This report shows the number of public GitHub repositories that are compliant and non-compliant with the Ministry of
+    Justice technical standards.
 </p>
 
 <p class="govuk-body">
-Out of {{ total }} <a href="/all-public-repositories.html">public repositories</a>, {{ compliant }} are <a href="/compliant-public-repositories.html">compliant</a> and {{ non_compliant }} are <a href="/non-compliant-public-repositories.html">non-compliant<a>.
+    Out of {{ total }} <a href="/all-public-repositories.html">public repositories</a>, {{ compliant }} are <a
+        href="/compliant-public-repositories.html">compliant</a> and {{ non_compliant }} are <a
+        href="/non-compliant-public-repositories.html">non-compliant<a>.
 </p>
 
 <p class="govuk-body">
@@ -22,7 +25,7 @@ Out of {{ total }} <a href="/all-public-repositories.html">public repositories</
 </p>
 
 
-<form action="/search" method="get" class="govuk-form-group">
+<form action="/search-public-repositories" method="get" class="govuk-form-group">
     <div class="govuk-form-group">
         <input class="govuk-input" id="search" name="q" type="text" placeholder="Repository Name" autocomplete="off">
     </div>
@@ -98,4 +101,3 @@ Out of {{ total }} <a href="/all-public-repositories.html">public repositories</
 {{ super() }}
 
 {% endblock %}
-
