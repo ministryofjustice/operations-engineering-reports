@@ -1,8 +1,10 @@
 import unittest
-from unittest.mock import patch, Mock
-from report_app.main.repository_report import RepositoryReport
-from moto import mock_dynamodb
+from unittest.mock import Mock, patch
+
 import boto3
+from moto import mock_dynamodb
+
+from report_app.main.repository_report import RepositoryReport
 
 
 class TestRepositoryReport(unittest.TestCase):
