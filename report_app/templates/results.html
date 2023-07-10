@@ -1,5 +1,25 @@
-<ul>
-  {% for result in results %}
-  <li>{{ result }}</li>
-  {% endfor %}
-</ul>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Search Results</h1>
+
+    <!-- Inserting a search bar here -->
+    <form action="/search-results-public" method="get" class="govuk-form-group">
+      <div class="govuk-form-group">
+        <input class="govuk-input" id="search" name="q" type="text" placeholder="Repository Name" autocomplete="off">
+      </div>
+      <button class="govuk-button" type="submit" style="margin-top: 10px;">Search</button>
+    </form>
+    <ul class="govuk-list govuk-list--bullet">
+      {% for result in results %}
+      <li>
+        <a href="public-report/{{ result.name }}" style="color:{{ 'blue' if result.data.status else 'red' }};">{{
+          result.name }}</a>
+      </li>
+      {% endfor %}
+
+  </div>
+</div>
+{% endblock %}
