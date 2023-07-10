@@ -5,7 +5,6 @@
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-l">Search Results</h1>
 
-    <!-- Inserting a search bar here -->
     <form action="/search-results-public" method="get" class="govuk-form-group">
       <div class="govuk-form-group">
         <input class="govuk-input" id="search" name="q" type="text" placeholder="Repository Name" autocomplete="off">
@@ -19,6 +18,7 @@
           result.name }}</a>
       </li>
       {% endfor %}
+    </ul>
 
   </div>
 </div>
