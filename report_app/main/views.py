@@ -118,8 +118,6 @@ def login():
     """
     logger.debug("login()")
     auth0 = current_app.extensions.get(AUTHLIB_CLIENT)
-    if auth0 is None:
-        abort(500, "Auth0 client not found.")
     return auth0.auth0.authorize_redirect(
         redirect_uri=url_for("main.callback", _external=True)
     )
