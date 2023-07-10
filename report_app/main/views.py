@@ -1,9 +1,9 @@
-import logging
 import datetime
+import logging
 import os
+from collections import Counter
 from functools import wraps
 from urllib.parse import quote_plus, urlencode
-from collections import Counter
 
 from authlib.integrations.flask_client import OAuth
 from flask import (Blueprint, abort, current_app, jsonify, redirect,
@@ -28,10 +28,6 @@ def setup_auth0(setup_state):
     Args:
         setup_state (Flask): The Flask app itself
     """
-    if __auth0_not_configured():
-        logger.warning("Auth0 not configured")
-        abort(500, "Auth0 not configured")
-
     app = setup_state.app
     OAuth(app)
     auth0 = app.extensions.get(AUTHLIB_CLIENT)
@@ -44,14 +40,6 @@ def setup_auth0(setup_state):
         },
         server_metadata_url=f'https://{os.getenv("AUTH0_DOMAIN")}/'
         + ".well-known/openid-configuration",
-    )
-
-
-def __auth0_not_configured():
-    return (
-        os.getenv("AUTH0_CLIENT_ID") is None
-        or os.getenv("AUTH0_CLIENT_SECRET") is None
-        or os.getenv("AUTH0_DOMAIN") is None
     )
 
 
