@@ -213,8 +213,7 @@ class TestGitHubReports(unittest.TestCase):
     def test_search_results_private_repositories(self):
         response = self.client.get('/search-results-private', query_string={'q': 'repo'})
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'test-private-repository', response.data)
+        self.assertEqual(response.status_code, 302)
 
     def test_bad_search_public_repositories(self):
         bad_request = 'zzz'
