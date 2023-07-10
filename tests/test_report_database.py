@@ -109,6 +109,11 @@ class TestReportDatabase(unittest.TestCase):
         self.report_database.add_repository_report('test_key2', {'name': 'test_key', 'is_private': False})
         self.assertEqual(len(self.report_database.get_all_public_repositories()), 1)
 
+    def test_get_all_private_repositories(self):
+        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'is_private': True})
+        self.report_database.add_repository_report('test_key2', {'name': 'test_key', 'is_private': False})
+        self.assertEqual(len(self.report_database.get_all_private_repositories()), 1)
+
 
 if __name__ == '__main__':
     unittest.main()
