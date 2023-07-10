@@ -1,12 +1,13 @@
 import unittest
-from unittest.mock import patch, MagicMock
-from report_app.main.report_database import ReportDatabase
-from moto import mock_dynamodb
+from unittest.mock import MagicMock, patch
+
 import boto3
+from moto import mock_dynamodb
+
+from report_app.main.report_database import ReportDatabase
 
 
 class TestReportDatabase(unittest.TestCase):
-
     def setUp(self):
         self.mock_db = mock_dynamodb()
         self.mock_db.start()
@@ -102,6 +103,11 @@ class TestReportDatabase(unittest.TestCase):
         self.report_database.add_repository_report('test_key2', {'name': 'test_key2', 'status': False})
         self.assertEqual(len(self.report_database.get_all_compliant_repository_reports()), 1)
         self.assertEqual(len(self.report_database.get_all_non_compliant_repository_reports()), 1)
+
+    def test_get_all_public_repositories(self):
+        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'is_private': True})
+        self.report_database.add_repository_report('test_key2', {'name': 'test_key', 'is_private': False})
+        self.assertEqual(len(self.report_database.get_all_public_repositories()), 1)
 
 
 if __name__ == '__main__':

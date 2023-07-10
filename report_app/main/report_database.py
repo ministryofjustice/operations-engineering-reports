@@ -117,3 +117,8 @@ class ReportDatabase:
         """Get all non-compliant repository reports from the database."""
         reports = self.get_all_repository_reports()
         return [report for report in reports if not report["data"]["status"]]
+
+    def get_all_public_repositories(self) -> list[dict]:
+        """Get all public repositories from the database."""
+        reports = self.get_all_repository_reports()
+        return [report for report in reports if not report["data"]["is_private"]]
