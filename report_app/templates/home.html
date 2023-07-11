@@ -6,38 +6,40 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <h1 class="govuk-heading-xl">Ministry of Justice GitHub Standards Report</h1>
-
+<h2 class="govuk-heading-m">Last updated: {{ last_updated }}</h2>
 <h3 class="govuk-heading-l">Overview</h3>
 <p class="govuk-body"><b>Total reports:</b> {{ total }}</p>
 <p class="govuk-body"><b>Compliant reports:</b> {{ compliant }}</p>
 <p class="govuk-body"><b>Non-compliant reports:</b> {{ non_compliant }}</p>
 
 <p class="govuk-body">
-  This website lists both public and private MoJ GitHub repositories which are and are not fully compliant with our organisation standards.
+    This website lists both public and private MoJ GitHub repositories which are and are not fully compliant with our
+    organisation standards.
 
-  The list of standards used can be found at the <a href="https://github.com/ministryofjustice/github-repository-standards">GitHub Standards Repository</a>
+    The list of standards used can be found at the <a
+        href="https://github.com/ministryofjustice/github-repository-standards">GitHub Standards Repository</a>
 </p>
 
 <p class="govuk-body">
-  Please note: in order to view private repositories you must login to GitHub.
+    Please note: in order to view private repositories you must login to GitHub.
 </p>
 
 <p class="govuk-body"><a href="public-github-repositories.html">View public repository reports</a></p>
 <p class="govuk-body"><a href="private-github-repositories.html">View private repository reports</a></p>
 
 {% if 'user' in session %}
-    <form action="/logout" method="post">
-        <button type="submit" class="govuk-button">Logout</button>
-    </form>
+<form action="/logout" method="post">
+    <button type="submit" class="govuk-button">Logout</button>
+</form>
 {% else %}
-    <form action="/login" method="get">
-        <button type="submit" class="govuk-button">Login</button>
-    </form>
+<form action="/login" method="get">
+    <button type="submit" class="govuk-button">Login</button>
+</form>
 {% endif %}
 
 <h3 class="govuk-heading-l">Most Common Infractions</h3>
 {% for infraction, count in common_infractions %}
-	<p class="govuk-body"><b>{{ infraction }}:</b> {{ count }}</p>
+<p class="govuk-body"><b>{{ infraction }}:</b> {{ count }}</p>
 {% endfor %}
 
 <canvas id="myChart"></canvas>
@@ -84,31 +86,30 @@
 });
 </script>
 <script>
-var ctx = document.getElementById('chart').getContext('2d');
-var chart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-        labels: ['Compliant', 'Non-compliant'],
-        datasets: [{
-            data: [{{ compliant }}, {{ non_compliant }}],
-            backgroundColor: ['#4CAF50', '#F44336'],
-        }]
+    var ctx = document.getElementById('chart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Compliant', 'Non-compliant'],
+            datasets: [{
+                data: [{{ compliant }}, {{ non_compliant }}],
+        backgroundColor: ['#4CAF50', '#F44336'],
+    }]
     },
     options: {
         responsive: true,
-        legend: {
+            legend: {
             position: 'top',
         },
         title: {
             display: true,
-            text: 'Compliance Status'
+                text: 'Compliance Status'
         },
         animation: {
             animateScale: true,
-            animateRotate: true
+                animateRotate: true
         }
     }
 });
 </script>
 {% endblock %}
-
