@@ -105,9 +105,9 @@ def index():
     return render_template("home.html",
                            total=len(all_reports),
                            compliant=len(compliant_reports),
-                           non_compliant=len(non_compliant_reports),
-                           common_infractions=common_infractions)
-
+                           last_updated=all_reports[0]["stored_at"],
+                           common_infractions=common_infractions,
+                           non_compliant=len(non_compliant_reports))
 
 @main.route("/login")
 def login():
@@ -313,54 +313,42 @@ def display_badge_if_compliant(repository_name: str) -> dict:
     }
 
 
-@main.route("/public-github-repositories.html")
+@main.route("/public-github-repositories.html", methods=["GET"])
 def public_github_repositories():
-    all_reports = ReportDatabase(
+    public_repositories = ReportDatabase(
         table_name=os.getenv("DYNAMODB_TABLE_NAME"),
         access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
         secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
         region=os.getenv("DYNAMODB_REGION"),
-    ).get_all_repository_reports()
-
-    public_repositories = [repo for repo in all_reports if not repo['data']['is_private']]
+    ).get_all_public_repositories()
 
     compliant_repos = [repo for repo in public_repositories if repo['data']['status']]
     non_compliant_repos = [repo for repo in public_repositories if not repo['data']['status']]
 
-    compliant = len(compliant_repos)
-    non_compliant = len(non_compliant_repos)
-
     return render_template("public-github-repositories.html",
-                           last_updated=datetime.datetime.now().strftime("%d %B %Y"),
+                           last_updated=public_repositories[0]["stored_at"],
                            total=len(public_repositories),
-                           compliant=compliant,
-                           non_compliant=non_compliant)
-
+                           compliant=len(compliant_repos),
+                           non_compliant=len(non_compliant_repos))
 
 @main.route("/private-github-repositories.html")
 @requires_auth
 def private_github_repositories():
-    all_reports = ReportDatabase(
+    private_repositories = ReportDatabase(
         table_name=os.getenv("DYNAMODB_TABLE_NAME"),
         access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
         secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
         region=os.getenv("DYNAMODB_REGION"),
-    ).get_all_repository_reports()
+    ).get_all_private_repositories()
 
-    private_repos = [repo for repo in all_reports if repo['data']['is_private']]
-
-    compliant_repos = [repo for repo in private_repos if repo['data']['status']]
-    non_compliant_repos = [repo for repo in private_repos if not repo['data']['status']]
-
-    compliant = len(compliant_repos)
-    non_compliant = len(non_compliant_repos)
+    compliant_repos = [repo for repo in private_repositories if repo['data']['status']]
+    non_compliant_repos = [repo for repo in private_repositories if not repo['data']['status']]
 
     return render_template("private-github-repositories.html",
-                           last_updated=datetime.datetime.now().strftime("%d %B %Y"),
-                           total=len(private_repos),
-                           compliant=compliant,
-                           non_compliant=non_compliant)
-
+                           last_updated=private_repositories[0]["stored_at"],
+                           total=len(private_repositories),
+                           compliant=len(compliant_repos),
+                           non_compliant=len(non_compliant_repos))
 
 @main.route('/search-public-repositories', methods=['GET'])
 def search_public_repositories():
