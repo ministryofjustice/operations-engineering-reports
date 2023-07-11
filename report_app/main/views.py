@@ -109,6 +109,7 @@ def index():
                            common_infractions=common_infractions,
                            non_compliant=len(non_compliant_reports))
 
+
 @main.route("/login")
 def login():
     """When click on the login button connect to Auth0
@@ -331,6 +332,7 @@ def public_github_repositories():
                            compliant=len(compliant_repos),
                            non_compliant=len(non_compliant_repos))
 
+
 @main.route("/private-github-repositories.html")
 @requires_auth
 def private_github_repositories():
@@ -349,6 +351,7 @@ def private_github_repositories():
                            total=len(private_repositories),
                            compliant=len(compliant_repos),
                            non_compliant=len(non_compliant_repos))
+
 
 @main.route('/search-public-repositories', methods=['GET'])
 def search_public_repositories():
