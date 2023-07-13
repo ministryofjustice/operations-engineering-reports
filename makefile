@@ -35,14 +35,8 @@ clean-test:
 
 all:
 
-local:
-	bash scripts/start-local.sh
-
-prod: lint
-	bash scripts/start-prod.sh
-
 dev:
-	bash scripts/start-dev.sh
+	bash scripts/start-db-dev.sh
 
 db-ui:
 	bash scripts/start-db-ui.sh
