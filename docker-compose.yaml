@@ -28,6 +28,9 @@ services:
       DOCKER_COMPOSE_DEV: "true"
       AWS_REGION: "eu-west-2"
       API_KEY: "fake"
+      AUTH0_CLIENT_ID: "dev"
+      AUTH0_CLIENT_SECRET: "dev"
+      AUTH0_DOMAIN: "operations-engineering.eu.auth0.com"
+      APP_SECRET_KEY: "dummy"
     ports:
       - "4567:4567"
-    env_file: .env
