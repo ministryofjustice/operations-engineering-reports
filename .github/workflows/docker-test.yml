@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build
-        run: docker build -t image-test -f Dockerfile.prod .
+        run: docker build -t image-test .
       - name: Check it exists
         run: docker images
 

@@ -26,7 +26,7 @@ jobs:
         with:
           generate_release_notes: true
       - name: Build
-        run: docker build -t image -f Dockerfile.prod .
+        run: docker build -t image .
       - name: Push to ECR
         id: ecr
         uses: jwalton/gh-ecr-push@v1
