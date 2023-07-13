@@ -6,5 +6,10 @@ export DYNAMODB_TABLE_NAME=cp-637250fa84046ef0
 export API_KEY=fake
 export AWS_REGION=eu-west-2
 
-docker-compose -f docker-compose.yml up -d --build
+ if ! [ -a .env ]
+ then
+     cp .env.example .env
+ fi
+
+docker-compose -f docker-compose.yaml up -d --build
 aws dynamodb create-table --cli-input-json file://tests/fixtures/create-table.json --endpoint-url http://localhost:8000 > /dev/null
