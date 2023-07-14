@@ -123,8 +123,6 @@ helm history -n operations-engineering-reports-dev operations-engineering-report
 
 The production namespace on [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/what-is-the-cloud-platform.html) for this project is called `operations-engineering-reports-prod`.
 
-You can see the production app running at: https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/
-
 To deploy the app to the production namespace do the following:
 
 - push to the `main` branch.
@@ -132,3 +130,19 @@ To deploy the app to the production namespace do the following:
 - push the tag to the remote repository using `git push origin --tags`
 
 This will trigger a GitHub Action that will create a release and deploy the app to the production namespace.
+
+You can see the production app running at: https://operations-engineering-reports-prod.cloud-platform.service.justice.gov.uk/
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact Us
+
+If you have any questions or need further clarification, feel free to ask in the #ask-operations-engineering channel on Slack or email us at operations-engineering@digital.justice.gov.uk.
