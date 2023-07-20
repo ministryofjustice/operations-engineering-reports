@@ -1,9 +1,8 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "operations-engineering-reports.fullname" . -}}
-{{- $svcPort := .Values.service.port }}
+{{- $svcPort := .Values.service.port -}}
 ---
 {{- $ingressHosts := .Values.ingress.hosts }}
-{{- $ingressHostsYaml := (list $ingressHosts) | toYaml | nindent 6 }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -16,7 +15,10 @@ metadata:
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:
-    - hosts: {{ $ingressHostsYaml }}
+    - hosts:
+        {{- range $host := $ingressHosts }}
+        - {{ $host }}
+        {{- end }}
   rules:
     {{- range $host := $ingressHosts }}
     - host: {{ $host }}
