@@ -72,13 +72,14 @@ jobs:
             --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
             --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
             --set image.repository=754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME} \
-            --set ingress.hosts={operations-engineering-reports-prod.cloud-platform.service.justice.gov.uk,operations-engineering-reports2.cloud-platform.service.justice.gov.uk}
+            --set ingress.hosts={operations-engineering-reports-prod.cloud-platform.service.justice.gov.uk, \
+            operations-engineering-reports.cloud-platform.service.justice.gov.uk}
       - name: Report failure to Slack
         if: always()
         uses: ravsamhq/notify-slack-action@v2
         with:
           status: ${{ job.status }}
           notify_when: "failure"
-          notification_title: "Failed to deploy reports to operations-engineering-reports-prod"
+          notification_title: "Failed to deploy the reports application to production"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
