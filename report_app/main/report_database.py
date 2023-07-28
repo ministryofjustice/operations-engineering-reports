@@ -21,6 +21,8 @@ class ReportDatabase:
 
         self._client = self.__create_client(access_key, secret_key, region)
         self._table = self._check_table_and_assign(table_name)
+        logger.info("ReportDatabase initialised with table %s", table_name)
+        logger.debug("ReportDatabase initialised with client %s", self._client)
 
     def _check_table_and_assign(self, table_name) -> any:
         try:
@@ -95,8 +97,11 @@ class ReportDatabase:
                 err.response["Error"]["Message"],
             )
             raise ClientError("An error occurred while adding the item to the table: %s", err)
+        logger.info("Item %s successfully added", key)
+        logger.debug("Item value: %s", value)
 
     def get_repository_report(self, key: str) -> dict:
+        logger.info("Getting report %s from table %s", key, self._table_name)
         try:
             response = self._table.get_item(Key={'name': key})
         except ClientError as err:
@@ -106,24 +111,29 @@ class ReportDatabase:
                 err.response['Error']['Code'], err.response['Error']['Message'])
             raise ClientError("An error occurred while getting the report from the table: %s", err)
         else:
+            logger.debug("Report %s successfully retrieved with %s", key, response['Item'])
             return response['Item']
 
     def get_all_compliant_repository_reports(self) -> list[dict]:
         """Get all compliant repository reports from the database."""
-        reports = self.get_all_repository_reports()
-        return [report for report in reports if report["data"]["status"]]
+        reports = self.get_all_compliant_repository_reports()
+        logger.debug("All compliant reports requested: %s", reports)
+        return reports
 
     def get_all_non_compliant_repository_reports(self) -> list[dict]:
         """Get all non-compliant repository reports from the database."""
-        reports = self.get_all_repository_reports()
-        return [report for report in reports if not report["data"]["status"]]
+        reports = self.get_all_non_compliant_repository_reports()
+        logger.debug("All noncompliant reports requested: %s", reports)
+        return reports
 
     def get_all_public_repositories(self) -> list[dict]:
         """Get all public reports from the database."""
-        reports = self.get_all_repository_reports()
-        return [report for report in reports if not report["data"]["is_private"]]
+        reports = self.get_all_public_repositories()
+        logger.debug("All public reports requested: %s", reports)
+        return reports
 
     def get_all_private_repositories(self) -> list[dict]:
         """Get all private reports from the database."""
-        reports = self.get_all_repository_reports()
-        return [report for report in reports if report["data"]["is_private"]]
+        reports = self.get_all_private_repositories()
+        logger.debug("All private reports requested: %s", reports)
+        return reports
