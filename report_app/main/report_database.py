@@ -101,7 +101,6 @@ class ReportDatabase:
         logger.debug("Item value: %s", value)
 
     def get_repository_report(self, key: str) -> dict:
-        logger.info("Getting report %s from table %s", key, self._table_name)
         try:
             response = self._table.get_item(Key={'name': key})
         except ClientError as err:
@@ -116,24 +115,20 @@ class ReportDatabase:
 
     def get_all_compliant_repository_reports(self) -> list[dict]:
         """Get all compliant repository reports from the database."""
-        reports = self.get_all_compliant_repository_reports()
-        logger.debug("All compliant reports requested: %s", reports)
-        return reports
+        reports = self.get_all_repository_reports()
+        return [report for report in reports if report["data"]["status"]
 
     def get_all_non_compliant_repository_reports(self) -> list[dict]:
         """Get all non-compliant repository reports from the database."""
-        reports = self.get_all_non_compliant_repository_reports()
-        logger.debug("All noncompliant reports requested: %s", reports)
-        return reports
+        reports = self.get_all_repository_reports()
+        return [report for report in reports if not report["data"]["status"]]
 
     def get_all_public_repositories(self) -> list[dict]:
         """Get all public reports from the database."""
-        reports = self.get_all_public_repositories()
-        logger.debug("All public reports requested: %s", reports)
-        return reports
+        reports = self.get_all_repository_reports()
+        return [report for report in reports if not report["data"]["is_private"]]
 
     def get_all_private_repositories(self) -> list[dict]:
         """Get all private reports from the database."""
-        reports = self.get_all_private_repositories()
-        logger.debug("All private reports requested: %s", reports)
-        return reports
+        reports = self.get_all_repository_reports()
+        return [report for report in reports if report["data"]["is_private"]]
