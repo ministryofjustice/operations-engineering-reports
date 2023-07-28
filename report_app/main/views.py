@@ -190,7 +190,6 @@ def logout():
 
 @main.errorhandler(404)
 def page_not_found(err):
-    # pylint: disable=unused-argument
     """Load 404.html when page not found error occurs
 
     Args:
@@ -199,7 +198,7 @@ def page_not_found(err):
     Returns:
         Load the templates/404.html page
     """
-    logger.debug("page_not_found()")
+    logger.debug("A request was made to a page that doesn't exist %s", err)
     return render_template("404.html"), 404
 
 
@@ -260,6 +259,7 @@ def update_github_reports():
     in the database as a new record.
     """
     if __is_request_correct(request) is False:
+        logger.error("update_github_reports(): incorrect api key, from %s", request.remote_addr)
         abort(400)
 
     RepositoryReport(request.json).update_all_github_reports()
