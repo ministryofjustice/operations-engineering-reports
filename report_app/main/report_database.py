@@ -116,7 +116,7 @@ class ReportDatabase:
     def get_all_compliant_repository_reports(self) -> list[dict]:
         """Get all compliant repository reports from the database."""
         reports = self.get_all_repository_reports()
-        return [report for report in reports if report["data"]["status"]
+        return [report for report in reports if report["data"]["status"]]
 
     def get_all_non_compliant_repository_reports(self) -> list[dict]:
         """Get all non-compliant repository reports from the database."""
