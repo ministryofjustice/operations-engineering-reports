@@ -1,17 +1,18 @@
 """Flask App"""
-import os
 import logging
+import os
+
 from flask import Flask
 from flask_cors import CORS
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
-from report_app.main.views import (
-    main,
-    server_forbidden,
-    page_not_found,
-    unknown_server_error,
+
+from report_app.main.views import (main, page_not_found, server_forbidden,
+                                   unknown_server_error)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s : %(message)s',
 )
-
-
 app = Flask(__name__, instance_relative_config=True)
 
 # Config folder file mapping
@@ -23,11 +24,11 @@ config = {
 # Set config, logging level and AWS DynamoDB table name
 if os.getenv("FLASK_CONFIGURATION", "production") == "development":
     app.config.from_object(config["development"])
-    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+    app.logger.setLevel(logging.DEBUG)
     logging.info("Running in Development mode.")
 else:
     app.config.from_object(config["production"])
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    app.logger.setLevel(logging.INFO)
     logging.info("Running in Production mode.")
 
 # Load sensitive settings from instance/config.py
