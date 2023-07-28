@@ -243,6 +243,7 @@ def gateway_timeout(err):
     logger.error("A gateway timeout error occurred: %s", err)
     return render_template("504.html"), 504
 
+
 def __is_request_correct(the_request):
     """Check request is a POST and has the correct API key
 
