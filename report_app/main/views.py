@@ -204,7 +204,6 @@ def page_not_found(err):
 
 @main.errorhandler(403)
 def server_forbidden(err):
-    # pylint: disable=unused-argument
     """Load 403.html when server forbids error occurs
 
     Args:
@@ -219,7 +218,6 @@ def server_forbidden(err):
 
 @main.errorhandler(500)
 def unknown_server_error(err):
-    # pylint: disable=unused-argument
     """Load 500.html when unknown server error occurs
 
     Args:
@@ -228,9 +226,22 @@ def unknown_server_error(err):
     Returns:
         Load the templates/500.html page
     """
-    logger.debug("unknown_server_error()")
+    logger.error("An unknown server error occurred: %s", err)
     return render_template("500.html"), 500
 
+
+@main.errorhandler(504)
+def gateway_timeout(err):
+    """Load 504.html when gateway timeout error occurs
+
+    Args:
+        err : N/A
+
+    Returns:
+        Load the templates/504.html page
+    """
+    logger.error("A gateway timeout error occurred: %s", err)
+    return render_template("504.html"), 504
 
 def __is_request_correct(the_request):
     """Check request is a POST and has the correct API key
