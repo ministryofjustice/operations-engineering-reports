@@ -1,8 +1,8 @@
-import logging
 import json
-from report_app.main.report_database import ReportDatabase
+import logging
 import os
 
+from report_app.main.report_database import ReportDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +38,10 @@ class RepositoryReport:
     def update_all_github_reports(self) -> None:
         """Update all the reports in the database after converting the report to json"""
         for report in self.report_data:
-            try:
-                report = json.loads(report)
-                self._add_report_to_db(report)
-            except Exception as err:
-                logger.error("Could not add report to database: %s", err)
+            report = json.loads(report)
+            self._add_report_to_db(report)
 
     def _add_report_to_db(self, new_report: dict) -> None:
         report_name = new_report["name"]
+        logger.info("Adding %s to the database", report_name)
         self.database_client.add_repository_report(report_name, new_report)
