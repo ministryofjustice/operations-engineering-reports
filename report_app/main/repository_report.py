@@ -38,8 +38,11 @@ class RepositoryReport:
     def update_all_github_reports(self) -> None:
         """Update all the reports in the database after converting the report to json"""
         for report in self.report_data:
-            report = json.loads(report)
-            self._add_report_to_db(report)
+            try:
+                report = json.loads(report)
+                self._add_report_to_db(report)
+            except Exception as err:
+                logger.error("Could not add report to database: %s", err)
 
     def _add_report_to_db(self, new_report: dict) -> None:
         report_name = new_report["name"]
