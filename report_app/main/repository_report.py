@@ -22,12 +22,8 @@ class RepositoryReport:
 
     @property
     def _create_db_client(self) -> ReportDatabase:
-        # TODO: Find a nicer way to pass these values to the ReportDatabase class
         return ReportDatabase(
-            table_name=os.environ.get("DYNAMODB_TABLE_NAME"),
-            access_key=os.environ.get("DYNAMODB_ACCESS_KEY_ID"),
-            secret_key=os.environ.get("DYNAMODB_SECRET_ACCESS_KEY"),
-            region=os.environ.get("DYNAMODB_REGION")
+            table_name=os.environ.get("DYNAMODB_TABLE_NAME") or "repository-reports",
         )
 
     @property

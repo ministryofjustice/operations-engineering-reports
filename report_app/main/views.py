@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 
 AUTHLIB_CLIENT = "authlib.integrations.flask_client"
 
+TABLE_NAME = os.getenv("DYNAMODB_TABLE_NAME")
+if not TABLE_NAME:
+    raise ValueError("The table name cannot be empty")
+
 
 @main.record
 def setup_auth0(setup_state):
@@ -69,10 +73,7 @@ def requires_auth(function_f):
 def index():
     '''Entrypoint into the application'''
     all_reports = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_repository_reports()
 
     compliant_reports = [report for report in all_reports if report['data']['status']]
@@ -293,10 +294,7 @@ def display_badge_if_compliant(repository_name: str) -> dict:
         repository_name: the name of the repository to check
     """
     dynamo_db = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     )
 
     try:
@@ -329,10 +327,7 @@ def display_badge_if_compliant(repository_name: str) -> dict:
 @main.route("/public-github-repositories.html", methods=["GET"])
 def public_github_repositories():
     public_repositories = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_public_repositories()
 
     compliant_repos = [repo for repo in public_repositories if repo['data']['status']]
@@ -349,10 +344,7 @@ def public_github_repositories():
 @requires_auth
 def private_github_repositories():
     private_repositories = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_private_repositories()
 
     compliant_repos = [repo for repo in private_repositories if repo['data']['status']]
@@ -371,10 +363,7 @@ def search_public_repositories():
     search_results = []
 
     public_reports = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_public_repositories()
 
     for repo in public_reports:
@@ -402,10 +391,7 @@ def display_individual_public_report(repository_name: str):
     """View the GitHub standards report for a repository"""
     try:
         report = ReportDatabase(
-            table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-            access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-            secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-            region=os.getenv("DYNAMODB_REGION"),
+            TABLE_NAME
         ).get_repository_report(repository_name)
     except KeyError:
         logger.warning("display_individual_public_report(): repository not found")
@@ -417,10 +403,7 @@ def display_individual_public_report(repository_name: str):
 def display_compliant_public_repositories():
     """View all repositories that adhere to the MoJ GitHub standards"""
     compliant_repositories = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_compliant_repository_reports()
 
     public_compliant_repositories = [repo for repo in compliant_repositories if not repo['data']['is_private']]
@@ -432,10 +415,7 @@ def display_compliant_public_repositories():
 def display_noncompliant_public_repositories():
     """View all repositories that do not adhere to the MoJ GitHub standards"""
     non_compliant = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_non_compliant_repository_reports()
 
     non_compliant_repositories = [repo for repo in non_compliant if not repo['data']['is_private']]
@@ -447,10 +427,7 @@ def display_noncompliant_public_repositories():
 def display_all_public_repositories():
     """View all repositories that do not adhere to the MoJ GitHub standards"""
     all_reports = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_repository_reports()
 
     public_reports = [repo for repo in all_reports if not repo['data']['is_private']]
@@ -465,10 +442,7 @@ def search_private_repositories():
     search_results = []
 
     private_repos = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_private_repositories()
 
     for repo in private_repos:
@@ -497,10 +471,7 @@ def display_individual_private_report(repository_name: str):
     """View the GitHub standards report for a private repository"""
     try:
         report = ReportDatabase(
-            table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-            access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-            secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-            region=os.getenv("DYNAMODB_REGION"),
+            TABLE_NAME
         ).get_repository_report(repository_name)
     except KeyError:
         logger.warning("display_individual_private_report(): repository not found")
@@ -513,10 +484,7 @@ def display_individual_private_report(repository_name: str):
 def display_compliant_private_repositories():
     """View all private repositories that adhere to the MoJ GitHub standards"""
     compliant_repositories = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_compliant_repository_reports()
 
     private_compliant_repositories = [repo for repo in compliant_repositories if repo['data']['is_private']]
@@ -529,10 +497,7 @@ def display_compliant_private_repositories():
 def display_noncompliant_private_repositories():
     """View all repositories that do not adhere to the MoJ GitHub standards"""
     non_compliant = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_non_compliant_repository_reports()
 
     non_compliant_repositories = [repo for repo in non_compliant if repo['data']['is_private']]
@@ -545,10 +510,7 @@ def display_noncompliant_private_repositories():
 def display_all_private_repositories():
     """View all repositories that do not adhere to the MoJ GitHub standards"""
     all_reports = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_repository_reports()
 
     private_reports = [repo for repo in all_reports if repo['data']['is_private']]
@@ -563,10 +525,7 @@ def search_public_repositories_and_display_results():
     query = request.args.get('q')
     search_results = []
     public_repos = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_public_repositories()
 
     if query is None:
@@ -587,10 +546,7 @@ def search_private_repositories_and_display_results():
     query = request.args.get('q')
     search_results = []
     private_repos = ReportDatabase(
-        table_name=os.getenv("DYNAMODB_TABLE_NAME"),
-        access_key=os.getenv("DYNAMODB_ACCESS_KEY_ID"),
-        secret_key=os.getenv("DYNAMODB_SECRET_ACCESS_KEY"),
-        region=os.getenv("DYNAMODB_REGION"),
+        TABLE_NAME
     ).get_all_private_repositories()
 
     if query is None:
