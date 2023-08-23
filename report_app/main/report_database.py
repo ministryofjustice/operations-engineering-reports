@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ReportDatabase:
     """The report database is a client layer that allows you to perform CRUD operations on the DynamoDB table."""
 
-    def __init__(self, table_name: str, access_key: str, secret_key: str, region: str):
+    def __init__(self, table_name: str):
         self._table_name = table_name
         self._table = None
         self._client = None
@@ -19,10 +19,8 @@ class ReportDatabase:
         if not table_name:
             raise ValueError("The table name cannot be empty")
 
-        self._client = self.__create_client(access_key, secret_key, region)
+        self._client = self.__create_client()
         self._table = self._check_table_and_assign(table_name)
-        logger.info("ReportDatabase initialised with table %s", table_name)
-        logger.debug("ReportDatabase initialised with client %s", self._client)
 
     def _check_table_and_assign(self, table_name) -> any:
         try:
@@ -41,27 +39,45 @@ class ReportDatabase:
             return table
 
     @staticmethod
-    def __create_client(access_key, secret_key, region) -> boto3.resource:
-        if not access_key or not secret_key:
-            raise ValueError("Access key or secret key is empty")
-
+    def __create_client() -> boto3.resource:
+        region = os.environ['AWS_REGION']
         if not region:
-            raise ValueError("Region is empty")
+            region = "eu-west-2"
 
-        # TODO: Find a way to do this implicitly
+        # Check for development environment
         if os.getenv("DOCKER_COMPOSE_DEV"):
             return boto3.resource(
-                "dynamodb",
-                aws_access_key_id=access_key,
-                aws_secret_access_key=secret_key,
+                'dynamodb',
+                aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
                 region_name=region,
-                endpoint_url="http://dynamodb-local:8000",
+                endpoint_url='http://dynamodb-local:8000'
             )
+
+        role_arn = os.environ['AWS_ROLE_ARN']
+        if not role_arn:
+            raise ValueError("The role ARN cannot be empty")
+
+        # create an STS client object that represents a live connection to the
+        # STS service
+        sts_client = boto3.client('sts')
+
+        # Call the assume_role method of the STSConnection object and pass the role
+        # ARN and a role session name.
+        assumed_role_object = sts_client.assume_role(
+            RoleArn=role_arn,
+            RoleSessionName="AssumeRoleSession"
+        )
+
+        # From the response that contains the assumed role, get the temporary
+        # credentials that can be used to make subsequent API calls
+        credentials = assumed_role_object['Credentials']
 
         return boto3.resource(
             "dynamodb",
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key,
+            aws_access_key_id=credentials['AccessKeyId'],
+            aws_secret_access_key=credentials['SecretAccessKey'],
+            aws_session_token=credentials['SessionToken'],
             region_name=region,
         )
 
