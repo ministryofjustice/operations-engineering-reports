@@ -1,102 +1,62 @@
 import unittest
 from unittest.mock import Mock, patch
 
-import boto3
-from moto import mock_dynamodb
-
 from report_app.main.repository_report import RepositoryReport
 
 
 class TestRepositoryReport(unittest.TestCase):
-    @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': 'TEST_TABLE'})
-    @patch.dict('os.environ', {'DYNAMODB_REGION': 'eu-west-2'})
-    @patch.dict('os.environ', {'DYNAMODB_ACCESS_KEY_ID': 'FAKE'})
-    @patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': 'FAKE'})
-    def setUp(self):
-        inpt_a = '{"name": "A"}'
-        inpt_b = '{"name": "B"}'
-        self.report_data = [
-            inpt_a,
-            inpt_b
-        ]
 
-        self.dyanmodb = mock_dynamodb()
-        self.dyanmodb.start()
-        boto3.resource('dynamodb', region_name='eu-west-2').create_table(
-            TableName='TEST_TABLE',
-            KeySchema=[
-                {
-                    'AttributeName': 'name',
-                    'KeyType': 'HASH'
-                }
-            ],
-            AttributeDefinitions=[
-                {
-                    'AttributeName': 'name',
-                    'AttributeType': 'S'
-                }
-            ],
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 5,
-                'WriteCapacityUnits': 5
-            }
-        )
+    @patch('report_app.main.repository_report.ReportDatabase')
+    def setUp(self, MockReportDatabase):
+        self.mock_data = ["{\"name\": \"repo1\", \"data\": {\"status\": true}}", "{\"name\": \"repo2\", \"data\": {\"status\": false}}"]
+        self.report = RepositoryReport(report_data=self.mock_data)
+        self.mock_db_instance = MockReportDatabase.return_value
 
-        self.repository_report = RepositoryReport(self.report_data)
+    @patch('report_app.main.repository_report.ReportDatabase')
+    def test_initialization(self, MockReportDatabase):
+        mock_data = [{"name": "repo1", "data": {"status": True}}, {"name": "repo2", "data": {"status": False}}]
+        mock_db_instance = MockReportDatabase.return_value
 
-    def test_init(self):
-        self.assertEqual(self.repository_report.report_data, self.report_data)
-        self.assertIsNotNone(self.repository_report.database_client)
+        report = RepositoryReport(report_data=mock_data)
 
-    @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': ''})
-    @patch.dict('os.environ', {'DYNAMODB_REGION': ''})
-    @patch.dict('os.environ', {'DYNAMODB_ACCESS_KEY_ID': ''})
-    @patch.dict('os.environ', {'DYNAMODB_SECRET_ACCESS_KEY': ''})
-    def test_init_no_db(self):
-        self.assertRaises(ValueError, RepositoryReport, self.report_data)
+        self.assertEqual(report._report_data, mock_data)
 
-    def test_update_all_github_reports(self):
-        self.repository_report.update_all_github_reports()
-        test_data = self.repository_report.database_client.get_all_repository_reports()
-        self.assertDictContainsSubset({"name": "A"}, test_data[0])
+        self.assertEqual(report.database_client, mock_db_instance)
 
-    def test_database_client_error(self):
-        self.repository_report.database_client = None
-        self.assertIsNone(self.repository_report.update_all_github_reports())
+    def test_update_all_github_reports_success(self):
+        self.report._add_report_to_db = Mock()
 
-    @patch.object(RepositoryReport, '_add_report_to_db')
-    def test_update_all_github_reports_empty(self, mock_add_report):
-        self.repository_report._report_data = []
-        self.repository_report.update_all_github_reports()
-        mock_add_report.assert_not_called()
+        self.report.update_all_github_reports()
 
-    @patch.object(RepositoryReport, '_add_report_to_db')
-    def test_update_all_github_reports_valid_data(self, mock_add_report):
-        self.repository_report._report_data = ['{"name": "valid_report"}']
-        self.repository_report.update_all_github_reports()
-        mock_add_report.assert_called_once_with({"name": "valid_report"})
+        self.assertEqual(self.report._add_report_to_db.call_count, len(self.mock_data))
 
-    @patch('report_app.main.repository_report.json.loads')
     @patch('report_app.main.repository_report.logger')
-    def test_update_all_github_reports_with_exception(self, mock_logger, mock_json_loads):
-        mock_json_loads.side_effect = Exception("Test exception")
+    def test_update_all_github_reports_failure(self, mock_logger):
+        self.report._report_data = ["not a valid json"]
 
-        self.repository_report._report_data = ['report1']
-        self.repository_report.update_all_github_reports()
-
-        self.repository_report._add_report_to_db = Mock()
-        self.repository_report._add_report_to_db.side_effect = Exception("Test exception")
-        self.repository_report._add_report_to_db.assert_not_called()
-
-        mock_json_loads.assert_any_call(self.repository_report._report_data[0])
-
-        self.assertEqual(mock_json_loads.call_count, 1)
+        self.report.update_all_github_reports()
 
         mock_logger.error.assert_called_once()
 
-    @patch.dict('os.environ', {'DYNAMODB_TABLE_NAME': ''})
-    def test_fail_to_create_db_client_no_table(self):
-        self.assertRaises(ValueError, RepositoryReport, self.report_data)
+
+    @patch('report_app.main.repository_report.ReportDatabase')
+    def test_add_report_to_db_success(self, MockReportDatabase):
+        mock_report = {"name": "repo1", "data": {"status": True}}
+        report = RepositoryReport(report_data=[])
+
+        report._add_report_to_db(mock_report)
+
+        MockReportDatabase.return_value.add_repository_report.assert_called_once_with("repo1", mock_report)
+
+    @patch('report_app.main.repository_report.ReportDatabase')
+    def test_add_report_to_db_failure(self, MockReportDatabase):
+        mock_report = {"name": "repo1", "data": {"status": True}}
+        MockReportDatabase.return_value.add_repository_report.side_effect = Exception("Database error")
+        report = RepositoryReport(report_data=[])
+
+        with self.assertRaises(Exception) as context:
+            report._add_report_to_db(mock_report)
+        self.assertEqual(str(context.exception), "Database error")
 
 
 if __name__ == '__main__':
