@@ -4,6 +4,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+from flask import current_app
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,9 @@ class ReportDatabase:
         self._table_name = table_name
         self._table = None
         self._client = None
+
+        self._aws_region = "eu-west-2"
+        self._aws_role_arn = os.environ['AWS_ROLE_ARN']
 
         if not table_name:
             raise ValueError("The table name cannot be empty")
@@ -38,25 +42,16 @@ class ReportDatabase:
         else:
             return table
 
-    @staticmethod
-    def __create_client() -> boto3.resource:
-        region = os.environ['AWS_REGION']
-        if not region:
-            region = "eu-west-2"
-
+    def __create_client(self) -> boto3.resource:
         # Check for development environment
         if os.getenv("DOCKER_COMPOSE_DEV"):
             return boto3.resource(
                 'dynamodb',
-                aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-                aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
-                region_name=region,
+                aws_access_key_id="test_access_key",
+                aws_secret_access_key="test_secret_key",
+                region_name=self._aws_region,
                 endpoint_url='http://dynamodb-local:8000'
             )
-
-        role_arn = os.environ['AWS_ROLE_ARN']
-        if not role_arn:
-            raise ValueError("The role ARN cannot be empty")
 
         # create an STS client object that represents a live connection to the
         # STS service
@@ -65,7 +60,7 @@ class ReportDatabase:
         # Call the assume_role method of the STSConnection object and pass the role
         # ARN and a role session name.
         assumed_role_object = sts_client.assume_role(
-            RoleArn=role_arn,
+            RoleArn=self._aws_role_arn,
             RoleSessionName="AssumeRoleSession"
         )
 
@@ -78,7 +73,7 @@ class ReportDatabase:
             aws_access_key_id=credentials['AccessKeyId'],
             aws_secret_access_key=credentials['SecretAccessKey'],
             aws_session_token=credentials['SessionToken'],
-            region_name=region,
+            region_name=self._aws_region,
         )
 
     def get_all_repository_reports(self) -> list[dict]:
@@ -91,7 +86,9 @@ class ReportDatabase:
                 err.response["Error"]["Code"],
                 err.response["Error"]["Message"],
             )
-            raise ClientError("An error occurred while getting all items from the table: %s", err)
+            error_msg = f"An error occurred while getting all items from the table: {err}"
+            error_response = {'Error': {'Code': '500', 'Message': error_msg}}
+            raise ClientError(error_response, 'Scan')
         else:
             return response["Items"]
 
@@ -112,7 +109,9 @@ class ReportDatabase:
                 err.response["Error"]["Code"],
                 err.response["Error"]["Message"],
             )
-            raise ClientError("An error occurred while adding the item to the table: %s", err)
+            error_msg = f"An error occurred while adding items to the table: {err}"
+            error_response = {'Error': {'Code': '500', 'Message': error_msg}}
+            raise ClientError(error_response, 'PutItem')
         logger.info("Item %s successfully added", key)
         logger.debug("Item value: %s", value)
 
@@ -124,7 +123,9 @@ class ReportDatabase:
                 "Couldn't get report %s from table %s. Here's why: %s: %s",
                 key, self._table.name,
                 err.response['Error']['Code'], err.response['Error']['Message'])
-            raise ClientError("An error occurred while getting the report from the table: %s", err)
+            error_msg = f"An error occurred while getting the report from the table: {err}"
+            error_response = {'Error': {'Code': '500', 'Message': error_msg}}
+            raise ClientError(error_response, 'GetItem')
         else:
             logger.debug("Report %s successfully retrieved with %s", key, response['Item'])
             return response['Item']

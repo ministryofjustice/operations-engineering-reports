@@ -1,118 +1,243 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
-import boto3
-from moto import mock_dynamodb
+from botocore.exceptions import ClientError
 
 from report_app.main.report_database import ReportDatabase
 
 
+@patch.dict('os.environ', {'AWS_ROLE_ARN': 'arn:aws:iam::000000000000:role/test-role'})
 class TestReportDatabase(unittest.TestCase):
-    def setUp(self):
-        self.mock_db = mock_dynamodb()
-        self.mock_db.start()
 
-        boto3.resource('dynamodb', region_name='eu-west-2').create_table(
-            TableName='MOCK_TABLE',
-            KeySchema=[
-                {
-                    'AttributeName': 'name',
-                    'KeyType': 'HASH'
-                }
-            ],
-            AttributeDefinitions=[
-                {
-                    'AttributeName': 'name',
-                    'AttributeType': 'S'
-                }
-            ],
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 5,
-                'WriteCapacityUnits': 5
+    @patch('boto3.client')
+    @patch('boto3.resource')
+    def test_client_creation(self, mock_resource, mock_client):
+        mock_client.return_value.assume_role.return_value = {
+            'Credentials': {
+                'AccessKeyId': 'test_key',
+                'SecretAccessKey': 'test_secret',
+                'SessionToken': 'test_token'
             }
-        )
-        self.report_database = ReportDatabase('MOCK_TABLE', 'test_access_key', 'test_secret_key', 'eu-west-2')
+        }
 
-    def tearDown(self):
-        self.mock_db.stop()
+        mock_dynamodb_client = MagicMock()
+        mock_resource.return_value = mock_dynamodb_client
 
-    def test_init_with_correct_table(self):
-        self.assertEqual(self.report_database._table_name, 'MOCK_TABLE')
-        self.assertIsNotNone(self.report_database._table)
-        self.assertIsNotNone(self.report_database._client)
+        db = ReportDatabase('test_table')
 
-    def test_init_without_credentials(self):
-        self.assertRaises(ValueError, ReportDatabase, 'MOCK_TABLE', '', '', 'eu-west-2')
-
-    def test_init_with_incorrect_table(self):
-        self.assertRaises(Exception, ReportDatabase, 'INCORRECT_TABLE', 'test_access_key', 'test_secret_key',
-                          'eu-west-2')
-
-    def test_init_without_region(self):
-        self.assertRaises(ValueError, ReportDatabase, 'MOCK_TABLE', 'test_access_key', 'test_secret_key', '')
-
-    @patch('report_app.main.report_database.boto3.resource')
-    @patch('report_app.main.report_database.os.getenv')
-    def test_create_client_with_docker_compose_dev(self, mock_getenv, mock_boto_resource):
-        # Arrange
-        mock_boto_resource.return_value = MagicMock()
-        mock_getenv.return_value = '1'
-        access_key = 'test_access_key'
-        secret_key = 'test_secret_key'
-        region = 'test_region'
-
-        # Act
-        client = ReportDatabase._ReportDatabase__create_client(access_key, secret_key, region)
-
-        # Assert
-        mock_boto_resource.assert_called_once_with(
+        mock_resource.assert_called_once_with(
             "dynamodb",
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key,
-            region_name=region,
-            endpoint_url="http://dynamodb-local:8000",
+            aws_access_key_id='test_key',
+            aws_secret_access_key='test_secret',
+            aws_session_token='test_token',
+            region_name='eu-west-2'
         )
-        self.assertEqual(client, mock_boto_resource.return_value)
 
-    def test_check_table_exists_with_correct_table(self):
-        self.assertEqual(self.report_database._table_name, 'MOCK_TABLE')
+        self.assertEqual(db._client, mock_dynamodb_client)
 
-    def test_check_table_exists_with_incorrect_table(self):
-        self.assertRaises(Exception, self.report_database._check_table_and_assign, 'INCORRECT_TABLE')
+    @patch('boto3.client')
+    @patch('boto3.resource')
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    def test_successful_table_check(self, mock_check_table, mock_client, mock_resource):
+        mock_table = MagicMock()
+        mock_check_table.return_value = mock_table
 
-    def test_add_item(self):
-        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'data': 'test_value'})
-        self.assertIsNotNone(self.report_database.get_repository_report('test_key'))
+        mock_client.return_value.assume_role.return_value = {
+            'Credentials': {
+                'AccessKeyId': 'test_key',
+                'SecretAccessKey': 'test_secret',
+                'SessionToken': 'test_token'
+            }
+        }
 
-    def test_add_item_with_incorrect_key(self):
-        self.assertRaises(AttributeError, self.report_database.add_repository_report, "", "")
+        mock_dynamodb_client = MagicMock()
+        mock_resource.return_value = mock_dynamodb_client
 
-    def test_get_item_with_incorrect_key(self):
-        self.assertRaises(AttributeError, self.report_database.get_repository_report, "")
+        report_database = ReportDatabase('test_table')
 
-    def test_get_all_items(self):
-        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'data': 'test_value'})
-        self.report_database.add_repository_report('test_key2', {'name': 'test_key2', 'data': 'test_value2'})
-        self.assertEqual(len(self.report_database.get_all_repository_reports()), 2)
+        self.assertEqual(report_database._table, mock_table)
+        self.assertEqual(report_database._table_name, 'test_table')
 
-    def test_get_all_items_with_no_items(self):
-        self.assertEqual(len(self.report_database.get_all_repository_reports()), 0)
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    def test_failed_table_check(self, mock_check_table):
+        mock_check_table.side_effect = ClientError(
+            error_response={'Error': {'Code': 'ResourceNotFoundException', 'Message': 'Table not found'}},
+            operation_name='DescribeTable'
+        )
 
-    def test_get_all_compliant_and_non_compliant_reports(self):
-        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'status': True})
-        self.report_database.add_repository_report('test_key2', {'name': 'test_key2', 'status': False})
-        self.assertEqual(len(self.report_database.get_all_compliant_repository_reports()), 1)
-        self.assertEqual(len(self.report_database.get_all_non_compliant_repository_reports()), 1)
+        with self.assertRaises(ClientError):
+            ReportDatabase('test_table')
 
-    def test_get_all_public_repositories(self):
-        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'is_private': True})
-        self.report_database.add_repository_report('test_key2', {'name': 'test_key', 'is_private': False})
-        self.assertEqual(len(self.report_database.get_all_public_repositories()), 1)
+    @patch('boto3.client')
+    @patch('boto3.resource')
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    def test_successful_scan(self, mock_check_table, mock_client, mock_resource):
+        mock_table = MagicMock()
+        mock_check_table.return_value = mock_table
 
-    def test_get_all_private_repositories(self):
-        self.report_database.add_repository_report('test_key', {'name': 'test_key', 'is_private': True})
-        self.report_database.add_repository_report('test_key2', {'name': 'test_key', 'is_private': False})
-        self.assertEqual(len(self.report_database.get_all_private_repositories()), 1)
+        mock_client.return_value.assume_role.return_value = {
+            'Credentials': {
+                'AccessKeyId': 'test_key',
+                'SecretAccessKey': 'test_secret',
+                'SessionToken': 'test_token'
+            }
+        }
+
+        mock_dynamodb_client = MagicMock()
+        mock_resource.return_value = mock_dynamodb_client
+
+        mock_table.scan.return_value = {"Items": [{"name": "test_item"}]}
+
+        report_database = ReportDatabase('test_table')
+        result = report_database.get_all_repository_reports()
+
+        self.assertEqual(result, [{"name": "test_item"}])
+
+    @patch('boto3.client')
+    @patch('boto3.resource')
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    def test_failed_scan(self, mock_check_table, mock_client, mock_resource):
+        mock_table = MagicMock()
+        mock_check_table.return_value = mock_table
+
+        mock_client.return_value.assume_role.return_value = {
+            'Credentials': {
+                'AccessKeyId': 'test_key',
+                'SecretAccessKey': 'test_secret',
+                'SessionToken': 'test_token'
+            }
+        }
+
+        mock_dynamodb_client = MagicMock()
+        mock_resource.return_value = mock_dynamodb_client
+
+        mock_table.scan.side_effect = ClientError(
+            error_response={'Error': {'Code': 'SomeError', 'Message': 'Some error occurred'}},
+            operation_name='Scan'
+        )
+
+        self.assertRaises(ClientError, ReportDatabase('test').get_all_repository_reports)
+
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client')
+    def test_add_repository_report_success(self, mock_create_client, mock_check_table_and_assign):
+        mock_table = MagicMock()
+        mock_table.put_item.return_value = None
+        mock_check_table_and_assign.return_value = mock_table
+
+        db = ReportDatabase('test_table')
+
+        db.add_repository_report('test_key', {'test': 'value'})
+
+        mock_table.put_item.assert_called_once_with(Item={'name': 'test_key', 'data': {'test': 'value'}, 'stored_at': ANY})
+
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client')
+    def test_add_repository_report_failure(self, mock_create_client, mock_check_table_and_assign):
+        mock_table = MagicMock()
+        error_response = {'Error': {'Code': 'SomeErrorCode', 'Message': 'Some error occurred'}}
+        mock_table.put_item.side_effect = ClientError(error_response, 'PutItem')
+        mock_check_table_and_assign.return_value = mock_table
+
+        db = ReportDatabase('test_table')
+
+        with self.assertRaises(ClientError):
+            db.add_repository_report('test_key', {'test': 'value'})
+
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client')
+    def test_get_repository_report_success(self, mock_create_client, mock_check_table_and_assign):
+        mock_table = MagicMock()
+
+        mock_table.get_item.return_value = {
+            'Item': {
+                'name': 'test_repo',
+                'data': {'some_key': 'some_value'},
+                'stored_at': '01-01-2023 12:00:00'
+            }
+        }
+        mock_check_table_and_assign.return_value = mock_table
+
+        db = ReportDatabase('test_table')
+        result = db.get_repository_report('test_repo')
+        self.assertEqual(result['name'], 'test_repo')
+        self.assertEqual(result['data']['some_key'], 'some_value')
+
+    @patch.object(ReportDatabase, '_check_table_and_assign')
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client')
+    def test_get_repository_report_failure(self, mock_create_client, mock_check_table_and_assign):
+        mock_table = MagicMock()
+        error_response = {'Error': {'Code': 'SomeErrorCode', 'Message': 'Some error occurred'}}
+        mock_check_table_and_assign.return_value = mock_table
+
+        mock_table.get_item.side_effect = ClientError(error_response, 'GetItem')
+
+        with self.assertRaises(ClientError):
+            db = ReportDatabase('test_table')
+            db.get_repository_report('test_repo')
+
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client', return_value=MagicMock())
+    @patch.object(ReportDatabase, '_check_table_and_assign', return_value=MagicMock())
+    @patch.object(ReportDatabase, 'get_all_repository_reports')
+    def test_get_all_compliant_repository_reports(self, mock_get_all_reports, mock_check_table, mock_create_client):
+        mock_get_all_reports.return_value = [
+            {'name': 'repo1', 'data': {'status': True}},
+            {'name': 'repo2', 'data': {'status': False}},
+            {'name': 'repo3', 'data': {'status': True}},
+        ]
+
+        db = ReportDatabase('test_table')
+        compliant_reports = db.get_all_compliant_repository_reports()
+        self.assertEqual(len(compliant_reports), 2)
+        self.assertTrue(all(report['data']['status'] for report in compliant_reports))
+
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client', return_value=MagicMock())
+    @patch.object(ReportDatabase, '_check_table_and_assign', return_value=MagicMock())
+    @patch.object(ReportDatabase, 'get_all_repository_reports')
+    def test_get_all_non_compliant_repository_reports(self, mock_get_all_reports, mock_check_table, mock_create_client):
+        mock_get_all_reports.return_value = [
+            {'name': 'repo1', 'data': {'status': True}},
+            {'name': 'repo2', 'data': {'status': False}},
+            {'name': 'repo3', 'data': {'status': True}},
+        ]
+
+        db = ReportDatabase('test_table')
+
+        non_compliant_reports = db.get_all_non_compliant_repository_reports()
+        self.assertEqual(len(non_compliant_reports), 1)
+        self.assertTrue(all(not report['data']['status'] for report in non_compliant_reports))
+
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client', return_value=MagicMock())
+    @patch.object(ReportDatabase, '_check_table_and_assign', return_value=MagicMock())
+    @patch.object(ReportDatabase, 'get_all_repository_reports')
+    def test_get_all_public_repositories(self, mock_get_all_reports, mock_check_table, mock_create_client):
+        mock_get_all_reports.return_value = [
+            {'name': 'repo1', 'data': {'is_private': True}},
+            {'name': 'repo2', 'data': {'is_private': False}},
+            {'name': 'repo3', 'data': {'is_private': True}},
+        ]
+
+        db = ReportDatabase('test_table')
+
+        public_repositories = db.get_all_public_repositories()
+        self.assertEqual(len(public_repositories), 1)
+        self.assertFalse(all(report['data']['is_private'] for report in public_repositories))
+
+    @patch.object(ReportDatabase, '_ReportDatabase__create_client', return_value=MagicMock())
+    @patch.object(ReportDatabase, '_check_table_and_assign', return_value=MagicMock())
+    @patch.object(ReportDatabase, 'get_all_repository_reports')
+    def test_get_all_private_repositories(self, mock_get_all_reports, mock_check_table, mock_create_client):
+        mock_get_all_reports.return_value = [
+            {'name': 'repo1', 'data': {'is_private': True}},
+            {'name': 'repo2', 'data': {'is_private': False}},
+            {'name': 'repo3', 'data': {'is_private': True}},
+        ]
+
+        db = ReportDatabase('test_table')
+
+        public_repositories = db.get_all_private_repositories()
+        self.assertEqual(len(public_repositories), 2)
+        self.assertTrue(all(report['data']['is_private'] for report in public_repositories))
 
 
 if __name__ == '__main__':
