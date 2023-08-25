@@ -6,6 +6,8 @@ from report_app.main.report_database import ReportDatabase
 
 logger = logging.getLogger(__name__)
 
+DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
+
 
 class RepositoryReport:
     """RepositoryReport represents an abstraction of the DynamoDB table
@@ -18,13 +20,12 @@ class RepositoryReport:
 
     def __init__(self, report_data: list[any]) -> None:
         self._report_data = report_data
-        self.database_client = self._create_db_client
+        self.database_client = self._get_db_client
 
     @property
-    def _create_db_client(self) -> ReportDatabase:
-        return ReportDatabase(
-            table_name=os.environ.get("DYNAMODB_TABLE_NAME") or "repository-reports",
-        )
+    def _get_db_client(self) -> ReportDatabase:
+        """Create and return a new instance of the ReportDatabase client."""
+        return ReportDatabase(table_name=DYNAMODB_TABLE_NAME)
 
     @property
     def report_data(self) -> list[str]:
