@@ -38,7 +38,6 @@ class TestRepositoryReport(unittest.TestCase):
 
         mock_logger.error.assert_called_once()
 
-
     @patch('report_app.main.repository_report.ReportDatabase')
     def test_add_report_to_db_success(self, MockReportDatabase):
         mock_report = {"name": "repo1", "data": {"status": True}}
