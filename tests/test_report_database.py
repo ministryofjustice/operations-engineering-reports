@@ -58,8 +58,10 @@ class TestReportDatabase(unittest.TestCase):
         self.assertEqual(report_database._table, mock_table)
         self.assertEqual(report_database._table_name, 'test_table')
 
+    @patch('boto3.client')
+    @patch('boto3.resource')
     @patch.object(ReportDatabase, '_check_table_and_assign')
-    def test_failed_table_check(self, mock_check_table):
+    def test_failed_table_check(self, mock_check_table, mock_client, mock_resource):
         mock_check_table.side_effect = ClientError(
             error_response={'Error': {'Code': 'ResourceNotFoundException', 'Message': 'Table not found'}},
             operation_name='DescribeTable'
