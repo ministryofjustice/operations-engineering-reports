@@ -34,6 +34,7 @@ class RepositoryReport:
 
     def update_all_github_reports(self) -> None:
         """Update all the reports in the database after converting the report to json"""
+        logging.info("Updating all reports in the database")
         for report in self.report_data:
             try:
                 report = json.loads(report)

@@ -241,7 +241,7 @@ def gateway_timeout(err):
     return render_template("504.html"), 504
 
 
-def __is_request_correct(the_request):
+def _is_request_correct(the_request):
     """Check request is a POST and has the correct API key
 
     Args:
@@ -267,10 +267,12 @@ def update_github_reports():
     This will overwrite any existing reports storing each report
     in the database as a new record.
     """
-    if __is_request_correct(request) is False:
+    logger.info("update_github_reports(): received request from %s", request.remote_addr)
+    if _is_request_correct(request) is False:
         logger.error("update_github_reports(): incorrect api key, from %s", request.remote_addr)
         abort(400)
 
+    logging.info("update_github_reports(): updating all GitHub reports")
     RepositoryReport(request.json).update_all_github_reports()
 
     return jsonify({"message": "GitHub reports updated"}), 200
