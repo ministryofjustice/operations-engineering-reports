@@ -56,6 +56,7 @@ class TestAuth0AuthenticationView(unittest.TestCase):
         self.assertIn('Location', response.headers)
         self.assertIn('v2/logout', response.headers['Location'])
 
+
 @patch.dict('os.environ', {'AWS_ROLE_ARN': 'arn:aws:iam::000000000000:role/test-role'})
 class TestStandardsReportsViews(unittest.TestCase):
 
@@ -114,6 +115,7 @@ class TestStandardsReportsViews(unittest.TestCase):
         self.assertEqual(response.json, {"message": "GitHub reports updated"})
 
         mock_repository_report.return_value.update_all_github_reports.assert_called_once_with()
+
 
 if __name__ == "__main__":
     unittest.main()
