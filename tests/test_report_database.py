@@ -27,9 +27,6 @@ class TestReportDatabase(unittest.TestCase):
 
         mock_resource.assert_called_once_with(
             "dynamodb",
-            aws_access_key_id='test_key',
-            aws_secret_access_key='test_secret',
-            aws_session_token='test_token',
             region_name='eu-west-2'
         )
 

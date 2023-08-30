@@ -18,7 +18,6 @@ class ReportDatabase:
         self._client = None
 
         self._aws_region = "eu-west-2"
-        self._aws_role_arn = os.environ['AWS_ROLE_ARN']
 
         if not table_name:
             raise ValueError("The table name cannot be empty")
@@ -53,26 +52,8 @@ class ReportDatabase:
                 endpoint_url='http://dynamodb-local:8000'
             )
 
-        # create an STS client object that represents a live connection to the
-        # STS service
-        sts_client = boto3.client('sts')
-
-        # Call the assume_role method of the STSConnection object and pass the role
-        # ARN and a role session name.
-        assumed_role_object = sts_client.assume_role(
-            RoleArn=self._aws_role_arn,
-            RoleSessionName="AssumeRoleSession"
-        )
-
-        # From the response that contains the assumed role, get the temporary
-        # credentials that can be used to make subsequent API calls
-        credentials = assumed_role_object['Credentials']
-
         return boto3.resource(
             "dynamodb",
-            aws_access_key_id=credentials['AccessKeyId'],
-            aws_secret_access_key=credentials['SecretAccessKey'],
-            aws_session_token=credentials['SessionToken'],
             region_name=self._aws_region,
         )
 
