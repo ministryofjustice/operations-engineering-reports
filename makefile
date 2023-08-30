@@ -9,6 +9,8 @@ APP_SECRET_KEY ?= default-app-secret-key
 ENCRYPTION_KEY ?= default-encryption-key
 API_KEY ?= default-api-key
 HOST_SUFFIX ?= default-host-suffix
+IMAGE ?= default-image
+REGISTRY ?= default-registry
 
 # Targets
 help:
@@ -49,19 +51,24 @@ clean-test:
 
 
 # To run locally, you need to pass the following:
-# make deploy RELEASE_NAME=my-release AUTH0_CLIENT_ID=my-auth0-id AUTH0_CLIENT_SECRET=my-secret APP_SECRET_KEY=my-app-secret ENCRYPTION_KEY=my-encryption-key API_KEY=my-api-key HOST_SUFFIX=my-host-suffix
+# make deploy IMAGE=my-image RELEASE_NAME=my-release AUTH0_CLIENT_ID=my-auth0-id AUTH0_CLIENT_SECRET=my-secret APP_SECRET_KEY=my-app-secret ENCRYPTION_KEY=my-encryption-key API_KEY=my-api-key HOST_SUFFIX=my-host-suffix
 deploy-dev:
-	helm upgrade $(RELEASE_NAME) helm/operations-engineering-reports \
+	helm --debug upgrade $(RELEASE_NAME) helm/operations-engineering-reports \
 		--install \
 		--force \
 		--wait \
+		--set image.tag=$(IMAGE) \
 		--set application.auth0ClientId=$(AUTH0_CLIENT_ID) \
 		--set application.auth0ClientSecret=$(AUTH0_CLIENT_SECRET) \
 		--set application.appSecretKey=$(APP_SECRET_KEY) \
 		--set application.encryptionKey=$(ENCRYPTION_KEY) \
 		--set application.apiKey=$(API_KEY) \
-		--set=ingress.hosts={operations-engineering-reports-dev-$(HOST_SUFFIX).cloud-platform.service.justice.gov.uk} \
+		--set ingress.hosts={operations-engineering-reports-dev-$(HOST_SUFFIX).cloud-platform.service.justice.gov.uk} \
+		--set image.repository=754256621582.dkr.ecr.eu-west-2.amazonaws.com/operations-engineering/operations-engineering-reports-dev-ecr \
 		--namespace operations-engineering-reports-dev
+
+delete-dev:
+	helm delete $(RELEASE_NAME) --namespace operations-engineering-reports-dev
 
 all:
 
