@@ -12,6 +12,7 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-{{ $fullName }}-{{ .Values.ingress.colour }}
     external-dns.alpha.kubernetes.io/aws-weight: "100"
+    cloud-platform.justice.gov.uk/ignore-external-dns-weight: "true"
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:
