@@ -14,8 +14,6 @@ env:
 
   ECR_REPOSITORY: ${{ secrets.DEV_ECR_NAME }}
   ECR_REGISTRY: "754256621582.dkr.ecr.eu-west-2.amazonaws.com"
-  ECR_ROLE: ${{ secrets.DEVELOPMENT_ECR_ROLE_TO_ASSUME }}
-  ECR_REGION: eu-west-2
 
   IMAGE_TAG: ${{ github.sha }}
 
@@ -57,11 +55,11 @@ jobs:
       - name: Authenticate to the cluster
         run: |
           echo "${KUBE_CERT}" > ca.crt
-          kubectl config set-cluster ${ KUBE_CLUSTER } --certificate-authority=./ca.crt --server=https://${ KUBE_CLUSTER }
-          kubectl config set-credentials deploy-user --token=${ KUBE_TOKEN }
-          kubectl config set-context ${ KUBE_CLUSTER } --cluster=${ KUBE_CLUSTER } --user=deploy-user --namespace=${ KUBE_NAMESPACE }
+          kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://${KUBE_CLUSTER}
+          kubectl config set-credentials deploy-user --token=${KUBE_TOKEN}
+          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${KUBE_NAMESPACE}
           kubectl config get-contexts
-          kubectl config use-context ${ KUBE_CLUSTER }
+          kubectl config use-context ${KUBE_CLUSTER}
       - name: Helm install
         run: |
           helm upgrade operations-engineering-reports-dev \
@@ -70,12 +68,12 @@ jobs:
             --force \
             --wait \
             --timeout 10m \
-            --namespace ${ KUBE_NAMESPACE } \
-            --set image.tag=${ IMAGE_TAG }} \
-            --set application.auth0ClientId=${ AUTH0_CLIENT_ID } \
-            --set application.auth0ClientSecret=${ AUTH0_CLIENT_SECRET } \
-            --set application.appSecretKey=${ FLASK_APP_SECRET } \
-            --set application.encryptionKey=${ OPS_ENG_REPORTS_ENCRYPT_KEY } \
-            --set application.apiKey=${ OPERATIONS_ENGINEERING_REPORTS_API_KEY } \
-            --set image.repository=${ ECR_REGISTRY }/${ ECR_REPOSITORY } \
+            --namespace ${KUBE_NAMESPACE} \
+            --set image.tag=${IMAGE_TAG} \
+            --set application.auth0ClientId=${AUTH0_CLIENT_ID} \
+            --set application.auth0ClientSecret=${AUTH0_CLIENT_SECRET} \
+            --set application.appSecretKey=${FLASK_APP_SECRET} \
+            --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
+            --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
+            --set image.repository=${ECR_REGISTRY }/${ECR_REPOSITORY} \
             --set ingress.hosts={operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk}
