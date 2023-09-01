@@ -43,7 +43,7 @@ jobs:
           docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ vars.DEVELOPEMENT_ECR_REPOSITORY }}
+          ECR_REPOSITORY: ${{ vars.DEVELOPMENT_ECR_REPOSITORY }}
 
   deploy-to-dev:
     needs: build-push
@@ -63,7 +63,7 @@ jobs:
       - name: Helm install
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ vars.DEVELOPEMENT_ECR_REPOSITORY }}
+          ECR_REPOSITORY: ${{ vars.DEVELOPMENT_ECR_REPOSITORY  }}
         run: |
           helm upgrade operations-engineering-reports-dev \
             helm/operations-engineering-reports \
