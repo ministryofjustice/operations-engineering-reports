@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "main"
+      - "fix-gh-action"
 
 env:
   KUBE_CLUSTER: ${{ secrets.DEV_KUBE_CLUSTER }}
@@ -39,8 +39,8 @@ jobs:
       # Assume role in Cloud Platform
       - uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${ ECR_ROLE }
-          aws-region: ${ ECR_REGION }
+          role-to-assume: ${ECR_ROLE}
+          aws-region: ${ECR_REGION}
 
       # Login to container repository
       - uses: aws-actions/amazon-ecr-login@v1
