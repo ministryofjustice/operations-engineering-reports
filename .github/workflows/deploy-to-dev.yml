@@ -13,7 +13,7 @@ env:
   KUBE_TOKEN: ${{ secrets.DEV_KUBE_TOKEN }}
 
   ECR_REPOSITORY: ${{ secrets.DEV_ECR_NAME }}
-  ECR_REGISTORY: "754256621582.dkr.ecr.eu-west-2.amazonaws.com"
+  ECR_REGISTRY: "754256621582.dkr.ecr.eu-west-2.amazonaws.com"
   ECR_ROLE: ${{ secrets.DEVELOPMENT_ECR_ROLE_TO_ASSUME }}
   ECR_REGION: eu-west-2
 
