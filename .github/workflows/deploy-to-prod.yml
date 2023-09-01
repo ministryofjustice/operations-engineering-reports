@@ -31,7 +31,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
-
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
       - uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.PRODUCTION_ECR_ROLE_TO_ASSUME }}
