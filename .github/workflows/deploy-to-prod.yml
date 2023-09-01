@@ -34,7 +34,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.DEVELOPMENT_ECR_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.PRODUCTION_ECR_ROLE_TO_ASSUME }}
           aws-region: eu-west-2
 
       - uses: aws-actions/amazon-ecr-login@v1
