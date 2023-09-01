@@ -8,9 +8,17 @@ on:
 env:
   KUBE_CLUSTER: ${{ secrets.PROD_KUBE_CLUSTER }}
   KUBE_NAMESPACE: ${{ secrets.PROD_KUBE_NAMESPACE }}
-  ECR_NAME: ${{ secrets.PROD_ECR_NAME }}
+  KUBE_CERT: ${{ secrets.PROD_KUBE_CERT }}
+  KUBE_TOKEN: ${{ secrets.PROD_KUBE_TOKEN }}
+
+  ECR_REPOSITORY: ${{ secrets.PROD_ECR_NAME }}
+  ECR_REGISTRY: "754256621582.dkr.ecr.eu-west-2.amazonaws.com"
+
+  IMAGE_TAG: ${{ github.ref_name }}
+
   AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
   AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+
   FLASK_APP_SECRET: ${{ secrets.PROD_FLASK_APP_SECRET }}
   OPS_ENG_REPORTS_ENCRYPT_KEY: ${{ secrets.PROD_OPS_ENG_REPORTS_ENCRYPT_KEY }}
   OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.PROD_OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
@@ -18,24 +26,23 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Release
-        uses: softprops/action-gh-release@v1
+      - uses: actions/checkout@v3
+
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
-          generate_release_notes: true
-      - name: Build
-        run: docker build -t image .
-      - name: Push to ECR
-        id: ecr
-        uses: jwalton/gh-ecr-push@v1
-        with:
-          access-key-id: ${{ secrets.PROD_ECR_ACCESS_KEY }}
-          secret-access-key: ${{ secrets.PROD_ECR_SECRET_KEY }}
-          region: eu-west-2
-          local-image: image
-          image: ${ECR_NAME}:${{ github.ref_name }}
+          role-to-assume: ${{ secrets.DEVELOPMENT_ECR_ROLE_TO_ASSUME }}
+          aws-region: eu-west-2
+
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+
+      - run: |
+          docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
+          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
 
   deploy-to-prod:
     needs: build-push
@@ -45,9 +52,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Authenticate to the cluster
-        env:
-          KUBE_CERT: ${{ secrets.PROD_KUBE_CERT }}
-          KUBE_TOKEN: ${{ secrets.PROD_KUBE_TOKEN }}
         run: |
           echo "${KUBE_CERT}" > ca.crt
           kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://${KUBE_CLUSTER}
@@ -65,13 +69,13 @@ jobs:
             --wait \
             --namespace ${KUBE_NAMESPACE} \
             --set replicaCount=3 \
-            --set image.tag=${{ github.ref_name }} \
+            --set image.tag=${IMAGE_TAG} \
             --set application.auth0ClientId=${AUTH0_CLIENT_ID} \
             --set application.auth0ClientSecret=${AUTH0_CLIENT_SECRET} \
             --set application.appSecretKey=${FLASK_APP_SECRET} \
             --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
             --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
-            --set image.repository=754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME} \
+            --set image.repository=${ECR_REGISTRY}/${ECR_REPOSITORY} \
             --set ingress.hosts={operations-engineering-reports-prod.cloud-platform.service.justice.gov.uk,operations-engineering-reports.cloud-platform.service.justice.gov.uk}
       - name: Report failure to Slack
         if: always()
