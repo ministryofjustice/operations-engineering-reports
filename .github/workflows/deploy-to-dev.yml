@@ -40,7 +40,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${ ECR_ROLE }
-          aws-region: ${ ECR_REGION }
+          aws-region: "eu-west-2"
 
       # Login to container repository
       - uses: aws-actions/amazon-ecr-login@v1
