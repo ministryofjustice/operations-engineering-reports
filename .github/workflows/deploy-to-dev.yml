@@ -15,7 +15,7 @@ env:
   ECR_REPOSITORY: ${{ secrets.DEV_ECR_NAME }}
   ECR_REGISTORY: "754256621582.dkr.ecr.eu-west-2.amazonaws.com"
   ECR_ROLE: ${{ secrets.DEVELOPMENT_ECR_ROLE_TO_ASSUME }}
-  ECR_REGION: "eu-west-2"
+  ECR_REGION: eu-west-2
 
   IMAGE_TAG: ${{ github.sha }}
 
