@@ -7,32 +7,49 @@ on:
       - "main"
 
 env:
-    KUBE_CLUSTER: ${{ secrets.DEV_KUBE_CLUSTER }}
-    KUBE_NAMESPACE: ${{ secrets.DEV_KUBE_NAMESPACE }}
-    ECR_NAME: ${{ secrets.DEV_ECR_NAME }}
-    AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
-    AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
-    FLASK_APP_SECRET: ${{ secrets.DEV_FLASK_APP_SECRET }}
-    OPS_ENG_REPORTS_ENCRYPT_KEY: ${{ secrets.DEV_OPS_ENG_REPORTS_ENCRYPT_KEY }}
-    OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.DEV_OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
+  KUBE_CLUSTER: ${{ secrets.DEV_KUBE_CLUSTER }}
+  KUBE_NAMESPACE: ${{ secrets.DEV_KUBE_NAMESPACE }}
+  KUBE_CERT: ${{ secrets.DEV_KUBE_CERT }}
+  KUBE_TOKEN: ${{ secrets.DEV_KUBE_TOKEN }}
+
+  ECR_REPOSITORY: ${{ secrets.DEV_ECR_NAME }}
+  ECR_REGISTORY: "754256621582.dkr.ecr.eu-west-2.amazonaws.com"
+  ECR_ROLE: ${{ secrets.DEVELOPMENT_ECR_ROLE_TO_ASSUME }}
+  ECR_REGION: "eu-west-2"
+
+  IMAGE_TAG: ${{ github.sha }}
+
+  AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+  AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+
+  FLASK_APP_SECRET: ${{ secrets.DEV_FLASK_APP_SECRET }}
+  OPS_ENG_REPORTS_ENCRYPT_KEY: ${{ secrets.DEV_OPS_ENG_REPORTS_ENCRYPT_KEY }}
+  OPERATIONS_ENGINEERING_REPORTS_API_KEY: ${{ secrets.DEV_OPERATIONS_ENGINEERING_REPORTS_API_KEY }}
 
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read # This is required for actions/checkout
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Build
-        run: docker build -t image .
-      - name: Push to ECR
-        id: ecr
-        uses: jwalton/gh-ecr-push@v1
+      # Checkout GitHub repository
+      - uses: actions/checkout@v3
+
+      # Assume role in Cloud Platform
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
-          access-key-id: ${{ secrets.DEV_ECR_ACCESS_KEY }}
-          secret-access-key: ${{ secrets.DEV_ECR_SECRET_KEY }}
-          region: eu-west-2
-          local-image: image
-          image: ${ECR_NAME}:${{ github.sha }}
+          role-to-assume: ${ ECR_ROLE }
+          aws-region: ${ ECR_REGION }
+
+      # Login to container repository
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+
+      # Build and push a Docker image to the container repository
+      - run: |
+          docker build -t ${ ECR_REGISTRY }/${ ECR_REPOSITORY }:${ IMAGE_TAG }} .
+          docker push ${ ECR_REGISTRY }/${ ECR_REPOSITORY }:${ IMAGE_TAG }}
 
   deploy-to-dev:
     needs: build-push
@@ -42,16 +59,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Authenticate to the cluster
-        env:
-          KUBE_CERT: ${{ secrets.DEV_KUBE_CERT }}
-          KUBE_TOKEN: ${{ secrets.DEV_KUBE_TOKEN }}
         run: |
           echo "${KUBE_CERT}" > ca.crt
-          kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://${KUBE_CLUSTER}
-          kubectl config set-credentials deploy-user --token=${KUBE_TOKEN}
-          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${KUBE_NAMESPACE}
+          kubectl config set-cluster ${ KUBE_CLUSTER } --certificate-authority=./ca.crt --server=https://${ KUBE_CLUSTER }
+          kubectl config set-credentials deploy-user --token=${ KUBE_TOKEN }
+          kubectl config set-context ${ KUBE_CLUSTER } --cluster=${ KUBE_CLUSTER } --user=deploy-user --namespace=${ KUBE_NAMESPACE }
           kubectl config get-contexts
-          kubectl config use-context ${KUBE_CLUSTER}
+          kubectl config use-context ${ KUBE_CLUSTER }
       - name: Helm install
         run: |
           helm upgrade operations-engineering-reports-dev \
@@ -60,12 +74,12 @@ jobs:
             --force \
             --wait \
             --timeout 10m \
-            --namespace ${KUBE_NAMESPACE} \
-            --set image.tag=${{ github.sha }} \
-            --set application.auth0ClientId=${AUTH0_CLIENT_ID} \
-            --set application.auth0ClientSecret=${AUTH0_CLIENT_SECRET} \
-            --set application.appSecretKey=${FLASK_APP_SECRET} \
-            --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
-            --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
-            --set image.repository=754256621582.dkr.ecr.eu-west-2.amazonaws.com/${ECR_NAME} \
+            --namespace ${ KUBE_NAMESPACE } \
+            --set image.tag=${ IMAGE_TAG }} \
+            --set application.auth0ClientId=${ AUTH0_CLIENT_ID } \
+            --set application.auth0ClientSecret=${ AUTH0_CLIENT_SECRET } \
+            --set application.appSecretKey=${ FLASK_APP_SECRET } \
+            --set application.encryptionKey=${ OPS_ENG_REPORTS_ENCRYPT_KEY } \
+            --set application.apiKey=${ OPERATIONS_ENGINEERING_REPORTS_API_KEY } \
+            --set image.repository=${ ECR_REGISTRY }/${ ECR_REPOSITORY } \
             --set ingress.hosts={operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk}
