@@ -11,9 +11,6 @@ env:
   KUBE_CERT: ${{ secrets.PROD_KUBE_CERT }}
   KUBE_TOKEN: ${{ secrets.PROD_KUBE_TOKEN }}
 
-  ECR_REPOSITORY: ${{ secrets.PROD_ECR_NAME }}
-  ECR_REGISTRY: "754256621582.dkr.ecr.eu-west-2.amazonaws.com"
-
   IMAGE_TAG: ${{ github.ref_name }}
 
   AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
@@ -46,6 +43,9 @@ jobs:
       - run: |
           docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
           docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ vars.PRODUCTION_ECR_REPOSITORY }}
 
   deploy-to-prod:
     needs: build-push
@@ -63,6 +63,9 @@ jobs:
           kubectl config get-contexts
           kubectl config use-context ${KUBE_CLUSTER}
       - name: Helm install
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ vars.PRODUCTION_ECR_REPOSITORY }}
         run: |
           helm upgrade operations-engineering-reports-prod \
             helm/operations-engineering-reports \
@@ -80,6 +83,7 @@ jobs:
             --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
             --set image.repository=${ECR_REGISTRY}/${ECR_REPOSITORY} \
             --set ingress.hosts={operations-engineering-reports-prod.cloud-platform.service.justice.gov.uk,operations-engineering-reports.cloud-platform.service.justice.gov.uk}
+
       - name: Report failure to Slack
         if: always()
         uses: ravsamhq/notify-slack-action@v2
