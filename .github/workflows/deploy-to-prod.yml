@@ -27,7 +27,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -53,7 +53,7 @@ jobs:
     container: alpine/k8s:1.23.17
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Authenticate to the cluster
         run: |
           echo "${KUBE_CERT}" > ca.crt
