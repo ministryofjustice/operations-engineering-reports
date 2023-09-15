@@ -1,5 +1,5 @@
 authlib~=1.2.1
-boto3~=1.26.159
+boto3~=1.28.48
 cryptography~=41.0.3
 flask~=2.3.3
 flask-cors
