@@ -39,9 +39,10 @@ jobs:
         id: login-ecr
 
       - run: |
-          docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
-          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          docker build -t ${ECR_PREFIX}${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
+          docker push ${ECR_PREFIX}${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
         env:
+          ECR_PREFIX: ${{ vars.ECR_PREFIX }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ vars.DEVELOPMENT_ECR_REPOSITORY }}
 
@@ -78,5 +79,5 @@ jobs:
             --set application.appSecretKey=${FLASK_APP_SECRET} \
             --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
             --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
-            --set image.repository=${ECR_REGISTRY}/${ECR_REPOSITORY} \
+            --set image.repository=${ECR_PREFIX}${ECR_REGISTRY}/${ECR_REPOSITORY} \
             --set ingress.hosts={operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk}
