@@ -40,16 +40,6 @@ spec:
               value: {{ .Values.application.flaskDebug | quote }}
             - name: DYNAMODB_REGION
               value: "eu-west-2"
-            - name: DYNAMODB_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: opseng-reports-table
-                  key: access_key_id
-            - name: DYNAMODB_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: opseng-reports-table
-                  key: secret_access_key
             - name: DYNAMODB_TABLE_NAME
               valueFrom:
                 secretKeyRef:
