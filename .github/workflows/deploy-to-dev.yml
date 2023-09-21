@@ -13,6 +13,8 @@ env:
   KUBE_TOKEN: ${{ secrets.DEV_KUBE_TOKEN }}
 
   IMAGE_TAG: ${{ github.sha }}
+  ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+  ECR_REPOSITORY: ${{ vars.DEVELOPMENT_ECR_REPOSITORY }}
 
   AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
   AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
@@ -36,15 +38,10 @@ jobs:
           aws-region: eu-west-2
 
       - uses: aws-actions/amazon-ecr-login@v1
-        id: login-ecr
 
       - run: |
-          docker build -t ${ECR_PREFIX}${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
-          docker push ${ECR_PREFIX}${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
-        env:
-          ECR_PREFIX: ${{ vars.ECR_PREFIX }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ vars.DEVELOPMENT_ECR_REPOSITORY }}
+          docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
+          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
 
   deploy-to-dev:
     needs: build-push
@@ -53,6 +50,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Authenticate to the cluster
         run: |
           echo "${KUBE_CERT}" > ca.crt
@@ -61,10 +59,8 @@ jobs:
           kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${KUBE_NAMESPACE}
           kubectl config get-contexts
           kubectl config use-context ${KUBE_CLUSTER}
+
       - name: Helm install
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ vars.DEVELOPMENT_ECR_REPOSITORY  }}
         run: |
           helm upgrade operations-engineering-reports-dev \
             helm/operations-engineering-reports \
@@ -79,5 +75,5 @@ jobs:
             --set application.appSecretKey=${FLASK_APP_SECRET} \
             --set application.encryptionKey=${OPS_ENG_REPORTS_ENCRYPT_KEY} \
             --set application.apiKey=${OPERATIONS_ENGINEERING_REPORTS_API_KEY} \
-            --set image.repository=${ECR_PREFIX}${ECR_REGISTRY}/${ECR_REPOSITORY} \
+            --set image.repository=${ECR_REGISTRY}/${ECR_REPOSITORY} \
             --set ingress.hosts={operations-engineering-reports-dev.cloud-platform.service.justice.gov.uk}
