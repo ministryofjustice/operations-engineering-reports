@@ -1,5 +1,8 @@
 name: Deploy to Prod
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
