@@ -12,6 +12,8 @@ env:
   KUBE_TOKEN: ${{ secrets.PROD_KUBE_TOKEN }}
 
   IMAGE_TAG: ${{ github.ref_name }}
+  ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+  ECR_REPOSITORY: ${{ vars.PRODUCTION_ECR_REPOSITORY }}
 
   AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
   AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
@@ -28,10 +30,12 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.PRODUCTION_ECR_ROLE_TO_ASSUME }}
@@ -43,9 +47,6 @@ jobs:
       - run: |
           docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
           docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ vars.PRODUCTION_ECR_REPOSITORY }}
 
   deploy-to-prod:
     needs: build-push
@@ -54,6 +55,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Authenticate to the cluster
         run: |
           echo "${KUBE_CERT}" > ca.crt
@@ -62,6 +64,7 @@ jobs:
           kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${KUBE_NAMESPACE}
           kubectl config get-contexts
           kubectl config use-context ${KUBE_CLUSTER}
+
       - name: Helm install
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
