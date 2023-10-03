@@ -44,7 +44,7 @@ jobs:
           role-to-assume: ${{ secrets.PRODUCTION_ECR_ROLE_TO_ASSUME }}
           aws-region: eu-west-2
 
-      - uses: aws-actions/amazon-ecr-login@v1
+      - uses: aws-actions/amazon-ecr-login@v2
         id: login-ecr
 
       - run: |
