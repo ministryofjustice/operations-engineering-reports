@@ -8,20 +8,18 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
       time: "09:00" # UTC
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
       time: "09:00" # UTC
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "daily"
-      time: "09:00" # UTC
+      interval: "monthly"
   - package-ecosystem: "docker"
     directory: "/nginx"
     schedule:
-      interval: "daily"
-      time: "09:00" # UTC
+      interval: "monthly"
