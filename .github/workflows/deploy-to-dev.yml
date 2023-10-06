@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "main"
+      - "fix-github-action"
 
 env:
   KUBE_CLUSTER: ${{ secrets.DEV_KUBE_CLUSTER }}
