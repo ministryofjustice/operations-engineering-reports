@@ -69,7 +69,6 @@ jobs:
           kubectl config use-context ${KUBE_CLUSTER}
 
       - name: Helm install
-        env:
         run: |
           helm upgrade operations-engineering-reports-prod \
             helm/operations-engineering-reports \
