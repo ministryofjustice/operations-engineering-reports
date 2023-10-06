@@ -70,8 +70,6 @@ jobs:
 
       - name: Helm install
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ vars.PRODUCTION_ECR_REPOSITORY }}
         run: |
           helm upgrade operations-engineering-reports-prod \
             helm/operations-engineering-reports \
