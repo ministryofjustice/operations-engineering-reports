@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "operations-engineering-reports.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "operations-engineering-reports.selectorLabels" . | nindent 6 }}
