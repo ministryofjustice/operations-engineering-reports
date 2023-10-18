@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from report_app.main.repository_report import RepositoryReport
+from report_app.repository_report import RepositoryReport
 
 
 class TestRepositoryReport(unittest.TestCase):

@@ -3,7 +3,7 @@ from unittest.mock import ANY, MagicMock, patch
 
 from botocore.exceptions import ClientError
 
-from report_app.main.report_database import ReportDatabase
+from report_app.report_database import ReportDatabase
 
 
 @patch.dict('os.environ', {'AWS_ROLE_ARN': 'arn:aws:iam::000000000000:role/test-role'})

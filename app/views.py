@@ -1,4 +1,3 @@
-import datetime
 import logging
 import os
 from collections import Counter
@@ -10,10 +9,10 @@ from flask import (Blueprint, abort, current_app, jsonify, redirect,
                    render_template, render_template_string, request, session,
                    url_for)
 
-from report_app.main.report_database import ReportDatabase
-from report_app.main.repository_report import RepositoryReport
+from report_app.report_database import ReportDatabase
+from report_app.repository_report import RepositoryReport
 
-main = Blueprint("main", __name__)
+main = Blueprint("report_app", __name__)
 
 logger = logging.getLogger(__name__)
 

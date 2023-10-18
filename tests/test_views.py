@@ -5,9 +5,8 @@ from unittest.mock import MagicMock, patch
 from flask import current_app
 
 import report_app
-from report_app.main.views import (_is_request_correct,
-                                   display_badge_if_compliant,
-                                   search_public_repositories)
+from report_app.views import (_is_request_correct,
+                                   display_badge_if_compliant)
 
 
 class TestAuth0AuthenticationView(unittest.TestCase):

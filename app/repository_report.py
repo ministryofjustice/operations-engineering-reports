@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from report_app.main.report_database import ReportDatabase
+from report_app.report_database import ReportDatabase
 
 logger = logging.getLogger(__name__)
 
