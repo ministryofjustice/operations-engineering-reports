@@ -1,11 +1,15 @@
-FROM python:3.11.5-slim
+FROM python:3.12.0-alpine3.17
 
-RUN addgroup --gid 1017 --system appgroup \
-  && adduser --system --uid 1017 --group appgroup
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-RUN apt update -y && apt dist-upgrade -y && apt install -y
+RUN \
+  apk add \
+  --no-cache \
+  --no-progress \
+  --update \
+  build-base
 
-WORKDIR /home/operations-engineering-reports
+WORKDIR /app/operations-engineering-reports
 
 COPY requirements.txt requirements.txt
 COPY report_app report_app
@@ -16,11 +20,11 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-USER 1017
+USER appuser
 
 EXPOSE 4567
 
 ENTRYPOINT gunicorn operations_engineering_reports:app \
---bind 0.0.0.0:4567 \
---timeout 120
+  --bind 0.0.0.0:4567 \
+  --timeout 120
 
