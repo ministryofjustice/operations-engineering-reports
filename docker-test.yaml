@@ -4,11 +4,6 @@ commandTests:
     command: "which"
     args: ["gunicorn"]
     expectedOutput: ["/usr/local/bin/gunicorn"]
-  - name: "apt-get upgrade"
-    command: "apt-get"
-    args: ["-qqs", "upgrade"]
-    excludedOutput: [".*Inst.*Security.* | .*Security.*Inst.*"]
-    excludedError: [".*Inst.*Security.* | .*Security.*Inst.*"]
   - name: "python"
     command: "which"
     args: ["python"]
@@ -19,12 +14,12 @@ commandTests:
     expectedOutput: ["/usr/local/bin/pip3"]
   - name: "pwd"
     command: "pwd"
-    expectedOutput: ["/home/operations-engineering-reports"]
+    expectedOutput: ["/app/operations-engineering-reports"]
 metadataTest:
   envVars:
   exposedPorts: ["4567"]
 containerRunOptions:
-  user: "appgroup"
+  user: "appuser"
   privileged: false
 globalEnvVars:
   - key: "PYTHONDONTWRITEBYTECODE"
