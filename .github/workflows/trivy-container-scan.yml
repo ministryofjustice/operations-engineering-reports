@@ -1,0 +1,79 @@
+name: Scan Container for Vulnerabilities
+
+permissions:
+  contents: read
+
+on:
+  workflow_run:
+  schedule:
+    - cron: "0 6 * * 1" # At 06:00 on Monday.
+
+jobs:
+  CVE-scan:
+    runs-on: ubuntu-latest
+    environment: dev
+    permissions:
+      issues: write
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 #v3.6.0
+
+      - name: Build the Docker image
+        run: "docker build . --tag localbuild/testimage:latest"
+
+      - name: Trivy scan
+        id: scan
+        uses: aquasecurity/trivy-action@b77b85c0254bba6789e787844f0585cde1e56320 # v0.13.0
+        with:
+          image-ref: "localbuild/testimage:latest"
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: CVE Description escaped extraction and print
+        run: |
+          SCAN_RESULTS=$(jq -r '.runs[0].tool.driver.rules | map(.help.text) | join("\\n")' results.sarif)
+          echo "CVE_CRITICAL=$(echo $SCAN_RESULTS | grep -o CRITICAL | wc -l)" >> $GITHUB_ENV
+          echo "CVE_HIGH=$(echo $SCAN_RESULTS | grep -o HIGH | wc -l)" >> $GITHUB_ENV
+          echo "CVE_MEDIUM=$(echo $SCAN_RESULTS | grep -o MEDIUM | wc -l)" >> $GITHUB_ENV
+
+          echo $SCAN_RESULTS
+
+      - name: Fails if CVE HIGH or CRITICAL are detected
+        id: cve-threshold
+        if: env.CVE_HIGH > 0 || env.CVE_CRITICAL > 0
+        run: exit 1
+
+      - name: Send notification to Slack
+        id: slack
+        if: always() && github.event_name == 'schedule' && steps.cve-threshold.outcome == 'failure'
+        uses: slackapi/slack-github-action@e28cf165c92ffef168d23c5c9000cffc8a25e117 #v1.24.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "[ ${{ github.event.repository.name }} ]"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": " `CRITICAL` : *${{ env.CVE_CRITICAL }}*\n\n`HIGH` : *${{ env.CVE_HIGH }}*\n\n`MEDIUM` : *${{ env.CVE_MEDIUM }}*\n\n<https://github.com/${{ github.repository }}/security/code-scanning |See details on GitHub>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.CVE_SCAN_SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
