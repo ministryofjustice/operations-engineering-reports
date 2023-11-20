@@ -1,4 +1,4 @@
-FROM python:3.12.0-alpine3.17
+FROM python:3.12.0-alpine3.18
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup -u 1051
 
@@ -7,6 +7,9 @@ RUN \
   --no-cache \
   --no-progress \
   --update \
+  --upgrade \
+  libcrypto3 \
+  libssl3 \
   build-base
 
 WORKDIR /app/operations-engineering-reports
