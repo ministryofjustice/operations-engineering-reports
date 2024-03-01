@@ -1,6 +1,6 @@
 authlib~=1.2.1
 boto3~=1.26.159
-cryptography~=42.0.2
+cryptography~=42.0.5
 flask~=3.0.2
 flask-cors
 govuk-frontend-jinja
