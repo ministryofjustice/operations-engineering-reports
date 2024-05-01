@@ -1,4 +1,4 @@
-FROM python:3.12.1-alpine3.18
+FROM python:3.12.3-alpine3.18
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup -u 1051
 
