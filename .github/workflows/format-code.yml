@@ -11,7 +11,7 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.7
       - uses: ministryofjustice/github-actions/code-formatter@v14
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

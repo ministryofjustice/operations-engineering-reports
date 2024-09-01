@@ -32,7 +32,7 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.7
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -57,7 +57,7 @@ jobs:
     container: alpine/k8s:1.23.17
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.7
 
       - name: Authenticate to the cluster
         run: |
