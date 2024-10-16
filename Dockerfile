@@ -11,11 +11,13 @@ RUN apk add --no-cache --no-progress \
 
 WORKDIR /app/operations-engineering-reports
 
-COPY requirements.txt requirements.txt
+COPY Pipfile Pipfile
+COPY Pipfile.lock Pipfile.lock
 COPY report_app report_app
 COPY operations_engineering_reports.py operations_engineering_reports.py
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir pipenv==2024.1.0 \
+  && pipenv install --system --deploy --ignore-pipfile
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1

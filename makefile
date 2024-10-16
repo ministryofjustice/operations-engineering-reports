@@ -15,33 +15,28 @@ REGISTRY ?= default-registry
 # Targets
 help:
 	@echo "Available commands:"
-	@echo "make setup            - Setup the environment"
+	@echo "make venv            - Setup the environment"
 	@echo "make test             - Run tests"
 	@echo "make deploy-dev       - Deploy the application to the dev namespace"
 
-setup:
-	python3 -m venv venv
-	@venv/bin/pip3 install --upgrade pip
-	@venv/bin/pip3 install -r requirements.txt
 
-venv: requirements.txt requirements-test.txt
-	python3 -m venv venv
-	@venv/bin/pip3 install --upgrade pip
-	@venv/bin/pip3 install -r requirements.txt
+venv: 
+	pip3 install pipenv
+	pipenv install --dev 
 
 lint: venv
-	@venv/bin/flake8 --ignore=E501,W503 $(PYTHON_SOURCE_FILES)
-	@venv/bin/mypy --ignore-missing-imports $(PYTHON_SOURCE_FILES)
-	@venv/bin/pylint --recursive=y $(PYTHON_SOURCE_FILES)
+	pipenv run flake8 --ignore=E501,W503 $(PYTHON_SOURCE_FILES)
+	pipenv run mypy --ignore-missing-imports $(PYTHON_SOURCE_FILES)
+	pipenv run pylint --recursive=y $(PYTHON_SOURCE_FILES)
 
 format: venv
-	@venv/bin/black $(PYTHON_SOURCE_FILES)
+	pipenv run black $(PYTHON_SOURCE_FILES)
 
-test:
-	export FLASK_CONFIGURATION=development; python3 -m pytest -v
+test: venv
+	export FLASK_CONFIGURATION=development; pipenv run python -m pytest -v
 
 clean-test:
-	rm -fr venv
+	pipenv --rm
 	rm -fr .tox/
 	rm -fr .pytest_cache
 	rm -fr .mypy_cache
@@ -81,4 +76,4 @@ db-ui:
 stop:
 	docker-compose down -v --remove-orphans
 
-.PHONY: setup dev stop venv lint test format local prod clean-test all
+.PHONY: dev stop venv lint test format local prod clean-test all
