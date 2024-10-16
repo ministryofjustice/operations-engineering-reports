@@ -32,8 +32,8 @@ lint: venv
 format: venv
 	pipenv run black $(PYTHON_SOURCE_FILES)
 
-test:
-	export FLASK_CONFIGURATION=development; python3 -m pytest -v
+test: venv
+	export FLASK_CONFIGURATION=development; pipenv run pytest -v
 
 clean-test:
 	pipenv --rm
