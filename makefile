@@ -33,7 +33,7 @@ format: venv
 	pipenv run black $(PYTHON_SOURCE_FILES)
 
 test: venv
-	export FLASK_CONFIGURATION=development; pipenv run pytest -v
+	export FLASK_CONFIGURATION=development; pipenv run python -m pytest -v
 
 clean-test:
 	pipenv --rm
