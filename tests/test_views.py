@@ -248,7 +248,7 @@ class TestStandardsReportsViews(unittest.TestCase):
         mock_report_database.assert_called_once_with(os.getenv("DYNAMODB_TABLE_NAME"))
         mock_report_database.return_value.get_all_public_repositories.assert_called_once_with()
 
-    @patch('report_app.main.report_database.ReportDatabase.__new__')
+    @patch('report_app.main.views.ReportDatabase')
     def test_public_compliance_report(self, mock_report_database):
         mock_report_database.return_value = MagicMock()
         mock_report_database.return_value.get_all_public_repositories.return_value = [
@@ -260,7 +260,7 @@ class TestStandardsReportsViews(unittest.TestCase):
             "repository_names": ["test_passing", "test_failing", "test_non_public_or_missing"] 
         })
 
-        self.assertEqual(response.json, {'mock_repository_1': 'PASS', 'mock_repository_2': 'FAIL'})
+        self.assertEqual(response.json, {"test_passing": "PASS", "test_failing": "FAIL"})
 
         mock_report_database.assert_called_once_with(os.getenv("DYNAMODB_TABLE_NAME"))
         mock_report_database.return_value.get_all_public_repositories.assert_called_once_with()
