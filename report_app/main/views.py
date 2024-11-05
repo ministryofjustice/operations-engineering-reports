@@ -322,6 +322,24 @@ def display_badge_if_compliant(repository_name: str) -> dict:
     }
 
 
+@main.route("/api/public-compliance-report", methods=["POST"])
+def public_compliance_report():
+    public_repositories = ReportDatabase(
+        os.getenv("DYNAMODB_TABLE_NAME")
+    ).get_all_public_repositories()
+    requested_repositories = request.get_json()["repository_names"] or [] 
+    
+    public_compliance_report_map = {}
+    for repository in public_repositories:
+        if repository["name"] in requested_repositories:
+            repository_name = repository["name"]
+            is_compliant = bool(repository["data"] and repository["data"]["status"]) 
+            public_compliance_report_map[repository_name] = "PASS" if is_compliant else "FAIL"
+
+    return public_compliance_report_map
+
+    
+
 @main.route("/public-github-repositories.html", methods=["GET"])
 def public_github_repositories():
     public_repositories = ReportDatabase(
