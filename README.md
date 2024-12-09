@@ -23,7 +23,7 @@ Note: This project uses AWS DynamoDB for data storage. While it's not necessary 
 
 ## Reports
 
-At the Ministry of Justice, all our source code is open by default and stored on GitHub. We believe in transparency and accessibility in our codebase, and we've established some key standards to ensure we uphold these principles. The guidelines outlined in the [technical standards documentation](https://technical-guidance.service.justice.gov.uk/documentation/standards/storing-source-code.html#storing-source-code) help us maintain a secure, transparent and collaborative codebase. Adhering to these standards is crucial to ensure that our GitHub repositories remain accessible, safe, and easy to contribute to.
+At the Ministry of Justice, all our source code is open by default and stored on GitHub. We believe in transparency and accessibility in our codebase, and we've established some key standards to ensure we uphold these principles. The guidelines outlined in the [technical standards documentation](https://user-guide.operations-engineering.service.justice.gov.uk/documentation/information/storing-source-code.html) help us maintain a secure, transparent and collaborative codebase. Adhering to these standards is crucial to ensure that our GitHub repositories remain accessible, safe, and easy to contribute to.
 
 For more information, please review the detailed MoJ GitHub standards [here](https://user-guide.operations-engineering.service.justice.gov.uk/documentation/information/mojrepostandards.html).
 
