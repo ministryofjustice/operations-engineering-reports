@@ -16,7 +16,7 @@ from gql.transport.aiohttp import AIOHTTPTransport
 from gql.transport.exceptions import TransportServerError
 from requests import Session
 
-from config.logging_config import logging
+from cronjobs.config.logging_config import logging
 
 logging.getLogger("gql").setLevel(logging.WARNING)
 
