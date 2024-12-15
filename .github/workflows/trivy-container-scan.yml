@@ -25,7 +25,7 @@ jobs:
 
       - name: Trivy scan
         id: scan
-        uses: aquasecurity/trivy-action@d43c1f16c00cfd3978dde6c07f4bbcf9eb6993ca # v0.16.1
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
         with:
           image-ref: "localbuild/testimage:latest"
           format: "sarif"
