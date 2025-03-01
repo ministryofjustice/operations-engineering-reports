@@ -18,7 +18,7 @@ setuptools = "==75.2.0"
 cryptography = "==42.0.4"
 pygithub = "==2.3.0"
 gql = "==3.5.0"
-aiohttp = "==3.9.4"
+aiohttp = "==3.11.13"
 
 [dev-packages]
 pytest = "==8.3.3"
