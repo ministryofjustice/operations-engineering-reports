@@ -15,6 +15,7 @@ metadata:
     cloud-platform.justice.gov.uk/ignore-external-dns-weight: "true"
     allow-duplicate-host: "true"
     allowed-duplicate-ns: "operations-engineering-reports-prod,github-community-prod"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:
