@@ -13,6 +13,8 @@ metadata:
     external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-{{ $fullName }}-{{ .Values.ingress.colour }}
     external-dns.alpha.kubernetes.io/aws-weight: "100"
     cloud-platform.justice.gov.uk/ignore-external-dns-weight: "true"
+    allow-duplicate-host: "true"
+    allowed-duplicate-ns: "operations-engineering-reports-prod,github-community-prod"
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:
